@@ -25,9 +25,8 @@ public class DrziPredmetService {
     final PredmetRepository predmetRepository;
     final NastavnikRepository nastavnikRepository;
 
-    //ako sve prođe dobro, Spring automatski uradi commit (snimi promene u bazu);
+    @Transactional //ako sve prođe dobro, Spring automatski uradi commit (snimi promene u bazu);
     //ako se desi izuzetak, Spring automatski uradi rollback (poništi sve promene)
-    @Transactional
     public void saveDrziPredmet(DrziPredmetRequest request) {
 
         List<DrziPredmetNewRequest> drziPredmetList = request.getDrziPredmet();

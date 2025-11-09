@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication(scanBasePackages = {"org.raflab"})
 public class StudsluzbaServerApp {
+    // pokretanje spring aplikacije
 
 	public static void main(String[] args) {
 		SpringApplication.run(StudsluzbaServerApp.class, args);

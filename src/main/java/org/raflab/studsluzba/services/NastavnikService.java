@@ -14,8 +14,8 @@ public class NastavnikService {
 
     final NastavnikRepository nastavnikRepository;
 
-    public Nastavnik save(Nastavnik nastavnik) {
-        return nastavnikRepository.save(nastavnik);
+    public Long addNastavnik(Nastavnik nastavnik) {
+        return nastavnikRepository.save(nastavnik).getId();
     }
 
     public Iterable<Nastavnik> findAll() {

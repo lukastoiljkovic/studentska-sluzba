@@ -1,0 +1,57 @@
+package org.raflab.studsluzba.services;
+
+import lombok.AllArgsConstructor;
+import org.raflab.studsluzba.model.entities.DrziPredmet;
+import org.raflab.studsluzba.model.entities.Predmet;
+import org.raflab.studsluzba.model.entities.SlusaPredmet;
+import org.raflab.studsluzba.model.entities.StudentIndeks;
+import org.raflab.studsluzba.repositories.DrziPredmetRepository;
+import org.raflab.studsluzba.repositories.SlusaPredmetRepository;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+@AllArgsConstructor
+public class RaspodelaNastaveService {
+
+    private final DrziPredmetRepository drziPredmetRepository;
+    private final SlusaPredmetRepository slusaPredmetRepository;
+
+    // ZA DRZI PREDMET
+
+    public List<Predmet> getPredmetiZaNastavnikaUAktivnojSkolskojGodini(Long idNastavnika) {
+        return drziPredmetRepository.getPredmetiZaNastavnikaUAktivnojSkolskojGodini(idNastavnika);
+    }
+
+    public DrziPredmet addDrziPredmet(DrziPredmet drziPredmet) {
+        return drziPredmetRepository.save(drziPredmet);
+    }
+
+    public void deleteDrziPredmet(Long id) {
+        try {
+            drziPredmetRepository.deleteById(id);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // ZA SLUSA PREDMET
+
+    public List<StudentIndeks> getStudentiSlusaPredmetAktivnaGodina(Long idPredmeta, Long idNastavnika) {
+        return slusaPredmetRepository.getStudentiSlusaPredmetAktivnaGodina(idPredmeta, idNastavnika);
+    }
+
+    public List<StudentIndeks> getStudentiSlusaPredmetZaDrziPredmet(Long idDrziPredmet) {
+        return slusaPredmetRepository.getStudentiSlusaPredmetZaDrziPredmet(idDrziPredmet);
+    }
+
+    public List<StudentIndeks> getStudentiNeSlusajuDrziPredmet(Long idDrziPredmet) {
+        return slusaPredmetRepository.getStudentiNeSlusajuDrziPredmet(idDrziPredmet);
+    }
+
+    public SlusaPredmet addSlusaPredmet(SlusaPredmet slusaPredmet) {
+        return slusaPredmetRepository.save(slusaPredmet);
+    }
+
+}

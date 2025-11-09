@@ -23,7 +23,8 @@ public class NastavnikZvanje {
 	private String uzaNaucnaOblast;  // sifarnik na klijentu - tabela u bazi bez veze
 	private String zvanje;   // sifarnik na klijentu - tabela u bazi bez veze
 	private boolean aktivno;
+
 	@ManyToOne
-	@JsonIgnore
+	@JsonIgnore // TODO: treba da postuje arhitekturu
 	private Nastavnik nastavnik;
 }

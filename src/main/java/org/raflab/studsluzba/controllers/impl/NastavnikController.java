@@ -27,12 +27,12 @@ import javax.validation.Valid;
 public class NastavnikController {
 
 	final NastavnikService nastavnikService;
-	
-	@PostMapping(path = "/add")
-	public Long addNewNastavnik(@RequestBody @Valid NastavnikRequest nastavnikRequest) {
-		Nastavnik nastavnik = nastavnikService.save(Converters.toNastavnik(nastavnikRequest));
-		return nastavnik.getId();
-	}
+
+    @PostMapping(path="/add")
+    public Long addNewNastavnik(@RequestBody @Valid NastavnikRequest nastavnikRequest) {
+        return nastavnikService.addNastavnik(Converters.toNastavnik(nastavnikRequest));
+    }
+
 	
 	@GetMapping(path = "/all")
 	public List<NastavnikResponse> getAllNastavnik() {
@@ -42,7 +42,6 @@ public class NastavnikController {
 	@GetMapping(path = "/{id}")
 	public NastavnikResponse getNastavnikById(@PathVariable Long id) {
 		Optional<Nastavnik> rez = nastavnikService.findById(id);
-
 		return rez.map(Converters::toNastavnikResponse).orElse(null);
 	}
 	
@@ -50,7 +49,6 @@ public class NastavnikController {
 	public List<NastavnikResponse> search(
 			@RequestParam(required = false) String ime,
 			@RequestParam(required = false) String prezime){
-
         return Converters.toNastavnikResponseList(nastavnikService.findByImeAndPrezime(ime, prezime));
 	}
 	

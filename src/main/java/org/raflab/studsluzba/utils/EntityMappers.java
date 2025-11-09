@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class EntityMappers {
+    // mapiranje iz entity objekata u DTOs
 
 	public static StudentDTO fromStudentPodaciToDTO(StudentPodaci sp) {
 		StudentDTO s = new StudentDTO();

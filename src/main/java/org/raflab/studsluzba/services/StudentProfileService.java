@@ -4,11 +4,13 @@ import lombok.AllArgsConstructor;
 import org.raflab.studsluzba.model.entities.StudentIndeks;
 import org.raflab.studsluzba.model.dtos.StudentProfileDTO;
 import org.raflab.studsluzba.model.dtos.StudentWebProfileDTO;
-import org.raflab.studsluzba.repositories.PredmetRepository;
 import org.raflab.studsluzba.repositories.SlusaPredmetRepository;
 import org.raflab.studsluzba.repositories.StudentIndeksRepository;
 import org.raflab.studsluzba.repositories.StudentPodaciRepository;
+import org.raflab.studsluzba.utils.ParseUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
+
 @AllArgsConstructor
 @Service
 public class StudentProfileService {
@@ -16,11 +18,12 @@ public class StudentProfileService {
 	final StudentIndeksRepository studentIndeksRepo;
 	final StudentPodaciRepository studentPodaciRepo;
 	final SlusaPredmetRepository slusaPredmetRepo;
-	final PredmetRepository predmetRepo;
+
+    final StudentIndeksService studentIndeksService;
 
 	public StudentProfileDTO getStudentProfile(Long indeksId) {
 		StudentProfileDTO retVal = new StudentProfileDTO();
-		StudentIndeks studIndeks = studentIndeksRepo.findById(indeksId).get();		
+		StudentIndeks studIndeks = studentIndeksRepo.findById(indeksId).get();
 		retVal.setIndeks(studIndeks);		
 		retVal.setSlusaPredmete(slusaPredmetRepo.getSlusaPredmetForIndeksAktivnaGodina(indeksId));
 		return retVal;
@@ -34,5 +37,15 @@ public class StudentProfileService {
 		retVal.setSlusaPredmete(slusaPredmetRepo.getSlusaPredmetForIndeksAktivnaGodina(indeksId));
 		return retVal;
 	}
+
+    public StudentWebProfileDTO getStudentWebProfileForEmail(@RequestParam String studEmail) {
+        String[] parsedData = ParseUtils.parseEmail(studEmail);
+        if(parsedData!=null) {
+            StudentIndeks si = studentIndeksService.findStudentIndeks(parsedData[0], 2000+Integer.parseInt(parsedData[1]),Integer.parseInt(parsedData[2]));
+            if(si!=null)
+                return getStudentWebProfile(si.getId());
+        }
+        return null;
+    }
 
 }

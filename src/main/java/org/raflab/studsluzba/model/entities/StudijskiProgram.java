@@ -14,6 +14,7 @@ public class StudijskiProgram {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long id;
+
 	private String oznaka;  // RN, RM
 	private String naziv;   
 	private Integer godinaAkreditacije;

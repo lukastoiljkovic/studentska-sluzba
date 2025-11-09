@@ -1,19 +1,34 @@
 package org.raflab.studsluzba.services;
 
 import lombok.AllArgsConstructor;
+import org.raflab.studsluzba.controllers.request.StudentIndeksRequest;
+import org.raflab.studsluzba.controllers.response.StudentIndeksResponse;
 import org.raflab.studsluzba.model.entities.StudentIndeks;
+import org.raflab.studsluzba.model.entities.StudentPodaci;
+import org.raflab.studsluzba.model.entities.StudijskiProgram;
 import org.raflab.studsluzba.repositories.StudentIndeksRepository;
+import org.raflab.studsluzba.utils.Converters;
+import org.raflab.studsluzba.utils.EntityMappers;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Service
 public class StudentIndeksService {
     
     final StudentIndeksRepository studentIndeksRepository;
+    final StudentPodaciService studentPodaciService;
+    final StudijskiProgramiService studijskiProgramiService;
+    final EntityMappers entityMappers;
 
     @Transactional(readOnly = true)
     public int findBroj(int godina, String studProgramOznaka) {
@@ -43,4 +58,72 @@ public class StudentIndeksService {
     public StudentIndeks findByStudentIdAndAktivan(Long studentPodaciId) {
         return studentIndeksRepository.findAktivanStudentIndeksiByStudentPodaciId(studentPodaciId);
     }
+
+    public StudentIndeks findStudentIndeks(String studProgramOznaka, int godina, int broj){
+        return studentIndeksRepository.findStudentIndeks(studProgramOznaka,godina,broj);
+    }
+
+    public Page<StudentIndeks> findStudentIndeks(String ime, String prezime, String studProgramOznaka, Integer godina, Integer broj, Pageable pageable) {
+        return studentIndeksRepository.findStudentIndeks(ime, prezime, studProgramOznaka, godina, broj, pageable);
+    }
+
+    public List<StudentIndeks> findStudentIndeksiForStudentPodaciId(Long idStudentPodaci) {
+        return studentIndeksRepository.findStudentIndeksiForStudentPodaciId(idStudentPodaci);
+    }
+
+    public StudentIndeks addNewStudentPodaci(StudentIndeks studentIndeks) {
+        return studentIndeksRepository.save(studentIndeks);
+    }
+
+    @Transactional
+    // optional znaci da moze da vrati NULL a da se ne javi exception
+    public Optional<StudentIndeks> getStudentIndeksById(Long id) {
+        return studentIndeksRepository.findById(id);
+    }
+
+    @Transactional
+    public StudentIndeksResponse getStudentIndeks(Long id){
+        Optional<StudentIndeks> rez = getStudentIndeksById(id);
+        if(rez.isEmpty()) return null;
+        else {
+            StudentIndeks retVal = rez.get();
+            return entityMappers.fromStudentIndexToResponse(retVal);
+        }
+    }
+
+    public List<StudentIndeksResponse> getIndeksiForStudentPodaciId(Long idStudentPodaci){
+        return findStudentIndeksiForStudentPodaciId(idStudentPodaci)
+                .stream()
+                .map(entityMappers::fromStudentIndexToResponse) // map each entity to response
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public Long saveStudentIndeks(@RequestBody StudentIndeksRequest request) {
+        StudentIndeks studentIndeks = Converters.toStudentIndeks(request);
+
+        int nextBroj = findBroj(request.getGodina(), request.getStudProgramOznaka());
+        studentIndeks.setBroj(nextBroj);
+
+        Optional<StudentPodaci> studentPodaci = studentPodaciService.findById(request.getStudentId());
+        if(studentPodaci.isEmpty()) return null;		//TODO - throw error if not exist
+        studentIndeks.setStudent(studentPodaci.get());
+
+        List<StudijskiProgram> studijskiProgrami = studijskiProgramiService.findByOznaka(request.getStudProgramOznaka());
+        if (studijskiProgrami.isEmpty()) {
+            throw new RuntimeException("No StudijskiProgram found with oznaka: " + request.getStudProgramOznaka());
+        }
+        studentIndeks.setStudijskiProgram(studijskiProgrami.get(0));
+
+        try {
+            StudentIndeks savedStudentIndeks = addNewStudentPodaci(studentIndeks);
+            return savedStudentIndeks.getId();
+        } catch (DataIntegrityViolationException e) {
+            // TODO
+            throw new RuntimeException("Duplicate entry for broj, godina, and studProgramOznaka", e);
+        } catch (Exception e) {
+            throw new RuntimeException("Error while saving the StudentIndeks.", e);
+        }
+    }
+
 }

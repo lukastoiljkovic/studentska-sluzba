@@ -1,7 +1,8 @@
 package org.raflab.studsluzba.utils;
 
 public class ParseUtils {
-	
+	// za indekse
+
 	/*
 	 * dobija indeks oblika rn1923 i vraca niz stringova [RN,19,23]
 	 */

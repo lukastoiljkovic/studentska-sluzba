@@ -1,5 +1,6 @@
 package org.raflab.studsluzba.app;
 
+import lombok.AllArgsConstructor;
 import org.raflab.studsluzba.model.entities.*;
 import org.raflab.studsluzba.repositories.*;
 import org.springframework.boot.CommandLineRunner;
@@ -9,30 +10,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.time.LocalDate;
 import java.util.*;
 
-@Component
+@AllArgsConstructor
+@Component // Spring automatski pokrece ovu klasu
 public class Seeder implements CommandLineRunner {
+    // ima zadatak da popuni bazu pocetnim podacima kada se pokrene program
 
-    @Autowired
     private StudijskiProgramRepository studijskiProgramRepository;
-    @Autowired
     private PredmetRepository predmetRepository;
-    @Autowired
     private NastavnikRepository nastavnikRepository;
-    @Autowired
     private NastavnikZvanjeRepository nastavnikZvanjeRepository;
-    @Autowired
     private StudentPodaciRepository studentPodaciRepository;
-    @Autowired
     private StudentIndeksRepository studentIndeksRepository;
-    @Autowired
     private DrziPredmetRepository drziPredmetRepository;
-    @Autowired
     private SlusaPredmetRepository slusaPredmetRepository;
-    @Autowired
     private GrupaRepository grupaRepository;
 
     @Override
     public void run(String... args) throws Exception {
+        // automatski se pokrece zbog CommandLineRunner
+
         List<StudijskiProgram> spList = new ArrayList<>();
         for (int i = 1; i <= 5; i++) {
             StudijskiProgram sp = new StudijskiProgram();

@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Converters {
+    // konvertovanje izmedju entity, request i response objekata
 
     public static Nastavnik toNastavnik(NastavnikRequest nastavnikRequest) {
         Nastavnik nastavnik = new Nastavnik();
