@@ -140,7 +140,7 @@ public class Seeder implements CommandLineRunner {
         for (int i = 1; i <= 5; i++) {
             Grupa g = new Grupa();
             g.setStudijskiProgram(spList.get(i - 1));
-            g.setPredmeti(Collections.singletonList(predmetList.get(i - 1)));
+            //g.setPredmeti(Collections.singletonList(predmetList.get(i - 1)));
             grupaRepository.save(g);
         }
     }

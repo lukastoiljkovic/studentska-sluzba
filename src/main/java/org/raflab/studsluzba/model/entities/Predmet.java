@@ -5,6 +5,9 @@ import javax.persistence.*;
 import lombok.Data;
 import lombok.ToString;
 
+import java.util.List;
+import java.util.Set;
+
 @Entity @Data @ToString(exclude = {"studProgram"})
 public class Predmet {
 	
@@ -23,8 +26,20 @@ public class Predmet {
 	@ManyToOne
 	private StudijskiProgram studProgram;
 
+    @OneToMany(mappedBy = "predmet", fetch = FetchType.EAGER)
+    private Set<PredispitnaObaveza> predispitneObaveze;
 
 
+
+
+
+
+    ///
+    ///
+
+
+
+////////////////////////////////////
 
 	@Override
 	public int hashCode() {

@@ -3,26 +3,28 @@ package org.raflab.studsluzba.model.entities;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Set;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
 @Entity
 @Data
 public class Grupa {
-	
+    // ova klasa nije navedena u specifikaciji ali postoji u pocetnom projektu
+
 	@Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long id;
+
+    private String naziv; // npr 311 312 313
 	
 	@ManyToOne
 	private StudijskiProgram studijskiProgram;
-	
-	@ManyToMany
-	private List<Predmet> predmeti;
+
+    @OneToMany(mappedBy = "grupa")
+    private Set<SlusaPredmet> studenti;
+
+    @ManyToOne
+    private SkolskaGodina skolskaGodina; // menjaju se svake godine
 
 }

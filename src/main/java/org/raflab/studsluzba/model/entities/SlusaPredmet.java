@@ -1,12 +1,10 @@
 package org.raflab.studsluzba.model.entities;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
 import lombok.Data;
+
+import java.util.Set;
 
 @Entity
 @Data
@@ -22,4 +20,13 @@ public class SlusaPredmet {
 	@ManyToOne
 	private DrziPredmet drziPredmet;
 
+    @ManyToOne
+    private SkolskaGodina skolskaGodina; // dodato
+
+    @OneToMany(mappedBy = "slusaPredmet")
+    private Set<PredispitnaIzlazak> predispitneObaveze;
+
+    @ManyToOne
+    private Grupa grupa; // dodato, grupa u kojoj student slusa predmet
+    // grupa se menja svake godine, zato je ovde a ne u StudentIndeks
 }
