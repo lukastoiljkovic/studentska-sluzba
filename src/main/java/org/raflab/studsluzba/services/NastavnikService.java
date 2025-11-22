@@ -26,6 +26,11 @@ public class NastavnikService {
         return nastavnikRepository.findById(id);
     }
 
+    /// TODO
+    public void deleteById(Long id) {
+        nastavnikRepository.deleteById(id);
+    }
+
     public List<Nastavnik> findByImeAndPrezime(String ime, String prezime) {
         return nastavnikRepository.findByImeAndPrezime(ime, prezime);
     }

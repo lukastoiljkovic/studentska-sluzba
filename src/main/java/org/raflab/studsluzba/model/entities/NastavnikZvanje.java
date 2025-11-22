@@ -25,6 +25,6 @@ public class NastavnikZvanje {
 	private boolean aktivno;
 
 	@ManyToOne
-	@JsonIgnore // TODO: treba da postuje arhitekturu
+	//@JsonIgnore // TODO: treba da postuje arhitekturu
 	private Nastavnik nastavnik;
 }
