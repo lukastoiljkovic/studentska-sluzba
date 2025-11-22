@@ -29,40 +29,43 @@ import org.springframework.web.bind.annotation.RestController;
 public class RaspodelaNastaveController {
 	
     private final RaspodelaNastaveService raspodelaNastaveService;
-	
+
+    // DRZI PREDMET
+
 	@GetMapping(path = "/drzipredmet/aktivna/nastavnik/{idNastavnika}")
 	public List<Predmet> getDrziPredmetUAktivnojSkolskojGodini(@PathVariable Long idNastavnika) {
 		return raspodelaNastaveService.getPredmetiZaNastavnikaUAktivnojSkolskojGodini(idNastavnika);
 	}
-	
-	@GetMapping(path = "/slusapredmetaktivna/{idPredmeta}/{idNastavnika}")
+
+    @DeleteMapping(path="/drzipredmet/{id}")
+    public void deleteDrziPredmet(@PathVariable Long id) {
+        raspodelaNastaveService.deleteDrziPredmet(id);
+    }
+
+    @PostMapping(path="/drzipredmet/add")
+    public Long addDrziPredmet (@RequestBody DrziPredmet drziPredmet) {
+        return raspodelaNastaveService.addDrziPredmet(drziPredmet).getId();
+    }
+
+    @GetMapping(path = "/slusapredmet/aktivna/{idPredmeta}/{idNastavnika}")
 	public List<StudentIndeks> getSlusaPredmetUAktivnojSkolskojGodini(@PathVariable Long idPredmeta, @PathVariable Long idNastavnika) {
 		return raspodelaNastaveService.getStudentiSlusaPredmetAktivnaGodina(idPredmeta, idNastavnika);
 	}
 	
-	@GetMapping(path = "/slusapredmetaktivna/{idDrziPredmet}")
+	@GetMapping(path = "/slusapredmet/aktivna/{idDrziPredmet}")
 	public List<StudentIndeks> getSlusaPredmetUAktivnojSkolskojGodiniForDrziPredmet(@PathVariable Long idDrziPredmet) {
 		return raspodelaNastaveService.getStudentiSlusaPredmetZaDrziPredmet(idDrziPredmet);
 	}
-	
-	@GetMapping(path = "/neslusapredmetaktivna/{idDrziPredmet}")
+
+	@GetMapping(path = "/neslusapredmet/aktivna/{idDrziPredmet}")
 	public List<StudentIndeks> getNeSlusaPredmetUAktivnojSkolskojGodiniForDrziPredmet(@PathVariable Long idDrziPredmet) {
 		return raspodelaNastaveService.getStudentiNeSlusajuDrziPredmet(idDrziPredmet);
 	}
-	
-	@PostMapping(path="/drzipredmet/add") 
-   	public Long addDrziPredmet (@RequestBody DrziPredmet drziPredmet) {  	    
-   	    return raspodelaNastaveService.addDrziPredmet(drziPredmet).getId();
-   	}
 	
 	@PostMapping(path="/slusapredmet/add") 
    	public Long addSlusaPredmet (@RequestBody SlusaPredmet slusaPredmet) {  	    
    	    return raspodelaNastaveService.addSlusaPredmet(slusaPredmet).getId();
    	}
 	
-	@DeleteMapping(path="/drzipredmet/{id}")
-	public void deleteDrziPredmet(@PathVariable Long id) {
-        raspodelaNastaveService.deleteDrziPredmet(id);
-    }
 
 }
