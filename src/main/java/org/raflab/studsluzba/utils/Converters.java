@@ -1,17 +1,19 @@
 package org.raflab.studsluzba.utils;
 
+import lombok.Data;
+
 import org.raflab.studsluzba.controllers.request.*;
-import org.raflab.studsluzba.controllers.response.NastavnikResponse;
-import org.raflab.studsluzba.controllers.response.StudentIndeksResponse;
-import org.raflab.studsluzba.controllers.response.StudentPodaciResponse;
-import org.raflab.studsluzba.controllers.response.StudijskiProgramResponse;
-import org.raflab.studsluzba.model.entities.Nastavnik;
-import org.raflab.studsluzba.model.entities.StudentIndeks;
-import org.raflab.studsluzba.model.entities.StudentPodaci;
-import org.raflab.studsluzba.model.entities.StudijskiProgram;
+import org.raflab.studsluzba.controllers.response.*;
+import org.raflab.studsluzba.model.entities.*;
+import org.raflab.studsluzba.model.entities.IspitIzlazak;
+import org.raflab.studsluzba.controllers.response.IspitniRokResponse;
+import org.raflab.studsluzba.model.entities.IspitniRok;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDateTime;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Converters {
     // konvertovanje izmedju entity, request i response objekata
@@ -159,4 +161,204 @@ public class Converters {
         response.setStudijskiProgram(toStudijskiProgramResponse(si.getStudijskiProgram()));
         return response;
     }
+
+    // --------- GRUPA ---------
+
+    public static Grupa toGrupa(GrupaRequest req, StudijskiProgram sp, SkolskaGodina sg) {
+        Grupa g = new Grupa();
+        g.setNaziv(req.getNaziv());
+        g.setStudijskiProgram(sp);
+        g.setSkolskaGodina(sg);
+        return g;
+    }
+
+    public static GrupaResponse toGrupaResponse(Grupa grupa) {
+        if (grupa == null) return null;
+        GrupaResponse res = new GrupaResponse();
+        res.setId(grupa.getId());
+        res.setNaziv(grupa.getNaziv());
+
+        if (grupa.getStudijskiProgram() != null)
+            res.setStudijskiProgramNaziv(grupa.getStudijskiProgram().getNaziv());
+
+        if (grupa.getSkolskaGodina() != null)
+            res.setSkolskaGodinaNaziv(grupa.getSkolskaGodina().getNaziv());
+
+        return res;
+    }
+
+    public static List<GrupaResponse> toGrupaResponseList(Iterable<Grupa> grupe) {
+        List<GrupaResponse> lista = new ArrayList<>();
+        grupe.forEach(g -> lista.add(toGrupaResponse(g)));
+        return lista;
+    }
+
+    // ---------- ISPIT IZLAZAK ----------
+
+    public static IspitIzlazakResponse toIspitIzlazakResponse(IspitIzlazak e) {
+        if (e == null) return null;
+
+        IspitIzlazakResponse r = new IspitIzlazakResponse();
+        r.setId(e.getId());
+        r.setBrojPoena(e.getBrojPoena());
+        r.setNapomena(e.getNapomena());
+        r.setPonistava(e.isPonistava());
+
+        if (e.getStudentIndeks() != null) {
+            r.setStudentIndeksId(e.getStudentIndeks().getId());
+            r.setIndeksBroj(e.getStudentIndeks().getBroj());
+            r.setIndeksGodina(e.getStudentIndeks().getGodina());
+            r.setStudProgramOznaka(e.getStudentIndeks().getStudProgramOznaka());
+        }
+
+        if (e.getIspitPrijava() != null) {
+            r.setIspitPrijavaId(e.getIspitPrijava().getId());
+            r.setDatumPrijave(e.getIspitPrijava().getDatum());
+
+            if (e.getIspitPrijava().getIspit() != null) {
+                r.setIspitId(e.getIspitPrijava().getIspit().getId());
+                r.setDatumIspita(e.getIspitPrijava().getIspit().getDatumVremePocetka());
+                if (e.getIspitPrijava().getIspit().getPredmet() != null) {
+                    r.setPredmetSifra(e.getIspitPrijava().getIspit().getPredmet().getSifra());
+                    r.setPredmetNaziv(e.getIspitPrijava().getIspit().getPredmet().getNaziv());
+                }
+            }
+        }
+        return r;
+    }
+
+    public static IspitniRokResponse toIspitniRokResponse(IspitniRok ir) {
+        if (ir == null) return null;
+        IspitniRokResponse r = new IspitniRokResponse();
+        r.setId(ir.getId());
+        r.setNaziv(ir.getNaziv());
+        r.setDatumPocetka(ir.getDatumPocetka());
+        r.setDatumZavrsetka(ir.getDatumZavrsetka());
+        if (ir.getSkolskaGodina() != null) {
+            r.setSkolskaGodinaId(ir.getSkolskaGodina().getId());
+            r.setSkolskaGodinaNaziv(ir.getSkolskaGodina().getNaziv());
+        }
+        return r;
+    }
+
+    public static java.util.List<IspitniRokResponse> toIspitniRokResponseList(Iterable<IspitniRok> items) {
+        java.util.List<IspitniRokResponse> list = new java.util.ArrayList<>();
+        items.forEach(x -> list.add(toIspitniRokResponse(x)));
+        return list;
+    }
+
+    public static List<IspitIzlazakResponse> toIspitIzlazakResponseList(Iterable<IspitIzlazak> list) {
+        List<IspitIzlazakResponse> out = new ArrayList<>();
+        list.forEach(x -> out.add(toIspitIzlazakResponse(x)));
+        return out;
+    }
+
+    public static PredispitnaIzlazak toPredispitnaIzlazak(
+            PredispitnaIzlazakRequest req,
+            SlusaPredmet sp,
+            PredispitnaObaveza po) {
+
+        PredispitnaIzlazak izlazak = new PredispitnaIzlazak();
+        izlazak.setSlusaPredmet(sp);
+        izlazak.setPredispitnaObaveza(po);
+        izlazak.setPoeni(req.getPoeni());
+        izlazak.setDatum(req.getDatum());
+        return izlazak;
+    }
+
+    public static PredispitnaIzlazakResponse toPredispitnaIzlazakResponse(PredispitnaIzlazak izlazak) {
+        PredispitnaIzlazakResponse res = new PredispitnaIzlazakResponse();
+        res.setId(izlazak.getId());
+        res.setSlusaPredmetId(izlazak.getSlusaPredmet() != null ? izlazak.getSlusaPredmet().getId() : null);
+        res.setPredispitnaObavezaId(izlazak.getPredispitnaObaveza() != null ? izlazak.getPredispitnaObaveza().getId() : null);
+        res.setPoeni(izlazak.getPoeni());
+        res.setDatum(izlazak.getDatum());
+        return res;
+    }
+
+    public static List<PredispitnaIzlazakResponse> toPredispitnaIzlazakResponseList(List<PredispitnaIzlazak> lista) {
+        return lista.stream()
+                .map(Converters::toPredispitnaIzlazakResponse)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    public static PolozenPredmet toPolozenPredmet(PolozenPredmetRequest req,
+                                                  StudentIndeks si,
+                                                  Predmet p,
+                                                  IspitIzlazak izlazak) {
+        PolozenPredmet pp = new PolozenPredmet();
+        pp.setOcena(req.getOcena());
+        pp.setPriznat(req.isPriznat());
+        pp.setStudentIndeks(si);
+        pp.setPredmet(p);
+        pp.setIspitIzlazak(izlazak);
+        return pp;
+    }
+
+    public static PolozenPredmetResponse toPolozenPredmetResponse(PolozenPredmet pp) {
+        PolozenPredmetResponse r = new PolozenPredmetResponse();
+        r.setId(pp.getId());
+        r.setOcena(pp.getOcena());
+        r.setPriznat(pp.isPriznat());
+
+        if(pp.getStudentIndeks() != null) r.setStudentIndeksId(pp.getStudentIndeks().getId());
+        if(pp.getPredmet() != null) r.setPredmetId(pp.getPredmet().getId());
+        if(pp.getIspitIzlazak() != null) r.setIspitIzlazakId(pp.getIspitIzlazak().getId());
+
+        return r;
+    }
+
+    public static List<PolozenPredmetResponse> toPolozenPredmetResponseList(List<PolozenPredmet> lista) {
+        return lista.stream()
+                .map(Converters::toPolozenPredmetResponse)
+                .collect(Collectors.toList());
+    }
+
+    public static ObnovaGodine toObnova(ObnovaGodineRequest req,
+                                        StudentIndeks si,
+                                        SkolskaGodina sg,
+                                        Set<SlusaPredmet> predmeti) {
+
+        ObnovaGodine o = new ObnovaGodine();
+        o.setGodinaStudija(req.getGodinaStudija());
+        o.setDatum(req.getDatum());
+        o.setNapomena(req.getNapomena());
+        o.setStudentIndeks(si);
+        o.setSkolskaGodina(sg);
+        o.setPredmetiKojeObnavlja(predmeti);
+        return o;
+    }
+
+    public static ObnovaGodineResponse toObnovaResponse(ObnovaGodine og) {
+
+        ObnovaGodineResponse r = new ObnovaGodineResponse();
+
+        r.setId(og.getId());
+        r.setGodinaStudija(og.getGodinaStudija());
+        r.setDatum(og.getDatum());
+        r.setNapomena(og.getNapomena());
+
+        if (og.getStudentIndeks() != null)
+            r.setStudentIndeksId(og.getStudentIndeks().getId());
+
+        if (og.getSkolskaGodina() != null)
+            r.setSkolskaGodinaId(og.getSkolskaGodina().getId());
+
+        if (og.getPredmetiKojeObnavlja() != null)
+            r.setPredmetiKojeObnavljaIds(
+                    og.getPredmetiKojeObnavlja().stream()
+                            .map(SlusaPredmet::getId)
+                            .collect(Collectors.toSet())
+            );
+
+        return r;
+    }
+
+    public static List<ObnovaGodineResponse> toObnovaResponseList(List<ObnovaGodine> lista) {
+        return lista.stream()
+                .map(Converters::toObnovaResponse)
+                .collect(Collectors.toList());
+    }
+
+
 }
