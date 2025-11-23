@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Optional;
+
 public interface PolozenPredmetRepository extends CrudRepository<PolozenPredmet, Long> {
 
     Page<PolozenPredmet> findByStudentIndeksIdAndOcenaIsNotNull(Long studentIndeksId, Pageable pageable);
@@ -29,4 +31,21 @@ public interface PolozenPredmetRepository extends CrudRepository<PolozenPredmet,
             @Param("fromYear") String fromYear,
             @Param("toYear") String toYear
     );
+
+    @Query("SELECT AVG(pp.ocena) " +
+            "FROM PolozenPredmet pp " +
+            "JOIN pp.ispitIzlazak ie " +
+            "JOIN ie.ispitPrijava ip " +
+            "WHERE ip.ispit.id = :ispitId " +
+            "AND pp.ocena IS NOT NULL " +
+            "AND ie.ponistava = false")
+    Double avgOcenaZaIspit(@Param("ispitId") Long ispitId);
+    @Query("SELECT pp FROM PolozenPredmet pp " +
+            "WHERE pp.studentIndeks.id = :siId AND pp.predmet.id = :predmetId")
+    Optional<PolozenPredmet> findByStudentIndeksAndPredmet(
+            @Param("siId") Long siId,
+            @Param("predmetId") Long predmetId
+    );
+
+
 }

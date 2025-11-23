@@ -23,8 +23,10 @@ public interface SlusaPredmetRepository extends CrudRepository<SlusaPredmet, Lon
 	
 	@Query("select sp.studentIndeks from SlusaPredmet sp where sp.drziPredmet.id = :idDrziPredmet")
 	List<StudentIndeks> getStudentiSlusaPredmetZaDrziPredmet(Long idDrziPredmet);
-	
-	
+
+	boolean existsByStudentIndeksIdAndDrziPredmet_Predmet_IdAndSkolskaGodina_Id(
+			Long studentIndeksId, Long predmetId, Long skolskaGodinaId);
+
 	/*
 	 * TODO dodati slicne operacije koja vracaju sve studente za stud program/ godinu studija koje ne slusaju predmet
 	 */
