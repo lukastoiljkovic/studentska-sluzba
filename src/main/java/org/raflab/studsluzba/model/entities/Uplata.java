@@ -2,10 +2,7 @@ package org.raflab.studsluzba.model.entities;
 
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.time.LocalDate;
 
 @Entity @Data
@@ -16,6 +13,9 @@ public class Uplata {
 
     private LocalDate datum;
     private Double iznosRSD;
+    private Double iznosEUR;
     private Double kurs;
 
+    @ManyToOne
+    private UpisGodine upisGodine;
 }

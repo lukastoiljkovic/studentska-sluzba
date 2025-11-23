@@ -16,12 +16,16 @@ public class UpisGodineController {
 
     private final UpisGodineService service;
 
-    @PostMapping
+    /// obnova godine za studenta gde je potrebno omogućiti da se, pored nepoloženih,
+    /// izaberu predmeti iz naredne godine. Maksimalni zbir ESPB poena može biti 60.
+    /// Dodaje se nova obnova godine za studenta i predmeti koje sluša, a koji će
+    /// inicijalno biti nepoloženi.
+    @PostMapping("/add")
     public UpisGodineResponse create(@RequestBody UpisGodineRequest req) {
         return service.create(req);
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public List<UpisGodineResponse> list(
             @RequestParam(required = false) Long studentIndeksId,
             @RequestParam(required = false) Long skolskaGodinaId

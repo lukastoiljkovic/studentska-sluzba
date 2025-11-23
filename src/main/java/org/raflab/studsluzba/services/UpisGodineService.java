@@ -6,6 +6,7 @@ import org.raflab.studsluzba.controllers.response.UpisGodineResponse;
 import org.raflab.studsluzba.model.entities.*;
 import org.raflab.studsluzba.repositories.*;
 import org.raflab.studsluzba.utils.Converters;
+import org.raflab.studsluzba.utils.EntityMappers;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,42 +22,79 @@ public class UpisGodineService {
     private final StudentIndeksRepository studentIndeksRepository;
     private final SkolskaGodinaRepository skolskaGodinaRepository;
     private final SlusaPredmetRepository slusaPredmetRepository;
+    private final DrziPredmetRepository drziPredmetRepository;
+
+
+    public List<UpisGodineResponse> findUpisaneGodine(String studProgramOznaka, int godina, int broj) {
+        List<UpisGodine> lista = upisGodineRepository
+                .findByStudentIndeksStudProgramOznakaAndStudentIndeksGodinaAndStudentIndeksBroj(
+                        studProgramOznaka, godina, broj);
+
+        return lista.stream()
+                .map(Converters::toUpisGodineResponse)
+                .collect(Collectors.toList());
+    }
+
 
     // CREATE
-    @Transactional
     public UpisGodineResponse create(UpisGodineRequest req) {
-        // Minimalna ručna validacija za create
-        require(req.getGodinaStudija() != null, "godinaStudija je obavezna");
-        require(req.getDatum() != null, "datum je obavezan");
-        require(req.getStudentIndeksId() != null, "studentIndeksId je obavezan");
-        require(req.getSkolskaGodinaId() != null, "skolskaGodinaId je obavezan");
 
         StudentIndeks si = studentIndeksRepository.findById(req.getStudentIndeksId())
-                .orElseThrow(() -> new NoSuchElementException("StudentIndeks ne postoji: id=" + req.getStudentIndeksId()));
-        SkolskaGodina sg = skolskaGodinaRepository.findById(req.getSkolskaGodinaId())
-                .orElseThrow(() -> new NoSuchElementException("SkolskaGodina ne postoji: id=" + req.getSkolskaGodinaId()));
+                .orElseThrow(() -> new NoSuchElementException("StudentIndeks not found"));
 
-        // Anti-duplikat (jedan upis po studentu za istu šk. godinu)
-        boolean exists = StreamSupport.stream(upisGodineRepository.findAll().spliterator(), false)
-                .anyMatch(u -> u.getStudentIndeks() != null && u.getSkolskaGodina() != null
-                        && Objects.equals(u.getStudentIndeks().getId(), si.getId())
-                        && Objects.equals(u.getSkolskaGodina().getId(), sg.getId()));
-        if (exists) throw new IllegalStateException("Upis za datu školsku godinu već postoji za ovog studenta.");
+        SkolskaGodina sg = skolskaGodinaRepository.findById(req.getSkolskaGodinaId())
+                .orElseThrow(() -> new NoSuchElementException("SkolskaGodina not found"));
 
         UpisGodine u = new UpisGodine();
-        u.setGodinaStudija(req.getGodinaStudija());
-        u.setDatum(req.getDatum());
-        u.setNapomena(req.getNapomena());
         u.setStudentIndeks(si);
         u.setSkolskaGodina(sg);
+        u.setDatum(req.getDatum());
+        u.setNapomena(req.getNapomena());
+        u.setGodinaStudija(req.getGodinaStudija());
 
-        if (req.getPredmetiKojePrenosiIds() != null) {
-            List<SlusaPredmet> sp = slsaByIds(req.getPredmetiKojePrenosiIds());
-            u.setPredmetiKojePrenosi(new HashSet<>(sp));
+        // preneti predmeti
+        if (req.getPredmetiKojePrenosiIds() != null && !req.getPredmetiKojePrenosiIds().isEmpty()) {
+            u.setPredmetiKojePrenosi(new HashSet<>(slusaByIds(req.getPredmetiKojePrenosiIds())));
         }
 
-        return Converters.toUpisGodineResponse(upisGodineRepository.save(u));
+        // cuvamo upis
+        u = upisGodineRepository.save(u);
+
+
+        // 1) nadji sve drzi_predmet za tu sk.godinu
+        List<DrziPredmet> dpLista = drziPredmetRepository.findBySkolskaGodinaId(sg.getId());
+
+        // 2) filtriraj samo predmete konkretne godine i studijskog programa
+        List<DrziPredmet> predmetiZaGodinu = dpLista.stream()
+                .filter(dp -> {
+                    int godinaPredmeta = (dp.getPredmet().getSemestar() + 1) / 2;
+                    return godinaPredmeta == req.getGodinaStudija() &&
+                            dp.getPredmet().getStudProgram().getOznaka()
+                                    .equals(si.getStudProgramOznaka());
+                })
+
+                .collect(Collectors.toList());
+
+        // 3) kreiraj SlusaPredmet za svaki predmet
+        List<SlusaPredmet> slusaList = new ArrayList<>();
+        for (DrziPredmet dp : predmetiZaGodinu) {
+            SlusaPredmet sp = new SlusaPredmet();
+            sp.setStudentIndeks(si);
+            sp.setDrziPredmet(dp);
+            sp.setSkolskaGodina(sg);
+            sp.setGrupa(null); // nema logike dodele grupe zasad
+
+            slusaList.add(sp);
+        }
+
+        // 4) snimi sve
+        if (!slusaList.isEmpty()) {
+            slusaPredmetRepository.saveAll(slusaList);
+        }
+
+        return Converters.toUpisGodineResponse(u);
     }
+
 
     // READ: list sa opcionalnim filterima
     @Transactional(readOnly = true)
@@ -121,7 +159,7 @@ public class UpisGodineService {
             if (req.getPredmetiKojePrenosiIds().isEmpty()) {
                 u.setPredmetiKojePrenosi(Collections.emptySet());
             } else {
-                List<SlusaPredmet> sp = slsaByIds(req.getPredmetiKojePrenosiIds());
+                List<SlusaPredmet> sp = slusaByIds(req.getPredmetiKojePrenosiIds());
                 u.setPredmetiKojePrenosi(new HashSet<>(sp));
             }
         }
@@ -142,7 +180,7 @@ public class UpisGodineService {
         if (!cond) throw new IllegalArgumentException(msg);
     }
 
-    private List<SlusaPredmet> slsaByIds(Set<Long> ids) {
+    private List<SlusaPredmet> slusaByIds(Set<Long> ids) {
         if (ids == null || ids.isEmpty()) return Collections.emptyList();
         return slusaPredmetRepository.findByIdIn(ids);
     }

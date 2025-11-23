@@ -4,6 +4,7 @@ package org.raflab.studsluzba.repositories;
 
 import java.util.List;
 
+import org.raflab.studsluzba.model.entities.SrednjaSkola;
 import org.raflab.studsluzba.model.entities.StudentIndeks;
 import org.raflab.studsluzba.model.entities.StudentPodaci;
 import org.springframework.data.domain.Page;
@@ -14,7 +15,9 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface StudentPodaciRepository extends JpaRepository<StudentPodaci, Long> {	//	nasljedjene implementacije poput findById i findByAll
-	
+
+    List<StudentPodaci> findBySrednjaSkola(SrednjaSkola skola);
+
 	@Query("select sp from StudentPodaci sp where "
 			+ "(:ime is null or lower(sp.ime) like :ime) and "
 			+ "(:prezime is null or lower(sp.prezime) like :prezime) and "

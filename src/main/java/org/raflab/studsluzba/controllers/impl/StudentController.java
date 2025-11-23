@@ -1,17 +1,23 @@
 package org.raflab.studsluzba.controllers.impl;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
+import org.raflab.studsluzba.controllers.request.SrednjaSkolaRequest;
 import org.raflab.studsluzba.controllers.request.StudentIndeksRequest;
 import org.raflab.studsluzba.controllers.request.StudentPodaciRequest;
 import org.raflab.studsluzba.controllers.response.StudentIndeksResponse;
 import org.raflab.studsluzba.controllers.response.StudentPodaciResponse;
+import org.raflab.studsluzba.controllers.response.UpisGodineResponse;
 import org.raflab.studsluzba.model.dtos.StudentDTO;
 import org.raflab.studsluzba.model.dtos.StudentProfileDTO;
 import org.raflab.studsluzba.model.dtos.StudentWebProfileDTO;
+import org.raflab.studsluzba.model.entities.SrednjaSkola;
 import org.raflab.studsluzba.model.entities.StudentIndeks;
 import org.raflab.studsluzba.model.entities.StudentPodaci;
+import org.raflab.studsluzba.model.entities.Uplata;
 import org.raflab.studsluzba.services.*;
 import org.raflab.studsluzba.utils.Converters;
 import org.springframework.data.domain.Page;
@@ -23,10 +29,13 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(path="/api/student")
 public class StudentController {
 
-    final StudentPodaciService studentPodaciService;
-	final StudentProfileService studentProfileService;
-	final StudentIndeksService studentIndeksService;
-    final StudentSearchService studentSearchService;
+    private final StudentPodaciService studentPodaciService;
+    private final StudentProfileService studentProfileService;
+    private final StudentIndeksService studentIndeksService;
+    private final StudentSearchService studentSearchService;
+    private final UpisGodineService upisGodineService;
+    private final SrednjaSkolaService srednjaSkolaService;
+    private final UplataService uplataService;
 
     /// - selekcija studenta (njegovih ličnih podataka) preko broja indeksa
     @GetMapping(path="/podaci/byIndeks")
@@ -54,6 +63,43 @@ public class StudentController {
 
         return studentSearchService.search(ime, prezime, studProgram, godina, broj, page, size);
     }
+
+    ///  pregled svih upisanih godina za broj indeksa
+    @GetMapping("/upisane-godine")
+    public List<UpisGodineResponse> getUpisaneGodine(
+            @RequestParam String studProgramOznaka,
+            @RequestParam int godina,
+            @RequestParam int broj) {
+
+        return upisGodineService.findUpisaneGodine(studProgramOznaka, godina, broj);
+    }
+
+    /// selekcija svih upisanih studenata koji su završili određenu srednju školu
+    @PostMapping("/po-srednjoj-skoli")
+    public List<StudentPodaciResponse> getStudentiPoSrednjojSkoli(@RequestBody SrednjaSkolaRequest request) {
+        SrednjaSkola skola = Converters.toSrednjaSkola(request);
+
+        return srednjaSkolaService.getStudentiPoSrednjojSkoli(skola);
+    }
+
+    ///dodavanje nove uplate (čuva se datum uplate, iznos u dinarima i srednji kurs).
+    /// Trenutni srednji kurs ne treba da ima predefinisanu vrednost, nego ga treba
+    /// dohvatiti api pozivom
+    @PostMapping("/{upisGodineId}/uplata")
+    public Uplata dodajUplatu(@PathVariable Long upisGodineId,
+                              @RequestParam Double iznosEUR) {
+        return uplataService.dodajUplatu(upisGodineId, iznosEUR);
+    }
+
+    ///selekcija preostalog iznosa za uplatu u evrima i dinarima. Iznos školarine je predefinisana vrednost od 3000e
+    @GetMapping("/{upisGodineId}/preostalo")
+    public Map<String, Double> preostaliIznos(@PathVariable Long upisGodineId) {
+        Map<String, Double> mapa = new HashMap<>();
+        mapa.put("eur", uplataService.preostaliIznosEUR(upisGodineId));
+        mapa.put("rsd", uplataService.preostaliIznosRSD(upisGodineId));
+        return mapa;
+    }
+
 
     @PostMapping(path="/add")
 	public Long addNewStudentPodaci(@RequestBody StudentPodaciRequest studentPodaci) {
