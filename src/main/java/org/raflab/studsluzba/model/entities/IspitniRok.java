@@ -1,13 +1,14 @@
 package org.raflab.studsluzba.model.entities;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
-@Entity @Data
+@Entity @Data @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class IspitniRok {
 
     @Id

@@ -27,7 +27,6 @@ public class Converters {
         nastavnik.setEmail(nastavnikRequest.getEmail());
         nastavnik.setBrojTelefona(nastavnikRequest.getBrojTelefona());
         nastavnik.setAdresa(nastavnikRequest.getAdresa());
-        nastavnik.setZvanja(nastavnikRequest.getZvanja());
         nastavnik.setDatumRodjenja(nastavnikRequest.getDatumRodjenja());
         nastavnik.setPol(nastavnikRequest.getPol());
         nastavnik.setJmbg(nastavnikRequest.getJmbg());
@@ -43,12 +42,32 @@ public class Converters {
         response.setEmail(nastavnik.getEmail());
         response.setBrojTelefona(nastavnik.getBrojTelefona());
         response.setAdresa(nastavnik.getAdresa());
-        response.setZvanja(nastavnik.getZvanja());
+
+        // mapiranje zvanja na response DTO
+        Set<NastavnikZvanjeResponse> zvanjaDTO = nastavnik.getZvanja().stream()
+                .map(zvanje -> {
+                    NastavnikZvanjeResponse zvanjeResponse = new NastavnikZvanjeResponse();
+                    zvanjeResponse.setId(zvanje.getId());
+                    zvanjeResponse.setDatumIzbora(zvanje.getDatumIzbora());
+                    zvanjeResponse.setZvanje(zvanje.getZvanje());
+                    zvanjeResponse.setNaucnaOblast(zvanje.getNaucnaOblast());
+                    zvanjeResponse.setUzaNaucnaOblast(zvanje.getUzaNaucnaOblast());
+                    zvanjeResponse.setAktivno(zvanje.isAktivno());
+                    zvanjeResponse.setNastavnikId(nastavnik.getId());
+                    zvanjeResponse.setNastavnikIme(nastavnik.getIme());
+                    zvanjeResponse.setNastavnikPrezime(nastavnik.getPrezime());
+                    return zvanjeResponse;
+                })
+                .collect(Collectors.toSet());
+
+        response.setZvanja(zvanjaDTO);
+
         response.setDatumRodjenja(nastavnik.getDatumRodjenja());
         response.setPol(nastavnik.getPol());
         response.setJmbg(nastavnik.getJmbg());
         return response;
     }
+
 
     public static List<NastavnikResponse> toNastavnikResponseList(Iterable<Nastavnik> nastavnikIterable) {
         List<NastavnikResponse> nastavnikResponses = new ArrayList<>();

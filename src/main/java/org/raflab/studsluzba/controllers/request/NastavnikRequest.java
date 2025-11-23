@@ -4,23 +4,20 @@ import lombok.Data;
 import lombok.NonNull;
 import org.raflab.studsluzba.model.entities.NastavnikZvanje;
 
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.Set;
 
 @Data
 public class NastavnikRequest {
-
-    @NonNull
-    private String ime;
-    @NonNull
-    private String prezime;
-    @NonNull
+    @NotNull private String ime;
+    @NotNull private String prezime;
+    @NotNull
     private String srednjeIme;
-    @NonNull
-    private String email;
+    @NotNull private String email;
     private String brojTelefona;
     private String adresa;
-    private Set<NastavnikZvanje> zvanja;
+    private Set<NastavnikZvanjeRequest> zvanja;
 
     private LocalDate datumRodjenja;
     private Character pol;

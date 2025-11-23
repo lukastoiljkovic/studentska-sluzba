@@ -17,12 +17,12 @@ public class TokStudijaController {
 
     private final TokStudijaService service;
 
-    @PostMapping
+    @PostMapping("/add")
     public TokStudijaResponse create(@RequestBody TokStudijaRequest req) {
         return service.create(req);
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public List<TokStudijaResponse> list(@RequestParam(required = false) Long studentIndeksId) {
         return service.list(studentIndeksId);
     }

@@ -14,6 +14,7 @@ import org.raflab.studsluzba.repositories.StudentIndeksRepository;
 import org.raflab.studsluzba.utils.Converters;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
@@ -112,8 +113,9 @@ public class ObnovaGodineService {
         return obnovaGodineRepository.findById(id);
     }
 
+    @Transactional
     public List<ObnovaGodine> findAll() {
-        return (List<ObnovaGodine>) obnovaGodineRepository.findAll();
+        return (List<ObnovaGodine>) obnovaGodineRepository.findAllWithPredmeti();
     }
 
     public void deleteById(Long id) {

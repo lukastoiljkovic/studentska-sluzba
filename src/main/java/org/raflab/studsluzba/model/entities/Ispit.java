@@ -1,11 +1,12 @@
 package org.raflab.studsluzba.model.entities;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-@Entity @Data
+@Entity @Data @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Ispit {
 
     @Id

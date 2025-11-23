@@ -319,6 +319,28 @@ public class Seeder implements CommandLineRunner {
         upis1.setNapomena("Prvi upis");
         upis1 = upisGodineRepository.save(upis1);
 
+        UpisGodine upis2 = new UpisGodine();
+        upis2.setStudentIndeks(i2);
+        upis2.setSkolskaGodina(sg);
+        upis2.setGodinaStudija(1);
+        upis2.setDatum(LocalDate.of(2024,10,1));
+        upis2.setNapomena("Prvi upis - student i2");
+        upis2 = upisGodineRepository.save(upis2);
+
+        UpisGodine upis3 = new UpisGodine();
+        upis3.setStudentIndeks(i3);
+        upis3.setSkolskaGodina(sg);
+        upis3.setGodinaStudija(1);
+        upis3.setDatum(LocalDate.of(2024,10,1));
+        upis3.setNapomena("Prvi upis - student i3");
+        upis3 = upisGodineRepository.save(upis3);
+
+// --- UPLATE ZA TA DVA UPISA (JEDNA 1500€, DRUGA 3000€) ---
+        double middle = fetchEurMiddleRate();
+
+        Uplata uplataZaUpis2 = makeUplata(upis2, 1500.0, middle); // 1500€ za jedan od nova dva upisa
+        Uplata uplataZaUpis3 = makeUplata(upis3, 3000.0, middle); // 3000€ za drugi
+
         ObnovaGodine obnovaDummy = new ObnovaGodine();
         obnovaDummy.setStudentIndeks(i2);
         obnovaDummy.setSkolskaGodina(sg);
@@ -372,11 +394,6 @@ public class Seeder implements CommandLineRunner {
         pp.setIspitIzlazak(izlazak);
         polozenPredmetRepository.save(pp);
 
-        // UPLATE (trenutno entitet nema vezu ka studentu)
-        Uplata u1 = new Uplata();
-        u1.setDatum(LocalDate.now());
-        u1.setIznosRSD(120_000.0);
-        u1.setKurs(117.0);
     }
 
     // TokStudija repo je opciono
@@ -384,5 +401,26 @@ public class Seeder implements CommandLineRunner {
         try {
             tokStudijaRepository.save(tok);
         } catch (Exception ignored) {}
+    }
+
+    private double fetchEurMiddleRate() {
+        var rest = new org.springframework.web.client.RestTemplate();
+        String url = "https://kurs.resenje.org/api/v1/currencies/eur/rates/today";
+        @SuppressWarnings("unchecked")
+        java.util.Map<String, Object> map = rest.getForObject(url, java.util.Map.class);
+        if (map == null || !map.containsKey("exchange_middle")) {
+            throw new IllegalStateException("Nije moguće dohvatiti exchange_middle kurs EUR.");
+        }
+        Object val = map.get("exchange_middle");
+        return (val instanceof Number) ? ((Number) val).doubleValue() : Double.parseDouble(String.valueOf(val));
+    }
+
+    private Uplata makeUplata(UpisGodine upis, double eurAmount, double middleRate) {
+        Uplata u = new Uplata();
+        u.setUpisGodine(upis);
+        u.setDatum(LocalDate.now());
+        u.setKurs(middleRate);
+        u.setIznosRSD(eurAmount * middleRate);
+        return u;
     }
 }
