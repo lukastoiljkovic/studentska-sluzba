@@ -1,8 +1,6 @@
 package org.raflab.studsluzba.controllers.impl;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import lombok.RequiredArgsConstructor;
 import org.raflab.studsluzba.controllers.request.SrednjaSkolaRequest;
@@ -14,14 +12,20 @@ import org.raflab.studsluzba.controllers.response.UpisGodineResponse;
 import org.raflab.studsluzba.model.dtos.StudentDTO;
 import org.raflab.studsluzba.model.dtos.StudentProfileDTO;
 import org.raflab.studsluzba.model.dtos.StudentWebProfileDTO;
+import org.raflab.studsluzba.model.entities.SkolskaGodina;
 import org.raflab.studsluzba.model.entities.SrednjaSkola;
 import org.raflab.studsluzba.model.entities.StudentIndeks;
 import org.raflab.studsluzba.model.entities.StudentPodaci;
-import org.raflab.studsluzba.model.entities.Uplata;
+import org.raflab.studsluzba.model.entities.UpisGodine;
+import org.raflab.studsluzba.repositories.SkolskaGodinaRepository;
+import org.raflab.studsluzba.repositories.UpisGodineRepository;
 import org.raflab.studsluzba.services.*;
 import org.raflab.studsluzba.utils.Converters;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @CrossOrigin
 @RestController
@@ -37,22 +41,26 @@ public class StudentController {
     private final SrednjaSkolaService srednjaSkolaService;
     private final UplataService uplataService;
 
-    /// - selekcija studenta (njegovih ličnih podataka) preko broja indeksa
-    @GetMapping(path="/podaci/byIndeks")
-    public StudentPodaciResponse getStudentPodaciByIndeks(@RequestParam String studProgramOznaka,
-                                                          @RequestParam int godina,
-                                                          @RequestParam int broj) {
-        // dohvat StudentIndeks
-        StudentIndeks studentIndeks = studentIndeksService.findStudentIndeks(studProgramOznaka, godina, broj);
-        if (studentIndeks == null) return null; // ili throw Exception
+    // DODAJ OVE DEPENDENCY-E:
+    private final SkolskaGodinaRepository skolskaGodinaRepository;
+    private final UpisGodineRepository upisGodineRepository;
 
-        // dohvat StudentPodaci iz indeksa
+    @GetMapping(path="/podaci/byIndeks")
+    public ResponseEntity<StudentPodaciResponse> getStudentPodaciByIndeks(
+            @RequestParam String studProgramOznaka,
+            @RequestParam int godina,
+            @RequestParam int broj) {
+
+        StudentIndeks studentIndeks = studentIndeksService.findStudentIndeks(studProgramOznaka, godina, broj);
+        if (studentIndeks == null)
+            return ResponseEntity.notFound().build();
+
         StudentPodaci studentPodaci = studentIndeks.getStudent();
-        return studentPodaciService.getStudentPodaci(studentPodaci.getId());
+        StudentPodaciResponse resp = studentPodaciService.getStudentPodaci(studentPodaci.getId());
+        return ResponseEntity.ok(resp);
     }
 
-    /// selekcija studenata na osnovu imena i/ili prezimena (može samo ime, ili samo prezime ili oba da se unesu), paginirano
-    @GetMapping(path="/search")  // pretraga po imenu, prezimenu i elementima indeksa
+    @GetMapping(path="/search")
     public Page<StudentDTO> search(@RequestParam (required = false) String ime,
                                    @RequestParam (required = false) String prezime,
                                    @RequestParam (required = false) String studProgram,
@@ -64,7 +72,6 @@ public class StudentController {
         return studentSearchService.search(ime, prezime, studProgram, godina, broj, page, size);
     }
 
-    ///  pregled svih upisanih godina za broj indeksa
     @GetMapping("/upisane-godine")
     public List<UpisGodineResponse> getUpisaneGodine(
             @RequestParam String studProgramOznaka,
@@ -74,24 +81,44 @@ public class StudentController {
         return upisGodineService.findUpisaneGodine(studProgramOznaka, godina, broj);
     }
 
-    /// selekcija svih upisanih studenata koji su završili određenu srednju školu
     @PostMapping("/po-srednjoj-skoli")
-    public List<StudentPodaciResponse> getStudentiPoSrednjojSkoli(@RequestBody SrednjaSkolaRequest request) {
-        SrednjaSkola skola = Converters.toSrednjaSkola(request);
+    public List<StudentPodaciResponse> getStudentiPoSrednjojSkoli(@RequestParam String naziv) {
+        Optional<SrednjaSkola> skolaOpt = srednjaSkolaService.findByNaziv(naziv);
 
-        return srednjaSkolaService.getStudentiPoSrednjojSkoli(skola);
+        if (skolaOpt.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return srednjaSkolaService.getStudentiPoSrednjojSkoli(skolaOpt.get());
     }
 
-    ///dodavanje nove uplate (čuva se datum uplate, iznos u dinarima i srednji kurs).
-    /// Trenutni srednji kurs ne treba da ima predefinisanu vrednost, nego ga treba
-    /// dohvatiti api pozivom
-    @PostMapping("/{upisGodineId}/uplata")
-    public Uplata dodajUplatu(@PathVariable Long upisGodineId,
-                              @RequestParam Double iznosEUR) {
-        return uplataService.dodajUplatu(upisGodineId, iznosEUR);
+    // ============ ISPRAVLJENI ENDPOINT ZA UPLATU ============
+    @PostMapping("/{studentId}/uplata")
+    public void dodajUplatu(
+            @PathVariable Long studentId,
+            @RequestParam Double iznosEUR) {
+
+        // Nađi aktivan indeks studenta
+        StudentIndeks aktivanIndeks = studentIndeksService.findByStudentIdAndAktivan(studentId);
+        if (aktivanIndeks == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Aktivan indeks za studenta " + studentId + " ne postoji");
+        }
+
+        // Nađi trenutnu aktivnu školsku godinu
+        SkolskaGodina aktivnaSkolskaGodina = skolskaGodinaRepository.findByAktivnaTrue()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Aktivna školska godina ne postoji"));
+
+        // Nađi UpisGodine za ovaj indeks i aktivnu školsku godinu
+        UpisGodine upisGodine = upisGodineRepository
+                .findByStudentIndeksAndSkolskaGodina(aktivanIndeks, aktivnaSkolskaGodina)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Upis godine za studenta u aktivnoj školskoj godini ne postoji"));
+
+        uplataService.dodajUplatu(upisGodine.getId(), iznosEUR);
     }
 
-    ///selekcija preostalog iznosa za uplatu u evrima i dinarima. Iznos školarine je predefinisana vrednost od 3000e
     @GetMapping("/{upisGodineId}/preostalo")
     public Map<String, Double> preostaliIznos(@PathVariable Long upisGodineId) {
         Map<String, Double> mapa = new HashMap<>();
@@ -100,11 +127,10 @@ public class StudentController {
         return mapa;
     }
 
-
     @PostMapping(path="/add")
-	public Long addNewStudentPodaci(@RequestBody StudentPodaciRequest studentPodaci) {
-		return studentPodaciService.addStudentPodaci(Converters.toStudentPodaci(studentPodaci));
-	}
+    public Long addNewStudentPodaci(@RequestBody StudentPodaciRequest studentPodaci) {
+        return studentPodaciService.addStudentPodaci(Converters.toStudentPodaci(studentPodaci));
+    }
 
     @GetMapping(path="/all")
     public Iterable<StudentPodaciResponse> getAllStudentPodaci() {
@@ -117,54 +143,53 @@ public class StudentController {
         return studentPodaciService.getAllStudentPodaciPaginated(page, size);
     }
 
-	@GetMapping(path="/podaci/{id}")
-	public StudentPodaciResponse getStudentPodaci(@PathVariable Long id){
-		return studentPodaciService.getStudentPodaci(id);
-	}
+    @GetMapping(path="/podaci/{id}")
+    public StudentPodaciResponse getStudentPodaci(@PathVariable Long id){
+        return studentPodaciService.getStudentPodaci(id);
+    }
 
-	@PostMapping(path="/saveindeks")
-	public Long saveIndeks(@RequestBody StudentIndeksRequest request) {
+    @PostMapping(path="/saveindeks")
+    public Long saveIndeks(@RequestBody StudentIndeksRequest request) {
         return studentIndeksService.saveStudentIndeks(request);
-	}
+    }
 
-	@GetMapping(path="/indeks/{id}")
-	public StudentIndeksResponse getStudentIndeks(@PathVariable Long id){
+    @GetMapping(path="/indeks/{id}")
+    public StudentIndeksResponse getStudentIndeks(@PathVariable Long id){
         return studentIndeksService.getStudentIndeks(id);
-	}
+    }
 
-	@GetMapping(path="/indeksi/{idStudentPodaci}")
-	public List<StudentIndeksResponse> getIndeksiForStudentPodaciId(@PathVariable Long idStudentPodaci){
+    @GetMapping(path="/indeksi/{idStudentPodaci}")
+    public List<StudentIndeksResponse> getIndeksiForStudentPodaciId(@PathVariable Long idStudentPodaci){
         return studentIndeksService.getIndeksiForStudentPodaciId(idStudentPodaci);
-	}
+    }
 
-	@GetMapping(path="/fastsearch")  // salje se string oblika rn1923 - smer godina broj
-	public StudentIndeksResponse fastSearch(@RequestParam String indeksShort) {
+    @GetMapping(path="/fastsearch")
+    public StudentIndeksResponse fastSearch(@RequestParam String indeksShort) {
         return studentSearchService.fastSearch(indeksShort);
-	}
+    }
 
-	@GetMapping(path="/emailsearch")  // salje se email studenta
-	public StudentIndeksResponse emailSearch(@RequestParam String studEmail) {
+    @GetMapping(path="/emailsearch")
+    public StudentIndeksResponse emailSearch(@RequestParam String studEmail) {
         return studentSearchService.emailSearch(studEmail);
-	}
+    }
 
-	@GetMapping(path="/profile/{studentIndeksId}")
-	public StudentProfileDTO getStudentProfile(@PathVariable  Long studentIndeksId) {
-		return studentProfileService.getStudentProfile(studentIndeksId);
-	}
+    @GetMapping(path="/profile/{studentIndeksId}")
+    public StudentProfileDTO getStudentProfile(@PathVariable Long studentIndeksId) {
+        return studentProfileService.getStudentProfile(studentIndeksId);
+    }
 
-	@GetMapping(path="/webprofile/{studentIndeksId}")
-	public StudentWebProfileDTO getStudentWebProfile(@PathVariable  Long studentIndeksId) {
-		return studentProfileService.getStudentWebProfile(studentIndeksId);
-	}
+    @GetMapping(path="/webprofile/{studentIndeksId}")
+    public StudentWebProfileDTO getStudentWebProfile(@PathVariable Long studentIndeksId) {
+        return studentProfileService.getStudentWebProfile(studentIndeksId);
+    }
 
-	@GetMapping(path="/webprofile/email")
-	public StudentWebProfileDTO getStudentWebProfileForEmail(@RequestParam String studEmail) {
+    @GetMapping(path="/webprofile/email")
+    public StudentWebProfileDTO getStudentWebProfileForEmail(@RequestParam String studEmail) {
         return studentProfileService.getStudentWebProfileForEmail(studEmail);
-	}
+    }
 
     @DeleteMapping(path="/{id}")
     public void deleteStudentPodaci(@PathVariable Long id) {
-        studentPodaciService.deleteStudentPodaci(id);
+        studentPodaciService.deleteById(id);
     }
-
 }

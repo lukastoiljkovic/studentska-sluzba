@@ -7,7 +7,11 @@ import org.raflab.studsluzba.model.entities.SlusaPredmet;
 import org.raflab.studsluzba.model.entities.StudentIndeks;
 import org.raflab.studsluzba.repositories.DrziPredmetRepository;
 import org.raflab.studsluzba.repositories.SlusaPredmetRepository;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -20,6 +24,7 @@ public class RaspodelaNastaveService {
 
     // ZA DRZI PREDMET
 
+    @Transactional(readOnly = true)
     public List<Predmet> getPredmetiZaNastavnikaUAktivnojSkolskojGodini(Long idNastavnika) {
         return drziPredmetRepository.getPredmetiZaNastavnikaUAktivnojSkolskojGodini(idNastavnika);
     }
@@ -28,11 +33,17 @@ public class RaspodelaNastaveService {
         return drziPredmetRepository.save(drziPredmet);
     }
 
+    @Transactional
     public void deleteDrziPredmet(Long id) {
+        if (!drziPredmetRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Entitet sa ID " + id + " ne postoji.");
+        }
         try {
             drziPredmetRepository.deleteById(id);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (DataIntegrityViolationException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Ne može se obrisati entitet jer postoje povezani zapisi.");
         }
     }
 

@@ -3,11 +3,13 @@ package org.raflab.studsluzba.controllers.impl;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
+import org.raflab.studsluzba.controllers.response.PredmetResponse;
 import org.raflab.studsluzba.model.entities.DrziPredmet;
 import org.raflab.studsluzba.model.entities.Predmet;
 import org.raflab.studsluzba.model.entities.SlusaPredmet;
 import org.raflab.studsluzba.model.entities.StudentIndeks;
 import org.raflab.studsluzba.services.RaspodelaNastaveService;
+import org.raflab.studsluzba.utils.Converters;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,10 +34,11 @@ public class RaspodelaNastaveController {
 
     // DRZI PREDMET
 
-	@GetMapping(path = "/drzipredmet/aktivna/nastavnik/{idNastavnika}")
-	public List<Predmet> getDrziPredmetUAktivnojSkolskojGodini(@PathVariable Long idNastavnika) {
-		return raspodelaNastaveService.getPredmetiZaNastavnikaUAktivnojSkolskojGodini(idNastavnika);
-	}
+    @GetMapping(path = "/drzipredmet/aktivna/nastavnik/{idNastavnika}")
+    public List<PredmetResponse> getDrziPredmetUAktivnojSkolskojGodini(@PathVariable Long idNastavnika) {
+        List<Predmet> predmeti = raspodelaNastaveService.getPredmetiZaNastavnikaUAktivnojSkolskojGodini(idNastavnika);
+        return Converters.toPredmetResponseList(predmeti);
+    }
 
     @DeleteMapping(path="/drzipredmet/{id}")
     public void deleteDrziPredmet(@PathVariable Long id) {
@@ -43,7 +46,7 @@ public class RaspodelaNastaveController {
     }
 
     @PostMapping(path="/drzipredmet/add")
-    public Long addDrziPredmet (@RequestBody DrziPredmet drziPredmet) {
+    public Long addDrziPredmet(@RequestBody DrziPredmet drziPredmet) {
         return raspodelaNastaveService.addDrziPredmet(drziPredmet).getId();
     }
 

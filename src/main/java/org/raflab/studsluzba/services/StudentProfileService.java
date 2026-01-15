@@ -8,8 +8,13 @@ import org.raflab.studsluzba.repositories.SlusaPredmetRepository;
 import org.raflab.studsluzba.repositories.StudentIndeksRepository;
 import org.raflab.studsluzba.repositories.StudentPodaciRepository;
 import org.raflab.studsluzba.utils.ParseUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Collections;
+import java.util.List;
 
 @AllArgsConstructor
 @Service
@@ -28,15 +33,23 @@ public class StudentProfileService {
 		retVal.setSlusaPredmete(slusaPredmetRepo.getSlusaPredmetForIndeksAktivnaGodina(indeksId));
 		return retVal;
 	}
-	
-	public StudentWebProfileDTO getStudentWebProfile(Long indeksId) {
-		StudentWebProfileDTO retVal = new StudentWebProfileDTO();
-		StudentIndeks studIndeks = studentIndeksRepo.findById(indeksId).get();
-		Long studPodaciId = studIndeks.getStudent().getId();
-		retVal.setAktivanIndeks(studentPodaciRepo.getAktivanIndeks(studPodaciId));		
-		retVal.setSlusaPredmete(slusaPredmetRepo.getSlusaPredmetForIndeksAktivnaGodina(indeksId));
-		return retVal;
-	}
+
+    public StudentWebProfileDTO getStudentWebProfile(Long indeksId) {
+        StudentWebProfileDTO retVal = new StudentWebProfileDTO();
+        StudentIndeks studIndeks = studentIndeksRepo.findById(indeksId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Indeks ne postoji"));
+
+        Long studPodaciId = studIndeks.getStudent().getId();
+
+        List<StudentIndeks> aktivniIndeksi = Collections.singletonList(studentPodaciRepo.getAktivanIndeks(studPodaciId));
+        if (aktivniIndeksi.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nema aktivnih indeksa");
+        }
+
+        retVal.setAktivanIndeks(aktivniIndeksi.get(0));
+        retVal.setSlusaPredmete(slusaPredmetRepo.getSlusaPredmetForIndeksAktivnaGodina(indeksId));
+        return retVal;
+    }
 
     public StudentWebProfileDTO getStudentWebProfileForEmail(@RequestParam String studEmail) {
         String[] parsedData = ParseUtils.parseEmail(studEmail);

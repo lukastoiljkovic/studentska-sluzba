@@ -1,23 +1,35 @@
 package org.raflab.studsluzba.model.entities;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import javax.persistence.*;
 
-@Entity
 @Data
+@ToString(exclude = {
+        "nastavnik",
+        "predmet",
+        "skolskaGodina"
+})
+@EqualsAndHashCode(exclude = {
+        "nastavnik",
+        "predmet",
+        "skolskaGodina"
+})
+@Entity
 public class DrziPredmet {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long id;
 
-	@ManyToOne
-	private Nastavnik nastavnik;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Nastavnik nastavnik;
 
-	@ManyToOne
-	private Predmet predmet;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Predmet predmet;
 
-	@ManyToOne
-	private SkolskaGodina skolskaGodina;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private SkolskaGodina skolskaGodina;
 }

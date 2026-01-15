@@ -11,6 +11,7 @@ import org.raflab.studsluzba.model.entities.Nastavnik;
 import org.raflab.studsluzba.model.entities.ObnovaGodine;
 import org.raflab.studsluzba.services.ObnovaGodineService;
 import org.raflab.studsluzba.utils.Converters;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -45,23 +46,16 @@ public class ObnovaGodineController {
             @RequestParam(required = false) String napomena,
             @RequestParam(required = false) Set<Long> predmetiPrethodnaGodinaIds,
             @RequestParam(required = false) Set<Long> predmetiNarednaGodinaIds,
-            @RequestParam(required = false) LocalDate datum
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate datum
     ) {
-        // ako datum nije prosleđen, koristi danasnji datum
         if (datum == null) {
             datum = LocalDate.now();
         }
         return obnovaGodineService.addObnovaGodineNarednaGodina(
-                studentIndeksId,
-                skolskaGodinaId,
-                predmetiPrethodnaGodinaIds,
-                predmetiNarednaGodinaIds,
-                godinaStudija,
-                napomena,
-                datum
+                studentIndeksId, skolskaGodinaId, predmetiPrethodnaGodinaIds,
+                predmetiNarednaGodinaIds, godinaStudija, napomena, datum
         );
     }
-
 
     @PostMapping(path="/add")
     public Long addNewObnova(@RequestBody @Valid ObnovaGodineRequest obnovaRequest) {

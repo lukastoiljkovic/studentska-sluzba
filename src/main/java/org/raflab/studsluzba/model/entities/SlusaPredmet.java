@@ -3,11 +3,25 @@ package org.raflab.studsluzba.model.entities;
 import javax.persistence.*;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.util.Set;
 
-@Entity
 @Data
+@ToString(exclude = {
+        "studentIndeks",
+        "drziPredmet",
+        "predispitneObaveze",
+        "grupa",
+        "skolskaGodina"
+})
+@EqualsAndHashCode(exclude = {
+        "studentIndeks",
+        "drziPredmet",
+        "skolskaGodina"
+})
+@Entity
 public class SlusaPredmet {
 	
 	@Id

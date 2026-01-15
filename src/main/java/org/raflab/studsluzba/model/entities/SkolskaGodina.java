@@ -1,6 +1,7 @@
 package org.raflab.studsluzba.model.entities;
 
 import lombok.Data;
+import net.minidev.json.annotate.JsonIgnore;
 
 import javax.persistence.*;
 import java.util.List;
@@ -21,7 +22,7 @@ public class SkolskaGodina {
     @OneToMany(mappedBy = "skolskaGodina")
     private Set<SlusaPredmet> slusaPredmetList;
 
-    @OneToMany(mappedBy = "skolskaGodina", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "skolskaGodina", fetch = FetchType.LAZY)
     private Set<IspitniRok> ispitniRokovi;
 
 }

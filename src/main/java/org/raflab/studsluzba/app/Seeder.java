@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Set;
 
 @AllArgsConstructor
@@ -41,6 +40,7 @@ public class Seeder implements CommandLineRunner {
     private final UpisGodineRepository upisGodineRepository;
     private final ObnovaGodineRepository obnovaGodineRepository;
     private final TokStudijaRepository tokStudijaRepository;
+    private final UplataRepository uplataRepository;
 
     @Override
     public void run(String... args) {
@@ -98,7 +98,7 @@ public class Seeder implements CommandLineRunner {
         rn.setTrajanjeSemestara(8);
         rn.setVrstaStudija("OAS");
         rn.setUkupnoEspb(240);
-        rn = studijskiProgramRepository.save(ri);
+        rn = studijskiProgramRepository.save(rn);
 
         // PREDMETI
         Predmet p1 = new Predmet();
@@ -290,7 +290,7 @@ public class Seeder implements CommandLineRunner {
         sp4.setStudentIndeks(i3); sp4.setDrziPredmet(dp3); sp4.setSkolskaGodina(sg); sp4.setGrupa(gRI);
         sp4 = slusaPredmetRepository.save(sp4);
 
-        // PREDISPITNE OBAVEZE + POENI
+        /*// PREDISPITNE OBAVEZE + POENI
         PredispitnaObaveza kol1 = new PredispitnaObaveza();
         kol1.setPredmet(p1); kol1.setVrsta("Kolokvijum 1"); kol1.setMaxPoena(20);
         kol1 = predispitnaObavezaRepository.save(kol1);
@@ -308,7 +308,7 @@ public class Seeder implements CommandLineRunner {
         PredispitnaIzlazak pe2 = new PredispitnaIzlazak();
         pe2.setSlusaPredmet(sp1); pe2.setPredispitnaObaveza(kol2);
         pe2.setPoeni(12); pe2.setDatum(LocalDate.of(2025,1,15));
-        predispitnaIzlazakRepository.save(pe2);
+        predispitnaIzlazakRepository.save(pe2);*/
 
         // UPISI / OBNOVE / TOK STUDIJA
         UpisGodine upis1 = new UpisGodine();
@@ -341,6 +341,9 @@ public class Seeder implements CommandLineRunner {
         Uplata uplataZaUpis2 = makeUplata(upis2, 1500.0, middle); // 1500€ za jedan od nova dva upisa
         Uplata uplataZaUpis3 = makeUplata(upis3, 3000.0, middle); // 3000€ za drugi
 
+        uplataRepository.save(uplataZaUpis2);
+        uplataRepository.save(uplataZaUpis3);
+
         ObnovaGodine obnovaDummy = new ObnovaGodine();
         obnovaDummy.setStudentIndeks(i2);
         obnovaDummy.setSkolskaGodina(sg);
@@ -348,6 +351,14 @@ public class Seeder implements CommandLineRunner {
         obnovaDummy.setDatum(LocalDate.of(2024,10,1));
         obnovaDummy.setNapomena("Primer obnove");
         obnovaDummy = obnovaGodineRepository.save(obnovaDummy);
+
+        ObnovaGodine obnovaLuka = new ObnovaGodine();
+        obnovaLuka.setStudentIndeks(i1);
+        obnovaLuka.setSkolskaGodina(sg);
+        obnovaLuka.setGodinaStudija(1);
+        obnovaLuka.setDatum(LocalDate.of(2024,10,1));
+        obnovaLuka.setNapomena("Primer obnove za Lukу");
+        obnovaGodineRepository.save(obnovaLuka);
 
         TokStudija tok1 = new TokStudija();
         tok1.setStudentIndeks(i1);
@@ -393,6 +404,117 @@ public class Seeder implements CommandLineRunner {
         pp.setPriznat(false);
         pp.setIspitIzlazak(izlazak);
         polozenPredmetRepository.save(pp);
+
+        // POLOŽENI PREDMETI
+
+// --- Student i1 (Luka) ---
+        PolozenPredmet pp1 = new PolozenPredmet();
+        pp1.setStudentIndeks(i1);
+        pp1.setPredmet(p1);
+        pp1.setOcena(6);
+        pp1.setPriznat(false);
+        pp1.setIspitIzlazak(izlazak); // postoji iz prethodnog koda
+        polozenPredmetRepository.save(pp1);
+
+// --- Student i2 (Mina) ---
+        Ispit ispitP2 = new Ispit();
+        ispitP2.setIspitniRok(sept);
+        ispitP2.setNastavnik(n1);
+        ispitP2.setPredmet(p2); // Operativni sistemi
+        ispitP2.setDatumVremePocetka(LocalDateTime.of(2025,9,12,10,0));
+        ispitP2.setZakljucen(true);
+        ispitP2 = ispitRepository.save(ispitP2);
+
+        IspitPrijava prijava2 = new IspitPrijava();
+        prijava2.setIspit(ispitP2);
+        prijava2.setStudentIndeks(i2);
+        prijava2.setDatum(LocalDate.of(2025,9,10));
+        prijava2 = ispitPrijavaRepository.save(prijava2);
+
+        IspitIzlazak izlazak2 = new IspitIzlazak();
+        izlazak2.setIspitPrijava(prijava2);
+        izlazak2.setStudentIndeks(i2);
+        izlazak2.setBrojPoena(40);
+        izlazak2.setPonistava(false);
+        izlazak2.setNapomena("Uspesan izlazak");
+        izlazak2 = ispitIzlazakRepository.save(izlazak2);
+
+        PolozenPredmet pp2 = new PolozenPredmet();
+        pp2.setStudentIndeks(i2);
+        pp2.setPredmet(p2);
+        pp2.setOcena(8);
+        pp2.setPriznat(false);
+        pp2.setIspitIzlazak(izlazak2);
+        polozenPredmetRepository.save(pp2);
+
+// --- Student i3 (Petar) ---
+        Ispit ispitP3 = new Ispit();
+        ispitP3.setIspitniRok(sept);
+        ispitP3.setNastavnik(n2);
+        ispitP3.setPredmet(p3); // Matematika 1
+        ispitP3.setDatumVremePocetka(LocalDateTime.of(2025,9,15,10,0));
+        ispitP3.setZakljucen(true);
+        ispitP3 = ispitRepository.save(ispitP3);
+
+        IspitPrijava prijava3 = new IspitPrijava();
+        prijava3.setIspit(ispitP3);
+        prijava3.setStudentIndeks(i3);
+        prijava3.setDatum(LocalDate.of(2025,9,12));
+        prijava3 = ispitPrijavaRepository.save(prijava3);
+
+        IspitIzlazak izlazak3 = new IspitIzlazak();
+        izlazak3.setIspitPrijava(prijava3);
+        izlazak3.setStudentIndeks(i3);
+        izlazak3.setBrojPoena(45);
+        izlazak3.setPonistava(false);
+        izlazak3.setNapomena("Uspesan izlazak");
+        izlazak3 = ispitIzlazakRepository.save(izlazak3);
+
+        PolozenPredmet pp3 = new PolozenPredmet();
+        pp3.setStudentIndeks(i3);
+        pp3.setPredmet(p3);
+        pp3.setOcena(10);
+        pp3.setPriznat(false);
+        pp3.setIspitIzlazak(izlazak3);
+        polozenPredmetRepository.save(pp3);
+
+    // PREDISPITNE OBAVEZE + POENI
+        PredispitnaObaveza kol1_p1 = new PredispitnaObaveza();
+        kol1_p1.setPredmet(p1); kol1_p1.setVrsta("Kolokvijum 1"); kol1_p1.setMaxPoena(20);
+        kol1_p1 = predispitnaObavezaRepository.save(kol1_p1);
+
+        PredispitnaObaveza kol2_p1 = new PredispitnaObaveza();
+        kol2_p1.setPredmet(p1); kol2_p1.setVrsta("Kolokvijum 2"); kol2_p1.setMaxPoena(20);
+        kol2_p1 = predispitnaObavezaRepository.save(kol2_p1);
+
+    // Predmet p2 (SI202 - Operativni sistemi)
+        PredispitnaObaveza kol1_p2 = new PredispitnaObaveza();
+        kol1_p2.setPredmet(p2); kol1_p2.setVrsta("Kolokvijum 1"); kol1_p2.setMaxPoena(20);
+        kol1_p2 = predispitnaObavezaRepository.save(kol1_p2);
+
+        PredispitnaObaveza kol2_p2 = new PredispitnaObaveza();
+        kol2_p2.setPredmet(p2); kol2_p2.setVrsta("Kolokvijum 2"); kol2_p2.setMaxPoena(20);
+        kol2_p2 = predispitnaObavezaRepository.save(kol2_p2);
+
+    // Predmet p3 (RI101 - Matematika 1)
+        PredispitnaObaveza kol1_p3 = new PredispitnaObaveza();
+        kol1_p3.setPredmet(p3); kol1_p3.setVrsta("Kolokvijum 1"); kol1_p3.setMaxPoena(20);
+        kol1_p3 = predispitnaObavezaRepository.save(kol1_p3);
+
+        PredispitnaObaveza kol2_p3 = new PredispitnaObaveza();
+        kol2_p3.setPredmet(p3); kol2_p3.setVrsta("Kolokvijum 2"); kol2_p3.setMaxPoena(20);
+        kol2_p3 = predispitnaObavezaRepository.save(kol2_p3);
+
+        // Luka ima 10 + 12 poena predispitnih iz SI101
+        PredispitnaIzlazak pi1 = new PredispitnaIzlazak();
+        pi1.setSlusaPredmet(sp1); pi1.setPredispitnaObaveza(kol1_p1);
+        pi1.setPoeni(10); pi1.setDatum(LocalDate.of(2024,12,1));
+        predispitnaIzlazakRepository.save(pi1);
+
+        PredispitnaIzlazak pi2 = new PredispitnaIzlazak();
+        pi2.setSlusaPredmet(sp1); pi2.setPredispitnaObaveza(kol2_p1);
+        pi2.setPoeni(12); pi2.setDatum(LocalDate.of(2025,1,15));
+        predispitnaIzlazakRepository.save(pi2);
 
     }
 

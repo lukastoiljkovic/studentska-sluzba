@@ -1,14 +1,25 @@
 package org.raflab.studsluzba.model.entities;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.time.LocalDate;
 
 import javax.persistence.*;
 
-@Entity
 @Data
+@ToString(exclude = {
+        "srednjaSkola",
+        "prethodnaUstanova"
+})
+@EqualsAndHashCode(exclude = {
+        "srednjaSkola",
+        "prethodnaUstanova"
+})
+@Entity
 public class StudentPodaci {
+
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
 

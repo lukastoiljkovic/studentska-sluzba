@@ -3,9 +3,19 @@ package org.raflab.studsluzba.model.entities;
 import java.time.LocalDate;
 import javax.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
-@Entity
 @Data
+@ToString(exclude = {
+        "student",
+        "studijskiProgram"
+})
+@EqualsAndHashCode(exclude = {
+        "student",
+        "studijskiProgram"
+})
+@Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"broj", "godina", "studProgramOznaka", "aktivan"}))
 public class StudentIndeks {
 

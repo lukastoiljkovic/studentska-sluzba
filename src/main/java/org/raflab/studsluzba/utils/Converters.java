@@ -11,6 +11,7 @@ import org.raflab.studsluzba.model.entities.IspitniRok;
 import org.raflab.studsluzba.repositories.StudijskiProgramRepository;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -483,7 +484,6 @@ public class Converters {
         return list;
     }
 
-    // Converters.java (dodatak)
     public static TokStudijaResponse toTokStudijaResponse(TokStudija ts) {
         if (ts == null) return null;
         TokStudijaResponse r = new TokStudijaResponse();
@@ -497,11 +497,21 @@ public class Converters {
         }
 
         if (ts.getUpisi() != null) {
-            r.setUpisGodineIds(ts.getUpisi().stream().map(UpisGodine::getId).collect(Collectors.toSet()));
+            r.setUpisGodineIds(ts.getUpisi().stream()
+                    .map(UpisGodine::getId)
+                    .collect(Collectors.toSet()));
+        } else {
+            r.setUpisGodineIds(Collections.emptySet());
         }
+
         if (ts.getObnove() != null) {
-            r.setObnovaGodineIds(ts.getObnove().stream().map(ObnovaGodine::getId).collect(Collectors.toSet()));
+            r.setObnovaGodineIds(ts.getObnove().stream()
+                    .map(ObnovaGodine::getId)
+                    .collect(Collectors.toSet()));
+        } else {
+            r.setObnovaGodineIds(Collections.emptySet());
         }
+
         return r;
     }
 

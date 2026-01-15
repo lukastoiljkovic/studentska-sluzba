@@ -7,17 +7,15 @@ import java.util.Set;
 
 @Entity @Data
 public class TokStudija {
-
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private StudentIndeks studentIndeks;
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.LAZY) // LAZY
     private Set<UpisGodine> upisi;
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.LAZY) // LAZY
     private Set<ObnovaGodine> obnove;
-
 }

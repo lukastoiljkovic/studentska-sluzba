@@ -23,11 +23,11 @@ public interface StudentPodaciRepository extends JpaRepository<StudentPodaci, Lo
 			+ "(:prezime is null or lower(sp.prezime) like :prezime) and "
 			+ "not exists (select indeks from StudentIndeks indeks where indeks.student = sp)")
 	Page<StudentPodaci> findStudent(String ime, String prezime, Pageable pageable);
-	
-	@Query("select si from StudentIndeks si where si.aktivan=true and si.student.id = :studPodaciId")
-	StudentIndeks getAktivanIndeks(Long studPodaciId);
-	
-	@Query("select si from StudentIndeks si where si.aktivan=false and si.student.id = :studPodaciId")
+
+    @Query("select si from StudentIndeks si where si.aktivan=true and si.student.id = :studPodaciId order by si.id desc")
+    StudentIndeks getAktivanIndeks(Long studPodaciId);
+
+    @Query("select si from StudentIndeks si where si.aktivan=false and si.student.id = :studPodaciId")
 	List<StudentIndeks> getNeaktivniIndeksi(Long studPodaciId);
 		
 	

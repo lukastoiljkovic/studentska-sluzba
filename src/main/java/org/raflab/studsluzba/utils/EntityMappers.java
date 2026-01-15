@@ -49,43 +49,38 @@ public class EntityMappers {
         return response;
     }
 
-    public StudentPodaciResponse fromStudentPodaciToResponse(StudentPodaci sp) {
-        if (sp == null) {
-            return null;
-        }
+    public StudentPodaciResponse fromStudentPodaciToResponse(StudentPodaci student) {
+        if (student == null) return null;
 
-        StudentPodaciResponse response = new StudentPodaciResponse();
-        response.setId(sp.getId());
-        response.setIme(sp.getIme());
-        response.setPrezime(sp.getPrezime());
-        response.setSrednjeIme(sp.getSrednjeIme());
-        response.setJmbg(sp.getJmbg());
-        response.setPol(sp.getPol()); // karakter 'M' ili 'Z'
-        response.setDatumRodjenja(sp.getDatumRodjenja());
-        response.setDrzavaRodjenja(sp.getDrzavaRodjenja());
-        response.setMestoRodjenja(sp.getMestoRodjenja());
-        response.setDrzavljanstvo(sp.getDrzavljanstvo());
-        response.setNacionalnost(sp.getNacionalnost());
-        response.setMestoPrebivalista(sp.getMestoPrebivalista());
-        response.setAdresaPrebivalista(sp.getAdresaPrebivalista());
-        response.setBrojTelefonaMobilni(sp.getBrojTelefonaMobilni());
-        response.setBrojTelefonaFiksni(sp.getBrojTelefonaFiksni());
-        response.setEmailFakultetski(sp.getEmailFakultetski());
-        response.setEmailPrivatni(sp.getEmailPrivatni());
-        response.setBrojLicneKarte(sp.getBrojLicneKarte());
-        response.setLicnuKartuIzdao(sp.getLicnuKartuIzdao());
+        StudentPodaciResponse resp = new StudentPodaciResponse();
+        resp.setId(student.getId());
+        resp.setIme(student.getIme());
+        resp.setPrezime(student.getPrezime());
+        resp.setSrednjeIme(student.getSrednjeIme());
+        resp.setJmbg(student.getJmbg());
+        resp.setPol(student.getPol());
+        resp.setDatumRodjenja(student.getDatumRodjenja());
+        resp.setDrzavaRodjenja(student.getDrzavaRodjenja());
+        resp.setMestoRodjenja(student.getMestoRodjenja());
+        resp.setDrzavljanstvo(student.getDrzavljanstvo());
+        resp.setNacionalnost(student.getNacionalnost());
+        resp.setMestoPrebivalista(student.getMestoPrebivalista());
+        resp.setAdresaPrebivalista(student.getAdresaPrebivalista());
+        resp.setBrojTelefonaMobilni(student.getBrojTelefonaMobilni());
+        resp.setBrojTelefonaFiksni(student.getBrojTelefonaFiksni());
+        resp.setEmailFakultetski(student.getEmailFakultetski());
+        resp.setEmailPrivatni(student.getEmailPrivatni());
+        resp.setBrojLicneKarte(student.getBrojLicneKarte());
+        resp.setLicnuKartuIzdao(student.getLicnuKartuIzdao());
+        resp.setUspehSrednjaSkola(student.getUspehSrednjaSkola());
+        resp.setUspehPrijemni(student.getUspehPrijemni());
 
-        if (sp.getSrednjaSkola() != null) {
-            response.setSrednjaSkola(sp.getSrednjaSkola().getNaziv());
-        }
-        response.setUspehSrednjaSkola(sp.getUspehSrednjaSkola());
-        response.setUspehPrijemni(sp.getUspehPrijemni());
+        // dodaj nazive entiteta
+        resp.setSrednjaSkola(student.getSrednjaSkola() != null ? student.getSrednjaSkola().getNaziv() : null);
+        resp.setPrethodnaUstanova(student.getPrethodnaUstanova() != null ? student.getPrethodnaUstanova().getNaziv() : null);
 
-        if (sp.getPrethodnaUstanova() != null) {
-            response.setPrethodnaUstanova(sp.getPrethodnaUstanova().getNaziv());
-        }
-
-        return response;
+        return resp;
     }
+
 }
 

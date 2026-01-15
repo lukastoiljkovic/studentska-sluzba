@@ -33,24 +33,33 @@ public class ParseUtils {
 	/*
 	 * dobija email studenta na primer ppetrovic1220rn@raf.rs, a vraca indeks u obliku  [rn, 20, 12]
 	 */
-	
-	public static String[] parseEmail(String studEmail) {
-		if(!studEmail.endsWith("@raf.rs")) return null;
-		String emailStr = studEmail.substring(0,studEmail.indexOf('@'));
-		StringBuilder sb = new StringBuilder();
-		int i = 0;
-		while(Character.isAlphabetic(emailStr.charAt(i))){
-			i++;
-		}
-		while(Character.isDigit(emailStr.charAt(i))) {
-			sb.append(emailStr.charAt(i++));
-		}
-		String cifre = sb.toString();	
-		String[] retVal = new String[3];
-		retVal[2] = cifre.substring(0, cifre.length()-2);
-		retVal[1] = cifre.substring(cifre.length()-2, cifre.length());
-		retVal[0] = emailStr.substring(i);		
-		return retVal;
-	}
+
+    public static String[] parseEmail(String studEmail) {
+        if (studEmail == null || !studEmail.endsWith("@raf.rs")) return null;
+
+        String emailStr = studEmail.substring(0, studEmail.indexOf('@'));
+        if (emailStr.length() < 3) return null; // minimalna dužina
+
+        StringBuilder sb = new StringBuilder();
+        int i = 0;
+
+        while (i < emailStr.length() && Character.isAlphabetic(emailStr.charAt(i))) {
+            i++;
+        }
+
+        while (i < emailStr.length() && Character.isDigit(emailStr.charAt(i))) {
+            sb.append(emailStr.charAt(i++));
+        }
+
+        String cifre = sb.toString();
+        if (cifre.length() < 2) return null;
+
+        String[] retVal = new String[3];
+        retVal[2] = cifre.substring(0, cifre.length() - 2);
+        retVal[1] = cifre.substring(cifre.length() - 2);
+        retVal[0] = emailStr.substring(i).toUpperCase();
+
+        return retVal;
+    }
 
 }

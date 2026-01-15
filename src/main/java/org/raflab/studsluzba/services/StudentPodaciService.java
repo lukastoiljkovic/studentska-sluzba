@@ -7,12 +7,15 @@ import org.raflab.studsluzba.model.entities.StudentPodaci;
 import org.raflab.studsluzba.repositories.StudentIndeksRepository;
 import org.raflab.studsluzba.repositories.StudentPodaciRepository;
 import org.raflab.studsluzba.utils.EntityMappers;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -77,19 +80,33 @@ public class StudentPodaciService {
 
     @Transactional
     public void deleteStudentPodaci(Long id) {
-        Optional<StudentPodaci> studentOpt = studentPodaciRepository.findById(id);
-        if (studentOpt.isEmpty()) return;
 
-        StudentPodaci student = studentOpt.get();
+    }
 
-        // prvo obriši sve indekse studenta direktno preko repository
-        List<StudentIndeks> indeksi = studentIndeksRepository.findStudentIndeksiForStudentPodaciId(id);
-        for (StudentIndeks indeks : indeksi) {
-            studentIndeksRepository.deleteById(indeks.getId());
+    @Transactional
+    public void deleteById(Long id) {
+        if (!studentPodaciRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Entitet sa ID " + id + " ne postoji.");
         }
+        try {
+            Optional<StudentPodaci> studentOpt = studentPodaciRepository.findById(id);
+            if (studentOpt.isEmpty()) return;
 
-        // zatim obriši samog studenta
-        studentPodaciRepository.deleteById(id);
+            StudentPodaci student = studentOpt.get();
+
+            // prvo obriši sve indekse studenta direktno preko repository
+            List<StudentIndeks> indeksi = studentIndeksRepository.findStudentIndeksiForStudentPodaciId(id);
+            for (StudentIndeks indeks : indeksi) {
+                studentIndeksRepository.deleteById(indeks.getId());
+            }
+
+            // zatim obriši samog studenta
+            studentPodaciRepository.deleteById(id);
+        } catch (DataIntegrityViolationException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Ne može se obrisati entitet jer postoje povezani zapisi.");
+        }
     }
 
 

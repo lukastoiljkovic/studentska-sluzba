@@ -11,7 +11,7 @@ public class PolozenPredmet {
     private Long id;
 
     private Integer ocena;
-    private boolean priznat; // ako je priznat sa drugog fakulteta
+    private boolean priznat;
 
     @ManyToOne
     private StudentIndeks studentIndeks;
@@ -19,7 +19,6 @@ public class PolozenPredmet {
     @ManyToOne
     private Predmet predmet;
 
-    @ManyToOne // nije OneToOne zato sto student moze poloziti vise puta, ako ponistava
+    @ManyToOne
     private IspitIzlazak ispitIzlazak;
-
 }

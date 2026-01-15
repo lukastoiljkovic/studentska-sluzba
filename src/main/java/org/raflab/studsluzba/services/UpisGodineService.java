@@ -7,8 +7,11 @@ import org.raflab.studsluzba.model.entities.*;
 import org.raflab.studsluzba.repositories.*;
 import org.raflab.studsluzba.utils.Converters;
 import org.raflab.studsluzba.utils.EntityMappers;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -24,7 +27,7 @@ public class UpisGodineService {
     private final SlusaPredmetRepository slusaPredmetRepository;
     private final DrziPredmetRepository drziPredmetRepository;
 
-
+    @Transactional
     public List<UpisGodineResponse> findUpisaneGodine(String studProgramOznaka, int godina, int broj) {
         List<UpisGodine> lista = upisGodineRepository
                 .findByStudentIndeksStudProgramOznakaAndStudentIndeksGodinaAndStudentIndeksBroj(
@@ -35,10 +38,9 @@ public class UpisGodineService {
                 .collect(Collectors.toList());
     }
 
-
     // CREATE
+    @Transactional
     public UpisGodineResponse create(UpisGodineRequest req) {
-
         StudentIndeks si = studentIndeksRepository.findById(req.getStudentIndeksId())
                 .orElseThrow(() -> new NoSuchElementException("StudentIndeks not found"));
 
@@ -52,19 +54,14 @@ public class UpisGodineService {
         u.setNapomena(req.getNapomena());
         u.setGodinaStudija(req.getGodinaStudija());
 
-        // preneti predmeti
         if (req.getPredmetiKojePrenosiIds() != null && !req.getPredmetiKojePrenosiIds().isEmpty()) {
             u.setPredmetiKojePrenosi(new HashSet<>(slusaByIds(req.getPredmetiKojePrenosiIds())));
         }
 
-        // cuvamo upis
         u = upisGodineRepository.save(u);
 
-
-        // 1) nadji sve drzi_predmet za tu sk.godinu
         List<DrziPredmet> dpLista = drziPredmetRepository.findBySkolskaGodinaId(sg.getId());
 
-        // 2) filtriraj samo predmete konkretne godine i studijskog programa
         List<DrziPredmet> predmetiZaGodinu = dpLista.stream()
                 .filter(dp -> {
                     int godinaPredmeta = (dp.getPredmet().getSemestar() + 1) / 2;
@@ -72,29 +69,29 @@ public class UpisGodineService {
                             dp.getPredmet().getStudProgram().getOznaka()
                                     .equals(si.getStudProgramOznaka());
                 })
-
                 .collect(Collectors.toList());
 
-        // 3) kreiraj SlusaPredmet za svaki predmet
+        if (predmetiZaGodinu.isEmpty()) {
+            System.out.println("UPOZORENJE: Nema DrziPredmet zapisa za godinu " + req.getGodinaStudija() +
+                    " i program " + si.getStudProgramOznaka() + " u školskoj godini " + sg.getNaziv());
+        }
+
         List<SlusaPredmet> slusaList = new ArrayList<>();
         for (DrziPredmet dp : predmetiZaGodinu) {
             SlusaPredmet sp = new SlusaPredmet();
             sp.setStudentIndeks(si);
             sp.setDrziPredmet(dp);
             sp.setSkolskaGodina(sg);
-            sp.setGrupa(null); // nema logike dodele grupe zasad
-
+            sp.setGrupa(null);
             slusaList.add(sp);
         }
 
-        // 4) snimi sve
         if (!slusaList.isEmpty()) {
             slusaPredmetRepository.saveAll(slusaList);
         }
 
         return Converters.toUpisGodineResponse(u);
     }
-
 
     // READ: list sa opcionalnim filterima
     @Transactional(readOnly = true)
@@ -167,13 +164,18 @@ public class UpisGodineService {
         return Converters.toUpisGodineResponse(upisGodineRepository.save(u));
     }
 
-    // DELETE
     @Transactional
     public void delete(Long id) {
         if (!upisGodineRepository.existsById(id)) {
-            throw new NoSuchElementException("UpisGodine ne postoji: id=" + id);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Entitet sa ID " + id + " ne postoji.");
         }
-        upisGodineRepository.deleteById(id);
+        try {
+            upisGodineRepository.deleteById(id);
+        } catch (DataIntegrityViolationException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Ne može se obrisati entitet jer postoje povezani zapisi.");
+        }
     }
 
     private static void require(boolean cond, String msg) {

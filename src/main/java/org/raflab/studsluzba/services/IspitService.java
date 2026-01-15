@@ -10,8 +10,10 @@ import org.raflab.studsluzba.controllers.response.PredispitniPoeniStudentRespons
 import org.raflab.studsluzba.model.entities.*;
 import org.raflab.studsluzba.repositories.*;
 import org.raflab.studsluzba.utils.Converters;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Comparator;
@@ -34,9 +36,7 @@ public class IspitService {
     private final PredispitnaIzlazakRepository predispRepo;
     private final IspitIzlazakRepository ispitIzlazakRepository;
 
-
     public Long add(IspitRequest req) {
-
         IspitniRok rok = ispitniRokRepository.findById(req.getIspitniRokId()).orElseThrow();
         Nastavnik nastavnik = nastavnikRepository.findById(req.getNastavnikId()).orElseThrow();
         Predmet predmet = predmetRepository.findById(req.getPredmetId()).orElseThrow();
@@ -50,14 +50,15 @@ public class IspitService {
 
         return ispitRepository.save(i).getId();
     }
+
     public List<IspitPrijavaResponse> getPrijavljeniStudentiZaIspit(Long ispitId) {
-        // 404 ako ispit ne postoji (lepši API)
         if (!ispitRepository.existsById(ispitId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ispit ne postoji.");
         }
         List<IspitPrijava> prijave = ispitPrijavaRepository.findAllByIspitId(ispitId);
         return Converters.toIspitPrijavaResponseList(prijave);
     }
+
     public Double getProsecnaOcenaNaIspitu(Long ispitId) {
         if (!ispitRepository.existsById(ispitId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ispit ne postoji.");
@@ -76,14 +77,12 @@ public class IspitService {
         Ispit ispit = ispitRepository.findById(req.getIspitId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ispit ne postoji."));
 
-        // zabrana duple prijave
         if (ispitPrijavaRepository.existsByStudentIndeksIdAndIspitId(si.getId(), ispit.getId())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Student je već prijavljen na ovaj ispit.");
         }
 
-        // student mora slušati TAJ predmet u istoj školskoj godini kao i ispitni rok
         Long predmetId = ispit.getPredmet().getId();
-        Long skGodId  = ispit.getIspitniRok().getSkolskaGodina().getId();
+        Long skGodId = ispit.getIspitniRok().getSkolskaGodina().getId();
 
         boolean slusa = slusaPredmetRepository
                 .existsByStudentIndeksIdAndDrziPredmet_Predmet_IdAndSkolskaGodina_Id(si.getId(), predmetId, skGodId);
@@ -93,7 +92,6 @@ public class IspitService {
                     "Student ne sluša ovaj predmet u odgovarajućoj školskoj godini.");
         }
 
-        // snimi prijavu
         IspitPrijava p = new IspitPrijava();
         p.setStudentIndeks(si);
         p.setIspit(ispit);
@@ -108,18 +106,16 @@ public class IspitService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ispit ne postoji."));
 
         Long predmetId = ispit.getPredmet().getId();
-        Long skGodId   = ispit.getIspitniRok().getSkolskaGodina().getId();
+        Long skGodId = ispit.getIspitniRok().getSkolskaGodina().getId();
 
         List<IspitPrijava> prijave = ispitPrijavaRepository.findAllByIspitId(ispitId);
 
         List<IspitRezultatResponse> result = prijave.stream().map(prijava -> {
             StudentIndeks si = prijava.getStudentIndeks();
 
-            // predispitni = suma svih PredispitnaIzlazak za (si, predmet, sk.godina)
             Integer predispitni = predispRepo.sumPoeniZaStudentaPredmetGodinu(
                     si.getId(), predmetId, skGodId);
 
-            // ispitni = poslednji neponišten izlazak za ovu prijavu (ili 0 ako nema)
             Integer ispitni = ispitIzlazakRepository
                     .findTopByIspitPrijava_IdAndPonistavaFalseOrderByIdDesc(prijava.getId())
                     .map(IspitIzlazak::getBrojPoena)
@@ -147,68 +143,87 @@ public class IspitService {
 
         return result;
     }
+
+    @Transactional
     public Long dodajIspitIzlazak(IspitIzlazakRequest req) {
-        if (req.getIspitPrijavaId() == null || req.getStudentIndeksId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ispitPrijavaId i studentIndeksId su obavezni.");
+        if (req.getIspitPrijavaId() == null || req.getBrojPoena() == null || req.getBrojPoena() < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ispitPrijavaId i pozitivan brojPoena su obavezni.");
         }
 
         IspitPrijava prijava = ispitPrijavaRepository.findById(req.getIspitPrijavaId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "IspitPrijava ne postoji."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ispit prijava ne postoji."));
 
-        if (!prijava.getStudentIndeks().getId().equals(req.getStudentIndeksId())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Prijava i studentIndeks nisu usklađeni.");
+        if (req.getStudentIndeksId() != null &&
+                !prijava.getStudentIndeks().getId().equals(req.getStudentIndeksId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "studentIndeksId ne odgovara prijavi.");
         }
 
-        // SNIMANJE IZLASKA
-        IspitIzlazak izl = new IspitIzlazak();
-        izl.setIspitPrijava(prijava);
-        izl.setBrojPoena(req.getBrojPoena());
-        izl.setPonistava(Boolean.TRUE.equals(req.getPonistava()));
-        izl.setNapomena(req.getNapomena());
+        if (prijava.getIspitIzlazak() != null) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Za ovu prijavu već postoji izlazak.");
+        }
 
-        IspitIzlazak sacuvan = ispitIzlazakRepository.save(izl);
+        if (prijava.getIspit() != null && prijava.getIspit().isZakljucen()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ispit je zaključen.");
+        }
+
+        IspitIzlazak ie = new IspitIzlazak();
+        ie.setIspitPrijava(prijava);
+        ie.setStudentIndeks(prijava.getStudentIndeks());
+        ie.setBrojPoena(req.getBrojPoena());
+        ie.setNapomena(req.getNapomena());
+        ie.setPonistava(Boolean.TRUE.equals(req.getPonistava()));
+
+        IspitIzlazak sacuvan = ispitIzlazakRepository.save(ie);
+        prijava.setIspitIzlazak(sacuvan);
+        ispitPrijavaRepository.save(prijava);
 
         if (Boolean.TRUE.equals(req.getPonistava())) {
             return sacuvan.getId();
         }
 
-        // IZRAČUNAVANJE UKUPNIH POENA
         Long siId = prijava.getStudentIndeks().getId();
         Long predmetId = prijava.getIspit().getPredmet().getId();
         Long skGodId = prijava.getIspit().getIspitniRok().getSkolskaGodina().getId();
 
         Integer predispitni = predispRepo.sumPoeniZaStudentaPredmetGodinu(siId, predmetId, skGodId);
-        int ispitni = req.getBrojPoena() == null ? 0 : req.getBrojPoena();
-        int ukupno = (predispitni == null ? 0 : predispitni) + ispitni;
+        int ukupno = (predispitni != null ? predispitni : 0) + req.getBrojPoena();
 
         if (ukupno >= 51) {
-            int ocena = izracunajOcenu(ukupno);
+            Optional<PolozenPredmet> existing = polozenPredmetRepository.findByStudentIndeksAndPredmet(siId, predmetId);
 
-            Optional<PolozenPredmet> postoji =
-                    polozenPredmetRepository.findByStudentIndeksAndPredmet(siId, predmetId);
+            PolozenPredmet pp;
+            if (existing.isPresent()) {
+                pp = existing.get();
+                int novaOcena = mapToOcena(ukupno);
+                if (novaOcena > pp.getOcena()) {
+                    pp.setOcena(novaOcena);
+                    pp.setIspitIzlazak(sacuvan);
+                }
+            } else {
+                pp = new PolozenPredmet();
+                pp.setPriznat(false);
+                pp.setStudentIndeks(prijava.getStudentIndeks());
+                pp.setPredmet(prijava.getIspit().getPredmet());
+                pp.setIspitIzlazak(sacuvan);
+                pp.setOcena(mapToOcena(ukupno));
+            }
 
-            PolozenPredmet pp = postoji.orElseGet(PolozenPredmet::new);
-            pp.setStudentIndeks(prijava.getStudentIndeks());
-            pp.setPredmet(prijava.getIspit().getPredmet());
-            pp.setIspitIzlazak(sacuvan);
-            pp.setOcena(ocena);
             polozenPredmetRepository.save(pp);
         }
 
         return sacuvan.getId();
     }
 
-    private int izracunajOcenu(int poeni) {
-        if (poeni < 51) return 5;
-        if (poeni <= 60) return 6;
-        if (poeni <= 70) return 7;
-        if (poeni <= 80) return 8;
-        if (poeni <= 90) return 9;
-        return 10;
+    private int mapToOcena(int poeni) {
+        if (poeni >= 91) return 10;
+        if (poeni >= 81) return 9;
+        if (poeni >= 71) return 8;
+        if (poeni >= 61) return 7;
+        if (poeni >= 51) return 6;
+        return 5;
     }
 
     public PredispitniPoeniStudentResponse getPredispitniPoeni(Long studentIndeksId, Long predmetId, Long skGodId) {
-
         Integer ukupno = predispRepo.sumPoeniZaStudentaPredmetGodinu(studentIndeksId, predmetId, skGodId);
         if (ukupno == null) ukupno = 0;
 
@@ -237,6 +252,7 @@ public class IspitService {
                 .stavke(stavke)
                 .build();
     }
+
     public long countIzlazakaNaPredmet(Long studentIndeksId, Long predmetId) {
         return ispitIzlazakRepository.countByStudentIndeks_IdAndIspitPrijava_Ispit_Predmet_Id(studentIndeksId, predmetId);
     }
@@ -249,7 +265,17 @@ public class IspitService {
         return (List<Ispit>) ispitRepository.findAll();
     }
 
+    @Transactional
     public void deleteById(Long id) {
-        ispitRepository.deleteById(id);
+        if (!ispitRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Entitet sa ID " + id + " ne postoji.");
+        }
+        try {
+            ispitRepository.deleteById(id);
+        } catch (DataIntegrityViolationException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Ne moze se obrisati entitet jer postoje povezani zapisi.");
+        }
     }
 }

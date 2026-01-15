@@ -7,7 +7,11 @@ import org.raflab.studsluzba.model.entities.StudentPodaci;
 import org.raflab.studsluzba.repositories.SrednjaSkolaRepository;
 import org.raflab.studsluzba.repositories.StudentPodaciRepository;
 import org.raflab.studsluzba.utils.EntityMappers;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,12 +33,26 @@ public class SrednjaSkolaService {
         return srednjaSkolaRepository.findById(id);
     }
 
+    public Optional<SrednjaSkola> findByNaziv(String naziv) {
+        return srednjaSkolaRepository.findByNaziv(naziv);
+    }
+
     public List<SrednjaSkola> findAll() {
         return srednjaSkolaRepository.findAll();
     }
 
+    @Transactional
     public void deleteById(Long id) {
-        srednjaSkolaRepository.deleteById(id);
+        if (!srednjaSkolaRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Entitet sa ID " + id + " ne postoji.");
+        }
+        try {
+            srednjaSkolaRepository.deleteById(id);
+        } catch (DataIntegrityViolationException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Ne može se obrisati entitet jer postoje povezani zapisi.");
+        }
     }
 
     public List<StudentPodaciResponse> getStudentiPoSrednjojSkoli(SrednjaSkola skola) {

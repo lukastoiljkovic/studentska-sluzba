@@ -3,25 +3,18 @@ package org.raflab.studsluzba.services;
 import lombok.AllArgsConstructor;
 import org.raflab.studsluzba.controllers.request.ObnovaGodineRequest;
 import org.raflab.studsluzba.controllers.response.ObnovaGodineResponse;
-import org.raflab.studsluzba.model.entities.ObnovaGodine;
-import org.raflab.studsluzba.model.entities.SkolskaGodina;
-import org.raflab.studsluzba.model.entities.SlusaPredmet;
-import org.raflab.studsluzba.model.entities.StudentIndeks;
-import org.raflab.studsluzba.repositories.ObnovaGodineRepository;
-import org.raflab.studsluzba.repositories.SkolskaGodinaRepository;
-import org.raflab.studsluzba.repositories.SlusaPredmetRepository;
-import org.raflab.studsluzba.repositories.StudentIndeksRepository;
+import org.raflab.studsluzba.model.entities.*;
+import org.raflab.studsluzba.repositories.*;
 import org.raflab.studsluzba.utils.Converters;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
-import javax.transaction.Transactional;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 @AllArgsConstructor
@@ -32,6 +25,7 @@ public class ObnovaGodineService {
     private final ObnovaGodineRepository obnovaGodineRepository;
     private final StudentIndeksRepository studentIndeksRepository;
 
+    @Transactional
     public List<ObnovaGodineResponse> getObnoveForStudentIndeks(Long studentIndeksId) {
         return obnovaGodineRepository.findByStudentIndeksId(studentIndeksId)
                 .stream()
@@ -39,43 +33,38 @@ public class ObnovaGodineService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public Long addObnovaGodineNarednaGodina(Long studentIndeksId,
-                                          Long skolskaGodinaId,
-                                          Set<Long> predmetiPrethodnaGodinaIds,
-                                          Set<Long> predmetiNarednaGodinaIds,
-                                          Integer godinaStudija,
-                                          String napomena,
-                                          LocalDate datum) {
+                                             Long skolskaGodinaId,
+                                             Set<Long> predmetiPrethodnaGodinaIds,
+                                             Set<Long> predmetiNarednaGodinaIds,
+                                             Integer godinaStudija,
+                                             String napomena,
+                                             LocalDate datum) {
 
-        StudentIndeks si = studentIndeksRepository.findById(studentIndeksId).orElseThrow();
-        SkolskaGodina sg = skolskaGodinaRepository.findById(skolskaGodinaId).orElseThrow();
+        StudentIndeks si = studentIndeksRepository.findById(studentIndeksId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "StudentIndeks ne postoji"));
+
+        SkolskaGodina sg = skolskaGodinaRepository.findById(skolskaGodinaId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "SkolskaGodina ne postoji"));
 
         Set<SlusaPredmet> predmeti = new HashSet<>();
-
-        // predmeti iz prethodne godine (nepoloženi)
-        if (predmetiPrethodnaGodinaIds != null) {
-            predmeti.addAll(StreamSupport.stream(
-                    slusaPredmetRepository.findAllById(predmetiPrethodnaGodinaIds).spliterator(), false
-            ).collect(Collectors.toSet()));
+        if (predmetiPrethodnaGodinaIds != null && !predmetiPrethodnaGodinaIds.isEmpty()) {
+            predmeti.addAll(slusaPredmetRepository.findByIdIn(predmetiPrethodnaGodinaIds));
+        }
+        if (predmetiNarednaGodinaIds != null && !predmetiNarednaGodinaIds.isEmpty()) {
+            predmeti.addAll(slusaPredmetRepository.findByIdIn(predmetiNarednaGodinaIds));
         }
 
-        // predmeti iz naredne godine
-        if (predmetiNarednaGodinaIds != null) {
-            predmeti.addAll(StreamSupport.stream(
-                    slusaPredmetRepository.findAllById(predmetiNarednaGodinaIds).spliterator(), false
-            ).collect(Collectors.toSet()));
-        }
-
-        // provera ukupnog ESPB
         int ukupnoEspb = predmeti.stream()
                 .mapToInt(sp -> sp.getDrziPredmet().getPredmet().getEspb())
                 .sum();
 
         if (ukupnoEspb > 60) {
-            throw new RuntimeException("Ukupan zbir ESPB poena ne sme da prelazi 60. Trenutno: " + ukupnoEspb);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Ukupan zbir ESPB ne sme biti veći od 60. Trenutno: " + ukupnoEspb);
         }
 
-        // kreiranje nove obnove godine
         ObnovaGodine obnova = new ObnovaGodine();
         obnova.setStudentIndeks(si);
         obnova.setSkolskaGodina(sg);
@@ -84,42 +73,54 @@ public class ObnovaGodineService {
         obnova.setNapomena(napomena);
         obnova.setPredmetiKojeObnavlja(predmeti);
 
-        obnovaGodineRepository.save(obnova);
-
-        // inicijalno svi predmeti se markiraju kao nepoloženi
-        predmeti.forEach(sp -> sp.setStudentIndeks(si));
-        slusaPredmetRepository.saveAll(predmeti);
-
-        return obnova.getId();
+        return obnovaGodineRepository.save(obnova).getId();
     }
 
+    @Transactional
     public Long addObnova(ObnovaGodineRequest req) {
+        StudentIndeks si = studentIndeksRepository.findById(req.getStudentIndeksId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "StudentIndeks ne postoji"));
 
-        StudentIndeks si = studentIndeksRepository.findById(req.getStudentIndeksId()).orElseThrow();
-        SkolskaGodina sg = skolskaGodinaRepository.findById(req.getSkolskaGodinaId()).orElseThrow();
+        SkolskaGodina sg = skolskaGodinaRepository.findById(req.getSkolskaGodinaId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "SkolskaGodina ne postoji"));
 
-        Set<SlusaPredmet> predmeti =
-                StreamSupport.stream(
-                        slusaPredmetRepository.findAllById(req.getPredmetiKojeObnavljaIds()).spliterator(),
-                        false
-                ).collect(Collectors.toSet());
+        Set<SlusaPredmet> predmeti = new HashSet<>();
+        if (req.getPredmetiKojeObnavljaIds() != null && !req.getPredmetiKojeObnavljaIds().isEmpty()) {
+            predmeti.addAll(slusaPredmetRepository.findByIdIn(req.getPredmetiKojeObnavljaIds()));
+        }
 
-        ObnovaGodine o = Converters.toObnova(req, si, sg, predmeti);
+        ObnovaGodine o = new ObnovaGodine();
+        o.setStudentIndeks(si);
+        o.setSkolskaGodina(sg);
+        o.setGodinaStudija(req.getGodinaStudija());
+        o.setDatum(req.getDatum());
+        o.setNapomena(req.getNapomena());
+        o.setPredmetiKojeObnavlja(predmeti);
 
         return obnovaGodineRepository.save(o).getId();
     }
 
+    @Transactional(readOnly = true)
     public Optional<ObnovaGodine> findById(Long id) {
         return obnovaGodineRepository.findById(id);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<ObnovaGodine> findAll() {
-        return (List<ObnovaGodine>) obnovaGodineRepository.findAllWithPredmeti();
+        return obnovaGodineRepository.findAllWithPredmeti();
     }
 
+    @Transactional
     public void deleteById(Long id) {
-        obnovaGodineRepository.deleteById(id);
+        if (!obnovaGodineRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Entitet sa ID " + id + " ne postoji.");
+        }
+        try {
+            obnovaGodineRepository.deleteById(id);
+        } catch (DataIntegrityViolationException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Ne može se obrisati obnova jer postoje povezani zapisi.");
+        }
     }
-
 }

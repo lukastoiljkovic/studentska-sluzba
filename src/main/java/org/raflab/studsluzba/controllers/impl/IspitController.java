@@ -72,16 +72,16 @@ public class IspitController {
 
     @GetMapping("/predispitni-poeni")
     public PredispitniPoeniStudentResponse getPredispitniPoeni(
-            @RequestParam Long studentIndeksId,
-            @RequestParam Long predmetId,
-            @RequestParam Long skGodinaId
+            @RequestParam(required = true) Long studentIndeksId,
+            @RequestParam(required = true) Long predmetId,
+            @RequestParam(required = true) Long skGodinaId
     ) {
         return service.getPredispitniPoeni(studentIndeksId, predmetId, skGodinaId);
     }
     @GetMapping("/broj-izlazaka")
     public Long countIzlazaka(
-            @RequestParam Long studentIndeksId,
-            @RequestParam Long predmetId
+            @RequestParam(required = true) Long studentIndeksId,
+            @RequestParam(required = true) Long predmetId
     ) {
         return service.countIzlazakaNaPredmet(studentIndeksId, predmetId);
     }

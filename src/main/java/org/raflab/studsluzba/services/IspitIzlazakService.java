@@ -7,8 +7,10 @@ import org.raflab.studsluzba.model.entities.IspitPrijava;
 import org.raflab.studsluzba.model.entities.PolozenPredmet;
 import org.raflab.studsluzba.model.entities.StudentIndeks;
 import org.raflab.studsluzba.repositories.*;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -32,9 +34,20 @@ public class IspitIzlazakService {
         return (List<IspitIzlazak>) ispitIzlazakRepository.findAll();
     }
 
+    @Transactional
     public void deleteById(Long id) {
-        ispitIzlazakRepository.deleteById(id);
+        if (!ispitIzlazakRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Entitet sa ID " + id + " ne postoji.");
+        }
+        try {
+            ispitIzlazakRepository.deleteById(id);
+        } catch (DataIntegrityViolationException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Ne moze se obrisati entitet jer postoje povezani zapisi.");
+        }
     }
+
     public Long add(IspitIzlazakRequest req) {
         // validacija ulaza
         if (req.getIspitPrijavaId() == null || req.getBrojPoena() == null || req.getBrojPoena() < 0) {

@@ -7,15 +7,19 @@ import org.raflab.studsluzba.model.entities.StudentIndeks;
 import org.raflab.studsluzba.model.entities.StudentPodaci;
 import org.raflab.studsluzba.model.entities.StudijskiProgram;
 import org.raflab.studsluzba.repositories.StudentIndeksRepository;
+import org.raflab.studsluzba.repositories.StudentPodaciRepository;
 import org.raflab.studsluzba.utils.Converters;
 import org.raflab.studsluzba.utils.EntityMappers;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -26,6 +30,7 @@ import java.util.stream.Collectors;
 public class StudentIndeksService {
 
     private final StudentIndeksRepository studentIndeksRepository;
+    private final StudentPodaciRepository studentPodaciRepository;
     private final StudijskiProgramiService studijskiProgramiService;
     private final EntityMappers entityMappers;
 
@@ -100,33 +105,42 @@ public class StudentIndeksService {
 
     @Transactional
     public Long saveStudentIndeks(StudentIndeksRequest request) {
-        // konvertuj request u entity
-        StudentIndeks studentIndeks = Converters.toStudentIndeks(request);
+        // 1. Validacija i učitavanje StudentPodaci iz baze
+        StudentPodaci student = studentPodaciRepository.findById(request.getStudentId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "StudentPodaci sa ID " + request.getStudentId() + " ne postoji."));
 
-        // odredi sledeci broj
+        // 2. Validacija StudijskiProgram
+        List<StudijskiProgram> studijskiProgrami = studijskiProgramiService.findByOznaka(request.getStudProgramOznaka());
+        if (studijskiProgrami.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "StudijskiProgram sa oznakom " + request.getStudProgramOznaka() + " ne postoji.");
+        }
+
+        // 3. Kreiranje StudentIndeks
+        StudentIndeks studentIndeks = new StudentIndeks();
+        studentIndeks.setGodina(request.getGodina());
+        studentIndeks.setStudProgramOznaka(request.getStudProgramOznaka());
+        studentIndeks.setNacinFinansiranja(request.getNacinFinansiranja());
+        studentIndeks.setAktivan(request.isAktivan());
+        studentIndeks.setVaziOd(request.getVaziOd() != null ? request.getVaziOd() : LocalDate.now());
+        studentIndeks.setOstvarenoEspb(0);
+
+        // 4. Dodeli sledeci broj indeksa
         int nextBroj = findBroj(request.getGodina(), request.getStudProgramOznaka());
         studentIndeks.setBroj(nextBroj);
 
-        // validacija postojanja studenta preko repository
-        StudentPodaci student = studentIndeks.getStudent(); // ili setuj iz Converters
-        if (student == null || student.getId() == null) {
-            throw new RuntimeException("StudentPodaci sa ID " + request.getStudentId() + " ne postoji.");
-        }
-
-        // povezi StudijskiProgram
-        List<StudijskiProgram> studijskiProgrami = studijskiProgramiService.findByOznaka(request.getStudProgramOznaka());
-        if (studijskiProgrami.isEmpty()) {
-            throw new RuntimeException("No StudijskiProgram found with oznaka: " + request.getStudProgramOznaka());
-        }
+        // 5. Poveži sa studentom i programom
+        studentIndeks.setStudent(student);
         studentIndeks.setStudijskiProgram(studijskiProgrami.get(0));
 
+        // 6. Sačuvaj
         try {
-            StudentIndeks savedStudentIndeks = addNewStudentIndeks(studentIndeks);
-            return savedStudentIndeks.getId();
+            StudentIndeks saved = studentIndeksRepository.save(studentIndeks);
+            return saved.getId();
         } catch (DataIntegrityViolationException e) {
-            throw new RuntimeException("Duplicate entry for broj, godina, and studProgramOznaka", e);
-        } catch (Exception e) {
-            throw new RuntimeException("Error while saving the StudentIndeks.", e);
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Indeks sa ovim podacima već postoji.");
         }
     }
 

@@ -4,7 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.raflab.studsluzba.controllers.request.VisokoskolskaUstanovaRequest;
 import org.raflab.studsluzba.model.entities.VisokoskolskaUstanova;
 import org.raflab.studsluzba.repositories.VisokoskolskaUstanovaRepository;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -34,7 +38,17 @@ public class VisokoskolskaUstanovaService {
         return StreamSupport.stream(it.spliterator(), false).collect(Collectors.toList());
     }
 
+    @Transactional
     public void deleteById(Long id) {
-        repo.deleteById(id);
+        if (!repo.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Entitet sa ID " + id + " ne postoji.");
+        }
+        try {
+            repo.deleteById(id);
+        } catch (DataIntegrityViolationException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Ne može se obrisati entitet jer postoje povezani zapisi.");
+        }
     }
 }

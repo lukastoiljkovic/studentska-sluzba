@@ -7,8 +7,11 @@ import org.raflab.studsluzba.controllers.response.TokStudijaResponse;
 import org.raflab.studsluzba.model.entities.*;
 import org.raflab.studsluzba.repositories.*;
 import org.raflab.studsluzba.utils.Converters;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -55,21 +58,24 @@ public class TokStudijaService {
         return Converters.toTokStudijaResponseList(src);
     }
 
-    // READ (single)
     @Transactional(readOnly = true)
     public TokStudijaResponse get(Long id) {
-        TokStudija ts = tokStudijaRepository.findById(id)
+        TokStudija ts = tokStudijaRepository.findByIdWithCollections(id)
                 .orElseThrow(() -> new NoSuchElementException("TokStudija ne postoji: id=" + id));
         return Converters.toTokStudijaResponse(ts);
     }
 
-
-    // DELETE
     @Transactional
     public void delete(Long id) {
         if (!tokStudijaRepository.existsById(id)) {
-            throw new NoSuchElementException("TokStudija ne postoji: id=" + id);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Entitet sa ID " + id + " ne postoji.");
         }
-        tokStudijaRepository.deleteById(id);
+        try {
+            tokStudijaRepository.deleteById(id);
+        } catch (DataIntegrityViolationException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Ne može se obrisati entitet jer postoje povezani zapisi.");
+        }
     }
 }

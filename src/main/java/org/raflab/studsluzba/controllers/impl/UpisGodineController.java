@@ -38,10 +38,10 @@ public class UpisGodineController {
         return service.get(id);
     }
 
-    @PutMapping("/{id}")
+    /*@PutMapping("/{id}")
     public UpisGodineResponse update(@PathVariable Long id, @RequestBody UpisGodineRequest req) {
         return service.update(id, req);
-    }
+    }*/
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {

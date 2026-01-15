@@ -1,10 +1,14 @@
 package org.raflab.studsluzba.services;
 
 import lombok.AllArgsConstructor;
+import org.raflab.studsluzba.controllers.request.StudijskiProgramRequest;
+import org.raflab.studsluzba.controllers.response.StudijskiProgramResponse;
 import org.raflab.studsluzba.model.entities.StudijskiProgram;
 import org.raflab.studsluzba.repositories.StudijskiProgramRepository;
+import org.raflab.studsluzba.utils.Converters;
 import org.raflab.studsluzba.utils.EntityMappers;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -24,6 +28,22 @@ public class StudijskiProgramiService {
 
     public List<StudijskiProgram> findByOznaka(String oznaka){
         return studijskiProgramRepository.findByOznaka(oznaka);
+    }
+
+    @Transactional
+    public StudijskiProgramResponse addStudijskiProgram(StudijskiProgramRequest request) {
+        StudijskiProgram sp = new StudijskiProgram();
+        sp.setOznaka(request.getOznaka());
+        sp.setNaziv(request.getNaziv());
+        sp.setGodinaAkreditacije(request.getGodinaAkreditacije());
+        sp.setZvanje(request.getZvanje());
+        sp.setTrajanjeGodina(request.getTrajanjeGodina());
+        sp.setTrajanjeSemestara(request.getTrajanjeSemestara());
+        sp.setVrstaStudija(request.getVrstaStudija());
+        sp.setUkupnoEspb(request.getUkupnoEspb());
+
+        sp = studijskiProgramRepository.save(sp);
+        return Converters.toStudijskiProgramResponse(sp);
     }
 
 }

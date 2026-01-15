@@ -9,7 +9,11 @@ import org.raflab.studsluzba.repositories.PredispitnaIzlazakRepository;
 import org.raflab.studsluzba.repositories.PredispitnaObavezaRepository;
 import org.raflab.studsluzba.repositories.SlusaPredmetRepository;
 import org.raflab.studsluzba.utils.Converters;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -36,7 +40,17 @@ public class PredispitnaIzlazakService {
         return (List<PredispitnaIzlazak>) izlazakRepository.findAll();
     }
 
+    @Transactional
     public void deleteById(Long id) {
-        izlazakRepository.deleteById(id);
+        if (!izlazakRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Entitet sa ID " + id + " ne postoji.");
+        }
+        try {
+            izlazakRepository.deleteById(id);
+        } catch (DataIntegrityViolationException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Ne moze se obrisati entitet jer postoje povezani zapisi.");
+        }
     }
 }
