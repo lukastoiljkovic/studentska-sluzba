@@ -142,7 +142,7 @@ public class Seeder implements CommandLineRunner {
         n1.setIme("Nikola");
         n1.setPrezime("Jovanović");
         n1.setSrednjeIme("Petar");
-        n1.setEmail("nikola.jovanovic@raf.rs");
+        n1.setEmail("njovanovic2324@raf.rs");
         n1.setBrojTelefona("060111222");
         n1.setAdresa("Bulevar 1, Beograd");
         n1.setDatumRodjenja(LocalDate.of(1980, 5, 10));
@@ -155,7 +155,7 @@ public class Seeder implements CommandLineRunner {
         n2.setIme("Milena");
         n2.setPrezime("Milić");
         n2.setSrednjeIme("Ana");
-        n2.setEmail("milena.milic@raf.rs");
+        n2.setEmail("mmilic6324@raf.rs");
         n2.setBrojTelefona("060333444");
         n2.setAdresa("Zmaj Jovina 2, Novi Sad");
         n2.setDatumRodjenja(LocalDate.of(1983, 7, 2));
@@ -192,7 +192,7 @@ public class Seeder implements CommandLineRunner {
         s1.setDrzavljanstvo("Srbija"); s1.setNacionalnost("Srpska");
         s1.setMestoPrebivalista("Beograd"); s1.setAdresaPrebivalista("Ulica 67");
         s1.setBrojTelefonaMobilni("06767676"); s1.setBrojTelefonaFiksni("06767676");
-        s1.setEmailFakultetski("luka.markovic@raf.rs"); s1.setEmailPrivatni("luka@gmail.com");
+        s1.setEmailFakultetski("lmarkovic10124rn@raf.rs"); s1.setEmailPrivatni("luka@gmail.com");
         s1.setBrojLicneKarte("LM123456"); s1.setLicnuKartuIzdao("MUP BG");
         s1.setSrednjaSkola(gim); s1.setUspehSrednjaSkola(4.35); s1.setUspehPrijemni(89.0);
         s1 = studentPodaciRepository.save(s1);
@@ -205,7 +205,7 @@ public class Seeder implements CommandLineRunner {
         s2.setDrzavaRodjenja("Srbija"); s2.setMestoRodjenja("Novi Sad");
         s2.setDrzavljanstvo("Srbija");
         s2.setMestoPrebivalista("Novi Sad"); s2.setAdresaPrebivalista("Ulica 2");
-        s2.setEmailFakultetski("mina.jovanovic@raf.rs"); s2.setEmailPrivatni("mina@gmail.com");
+        s2.setEmailFakultetski("mjovanovic10224si@raf.rs"); s2.setEmailPrivatni("mina@gmail.com");
         s2.setBrojLicneKarte("MJ223456"); s2.setLicnuKartuIzdao("MUP NS");
         s2.setSrednjaSkola(gim); s2.setUspehSrednjaSkola(4.80); s2.setUspehPrijemni(94.0);
         s2 = studentPodaciRepository.save(s2);
@@ -218,7 +218,7 @@ public class Seeder implements CommandLineRunner {
         s3.setDrzavaRodjenja("Srbija"); s3.setMestoRodjenja("Niš");
         s3.setDrzavljanstvo("Srbija");
         s3.setMestoPrebivalista("Niš"); s3.setAdresaPrebivalista("Ulica 3");
-        s3.setEmailFakultetski("petar.ilic@raf.rs"); s3.setEmailPrivatni("petar@gmail.com");
+        s3.setEmailFakultetski("pilic20124ri@raf.rs"); s3.setEmailPrivatni("petar@gmail.com");
         s3.setBrojLicneKarte("PI323456"); s3.setLicnuKartuIzdao("MUP NI");
         s3.setSrednjaSkola(gim); s3.setUspehSrednjaSkola(4.60); s3.setUspehPrijemni(90.0);
         s3 = studentPodaciRepository.save(s3);

@@ -6,12 +6,9 @@ import lombok.Data;
 import org.raflab.studsluzba.model.entities.SlusaPredmet;
 import org.raflab.studsluzba.model.entities.StudentIndeks;
 
+
 @Data
 public class StudentWebProfileDTO {
-	
-	private StudentIndeks aktivanIndeks;	
-
-	// za aktivnu skolsku godinu
-	private List<SlusaPredmet> slusaPredmete;
-	
+    private StudentIndeksDTO aktivanIndeks;
+    private List<SlusaPredmetDTO> slusaPredmete;
 }

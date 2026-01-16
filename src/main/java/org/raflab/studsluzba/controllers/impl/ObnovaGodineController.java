@@ -58,15 +58,14 @@ public class ObnovaGodineController {
     }
 
     @PostMapping(path="/add")
-    public Long addNewObnova(@RequestBody @Valid ObnovaGodineRequest obnovaRequest) {
-        return obnovaGodineService.addObnova(obnovaRequest);
+    public ObnovaGodineResponse addNewObnova(@RequestBody @Valid ObnovaGodineRequest request) {
+        return obnovaGodineService.addObnova(request);
     }
 
     @GetMapping(path = "/{id}")
     public ObnovaGodineResponse getObnovaById(@PathVariable Long id) {
-        // servis treba da vraća Optional<ObnovaGodine>
         return obnovaGodineService.findById(id)
-                .map(Converters::toObnovaResponse) // promeni sa toObnovaGodineResponse → toObnovaResponse
+                .map(Converters::toObnovaResponse)
                 .orElse(null);
     }
 

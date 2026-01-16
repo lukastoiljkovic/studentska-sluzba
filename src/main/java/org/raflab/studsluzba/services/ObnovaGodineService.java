@@ -33,6 +33,7 @@ public class ObnovaGodineService {
                 .collect(Collectors.toList());
     }
 
+
     @Transactional
     public Long addObnovaGodineNarednaGodina(Long studentIndeksId,
                                              Long skolskaGodinaId,
@@ -77,27 +78,32 @@ public class ObnovaGodineService {
     }
 
     @Transactional
-    public Long addObnova(ObnovaGodineRequest req) {
-        StudentIndeks si = studentIndeksRepository.findById(req.getStudentIndeksId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "StudentIndeks ne postoji"));
+    public ObnovaGodineResponse addObnova(ObnovaGodineRequest request) {
+        // nadji potrebne entitete
+        StudentIndeks si = studentIndeksRepository.findById(request.getStudentIndeksId())
+                .orElseThrow(() -> new RuntimeException("Student not found"));
 
-        SkolskaGodina sg = skolskaGodinaRepository.findById(req.getSkolskaGodinaId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "SkolskaGodina ne postoji"));
+        SkolskaGodina sg = skolskaGodinaRepository.findById(request.getSkolskaGodinaId())
+                .orElseThrow(() -> new RuntimeException("Skolska godina not found"));
 
-        Set<SlusaPredmet> predmeti = new HashSet<>();
-        if (req.getPredmetiKojeObnavljaIds() != null && !req.getPredmetiKojeObnavljaIds().isEmpty()) {
-            predmeti.addAll(slusaPredmetRepository.findByIdIn(req.getPredmetiKojeObnavljaIds()));
-        }
+        Set<SlusaPredmet> predmeti = new HashSet<>(
+                (Collection) slusaPredmetRepository.findAllById(request.getPredmetiKojeObnavljaIds())
+        );
 
+        // napravi novi entitet
         ObnovaGodine o = new ObnovaGodine();
+        o.setGodinaStudija(request.getGodinaStudija());
+        o.setDatum(request.getDatum());
+        o.setNapomena(request.getNapomena());
         o.setStudentIndeks(si);
         o.setSkolskaGodina(sg);
-        o.setGodinaStudija(req.getGodinaStudija());
-        o.setDatum(req.getDatum());
-        o.setNapomena(req.getNapomena());
         o.setPredmetiKojeObnavlja(predmeti);
 
-        return obnovaGodineRepository.save(o).getId();
+        // sacuvaj
+        ObnovaGodine saved = obnovaGodineRepository.save(o);
+
+        // konvertuj u DTO (bez bidirekcija)
+        return Converters.toObnovaResponse(saved);
     }
 
     @Transactional(readOnly = true)

@@ -350,29 +350,23 @@ public class Converters {
         return o;
     }
 
-    public static ObnovaGodineResponse toObnovaResponse(ObnovaGodine og) {
+    public static ObnovaGodineResponse toObnovaResponse(ObnovaGodine o) {
+        ObnovaGodineResponse dto = new ObnovaGodineResponse();
+        dto.setId(o.getId());
+        dto.setGodinaStudija(o.getGodinaStudija());
+        dto.setDatum(o.getDatum());
+        dto.setNapomena(o.getNapomena());
 
-        ObnovaGodineResponse r = new ObnovaGodineResponse();
+        // samo ID-evi, nema povratka ka entitetu
+        dto.setStudentIndeksId(o.getStudentIndeks() != null ? o.getStudentIndeks().getId() : null);
+        dto.setSkolskaGodinaId(o.getSkolskaGodina() != null ? o.getSkolskaGodina().getId() : null);
+        dto.setPredmetiKojeObnavljaIds(
+                o.getPredmetiKojeObnavlja() != null ?
+                        o.getPredmetiKojeObnavlja().stream().map(SlusaPredmet::getId).collect(Collectors.toSet())
+                        : Collections.emptySet()
+        );
 
-        r.setId(og.getId());
-        r.setGodinaStudija(og.getGodinaStudija());
-        r.setDatum(og.getDatum());
-        r.setNapomena(og.getNapomena());
-
-        if (og.getStudentIndeks() != null)
-            r.setStudentIndeksId(og.getStudentIndeks().getId());
-
-        if (og.getSkolskaGodina() != null)
-            r.setSkolskaGodinaId(og.getSkolskaGodina().getId());
-
-        if (og.getPredmetiKojeObnavlja() != null)
-            r.setPredmetiKojeObnavljaIds(
-                    og.getPredmetiKojeObnavlja().stream()
-                            .map(SlusaPredmet::getId)
-                            .collect(Collectors.toSet())
-            );
-
-        return r;
+        return dto;
     }
 
     public static List<ObnovaGodineResponse> toObnovaResponseList(List<ObnovaGodine> lista) {

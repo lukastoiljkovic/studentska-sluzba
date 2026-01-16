@@ -2,6 +2,7 @@ package org.raflab.studsluzba.controllers.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.raflab.studsluzba.controllers.request.PolozenPredmetRequest;
+import org.raflab.studsluzba.controllers.response.NepolozenPredmetResponse;
 import org.raflab.studsluzba.controllers.response.PolozenPredmetResponse;
 import org.raflab.studsluzba.model.entities.PolozenPredmet;
 import org.raflab.studsluzba.services.PolozenPredmetService;
@@ -33,7 +34,7 @@ public class PolozenPredmetController {
 
     /// - selekcija svih nepoloženih ispita za broj indeksa studenta, paginirano
     @GetMapping("/nepolozeni/{studentIndeksId}")
-    public Page<PolozenPredmetResponse> getNepolozeni(
+    public Page<NepolozenPredmetResponse> getNepolozeni(
             @PathVariable Long studentIndeksId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
