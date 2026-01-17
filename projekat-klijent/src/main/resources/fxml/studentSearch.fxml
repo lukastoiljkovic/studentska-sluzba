@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.raflab.studsluzbadesktopclient.controllers.StudentSearchController"
+            stylesheets="@../../css/stylesheet.css">
+
+    <top>
+        <VBox spacing="10" style="-fx-padding: 20; -fx-background-color: white;">
+            <!-- Naslov -->
+            <Label text="Pretraga Studenata"
+                   style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+
+            <Separator/>
+
+            <!-- Brza pretraga -->
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Brza pretraga (indeks):"
+                       style="-fx-font-weight: bold;"/>
+                <TextField fx:id="fastSearchTf"
+                           promptText="npr. RN2401"
+                           prefWidth="200"/>
+                <Button text="Pronađi"
+                        onAction="#handleFastSearch"
+                        styleClass="primary-button"/>
+            </HBox>
+
+            <Separator/>
+
+            <!-- Napredna pretraga -->
+            <GridPane hgap="10" vgap="10">
+                <Label text="Ime:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                <TextField fx:id="imeTf" GridPane.columnIndex="1" GridPane.rowIndex="0"
+                           prefWidth="200"/>
+
+                <Label text="Prezime:" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+                <TextField fx:id="prezimeTf" GridPane.columnIndex="3" GridPane.rowIndex="0"
+                           prefWidth="200"/>
+
+                <Label text="Studijski program:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                <TextField fx:id="studProgramTf" GridPane.columnIndex="1" GridPane.rowIndex="1"
+                           promptText="RN, RI, SI..."/>
+
+                <Label text="Godina upisa:" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+                <TextField fx:id="godinaTf" GridPane.columnIndex="3" GridPane.rowIndex="1"
+                           promptText="2024"/>
+
+                <Label text="Broj indeksa:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                <TextField fx:id="brojTf" GridPane.columnIndex="1" GridPane.rowIndex="2"
+                           promptText="1, 2, 3..."/>
+            </GridPane>
+
+            <!-- Dugmad -->
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Button text="Pretraži"
+                        onAction="#handleSearch"
+                        styleClass="primary-button"/>
+                <Button text="Očisti"
+                        onAction="#handleClear"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Novi Student"
+                        onAction="#handleNewStudent"
+                        styleClass="success-button"/>
+            </HBox>
+
+            <!-- Status -->
+            <Label fx:id="statusLabel"
+                   style="-fx-text-fill: #666;"/>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox spacing="10" style="-fx-padding: 20;">
+            <!-- Tabela -->
+            <TableView fx:id="resultTable" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="imeCol" text="Ime" prefWidth="150"/>
+                    <TableColumn fx:id="prezimeCol" text="Prezime" prefWidth="150"/>
+                    <TableColumn fx:id="indeksCol" text="Indeks" prefWidth="150"/>
+                    <TableColumn fx:id="godinaCol" text="Godina upisa" prefWidth="120"/>
+                    <TableColumn fx:id="aktivanCol" text="Aktivan" prefWidth="80"/>
+                </columns>
+                <placeholder>
+                    <Label text="Nema rezultata. Pokrenite pretragu."
+                           style="-fx-text-fill: #999;"/>
+                </placeholder>
+            </TableView>
+
+            <!-- Dugmad za rad sa tabelom -->
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Button text="Otvori Profil"
+                        onAction="#handleOpenProfile"
+                        styleClass="primary-button"/>
+                <Label text="Dupli klik na red za otvaranje profila"
+                       style="-fx-text-fill: #666; -fx-font-style: italic;"/>
+            </HBox>
+
+            <!-- Paginacija -->
+            <Pagination fx:id="pagination"
+                        pageCount="1"
+                        maxPageIndicatorCount="10"/>
+        </VBox>
+    </center>
+
+</BorderPane>

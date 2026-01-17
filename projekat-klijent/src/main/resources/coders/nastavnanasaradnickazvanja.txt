@@ -1,0 +1,9 @@
+predavač
+viši predavač
+profesor strukovnih studija
+docent
+vanredni profesor
+redovni profesor
+saradnik u nastavi
+asistent
+asistent sa doktoratom

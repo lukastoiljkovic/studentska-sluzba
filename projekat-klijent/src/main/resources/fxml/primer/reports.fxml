@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.geometry.Insets?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<BorderPane fx:id="reportsPane" prefHeight="600" prefWidth="800" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.raflab.studsluzbadesktopclient.controllers.primer.ReportsController">
+    <top>
+        <fx:include source="../menuBar.fxml"/>
+    </top>
+    <center>
+        <GridPane alignment="center" hgap="10" vgap="10">
+            <padding><Insets top="20" right="0" bottom="10" left="0"/></padding>
+            <Button text="Izvestaj svi studenti" onAction="#handleIzvestajSviStudenti" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+
+            <Label text="Godina upisa" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+            <TextField fx:id="godinaUpisaTf" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+            <Button text="Izvestaj po godini upisa" onAction="#handleIzvestajSviStudentiPoGodiniUpisa" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+
+            <Label text="Studijski program skraceno" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+            <TextField fx:id="studProgTf" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+            <Button text="Izvestaj po studijskom programu" onAction="#handleIzvestajSviStudentiPoStudProg" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
+
+        </GridPane>
+    </center>
+</BorderPane>

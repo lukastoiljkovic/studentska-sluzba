@@ -1,0 +1,287 @@
+Aleksinac
+Arandjelovac
+Arilje
+Moskva
+Babušnica
+Bajina Bašta
+Batočina
+Bela Palanka
+Barajevo
+Čukarica
+Grocka
+Novi Beograd
+Obrenovac
+Palilula
+Savski venac
+Sopot
+Stari grad
+Voždovac
+Vračar
+Zemun
+Zvezdara
+Blace
+Bogatić
+Boljevac
+Bor
+Bosilegrad
+Brus
+Bujanovac
+Crna Trava
+Ćićevac
+Ćuprija
+Čačak
+Čajetina
+Despotovac
+Dimitrov Grad
+Doljevc
+Gadžin Han
+Cetinje
+Gornji Milanovac
+Ivanjica
+Kladovo
+Knić
+Knjaževac
+Koceljeva
+Kosjerić
+Kragujevac
+Kraljevo
+Krupanj
+Kruševac
+Kučevo
+Kuršumlija
+Lajkovac
+Lazarevac
+Lebane
+Leskovac
+Loznica
+Lučani
+Ljig
+Ljubovija
+Majdanpek
+Mali Zvornik
+Malo Crniće
+Medvedža
+Merošina
+Mionica
+Mladenovac
+Negotin
+Niš
+Nova Varoš
+Novi Pazar
+Osečina
+Parađin
+Petrovac na Mlavi
+Pirot
+Požarevac
+Požega
+Preševo
+Priboj na Limu
+Prijepolje
+Prokuplje
+Rača Kragujevačka
+Raška
+Ražanj
+Rekovac
+Mrkonjić Grad
+Sjenica
+Smederevo
+Smederevska Palanka
+Sokobanja
+Surdulica
+Jagodina
+Paraćin
+Svrljig
+Šabac
+Svilajnac
+Užice
+Topola
+Trgovište
+Trstenik
+Tutin
+Ub
+Valjevo
+Varvarin
+Velika Plana
+Veliko Gradište
+Vladičin Han
+Vladimirci
+Vlasotince
+Vranje
+Vrnjačka Banja
+Zaječar
+Žabari
+Žagubica
+Žitoradja
+Beč
+Rakovica
+Lapovo
+Najrobi
+Novi Grad
+Surčin
+Teslić
+Trebinje
+Ada
+Alibunar
+Apatin
+Bač
+Bačka Palanka
+Bačka Topola
+Bački Petrovac
+Bečej
+Bela Crkva
+Beočin
+Čoka
+Indjija
+Irig
+Kanjiža
+Kikinda
+Kovačica
+Kovin
+Kula
+Mali Idjoš
+Nova Crnja
+Novi Bečej
+Novi Kneževac
+Novi Sad - grad
+Odžaci
+Opovo
+Pančevo
+Pećinci
+Plandište
+Ruma
+Sečanj
+Senta
+Sombor
+Srbobran
+Sremska Mitrovica
+Stara Pazova
+Subotica
+Šid
+Temerin
+Titel
+Vrbas
+Vršac
+Zrenjanin
+Žabalj
+Žitšte
+Nova Gorica
+Sremski Karlovci
+Dubrovnik
+Višegrad
+Gnjilane
+Dečan
+Djakovica
+Glogovac
+Gnjilane
+Istok
+Kačanik
+Klina
+Kosovska Kamenica
+Kosovska Mitrovica
+Leposavić
+Lipljan
+Orahovac
+Peć
+Podujevo
+Priština
+Prizren
+Srbica
+Suva Reka
+Uroševac
+Vitina
+Vučrtin
+Zubin Potok
+štimlje
+Štrbce
+Obilić
+Kosovo Polje
+Novo Brdo
+Zvečan
+Gora
+Gradiška
+Eindhoven
+Bar
+Bjelo Polje
+Budva
+Cetinje
+Danilovgrad
+Herceg Novi
+Berane
+Kolašin
+Kotor
+Mojkovac
+Nikšić
+Plav
+Plužine
+Pljevlja
+Rožaje
+Šavnik
+Podgorica
+Tivat
+Ulcinj
+Žabljak
+Andrijevica
+Jajce
+Novi Karlovci
+Prijedor
+Sarajevo
+Lopare
+Brežice
+Drvar
+Bihać
+Bosansko Petrovo selo
+Doboj
+Bosanska Dubica
+Trbovlje
+Kumanovo
+Knin
+Bagdad
+Prnjavor
+Skoplje
+Vukovar
+Knin
+Virovitica
+Štip
+Štip
+Gacko
+Vojnić
+Brčko
+Bosansko Gradište
+NEPOZNATO
+Hamburg
+Centar
+Milići
+BIJELJINA
+TRAVNIK
+KONJIC
+BUGOJNO
+Novo Sarajevo
+Mostar
+Banja Luka
+Derventa
+Zvornik
+Visoko
+Banja Koviljača
+Ilidža
+MOST
+Podgorica
+HITENTAL
+Guča
+ZAGREB
+SPLIT
+Osijek
+Eindhoven
+Ogulin
+Karlovac
+Thiene
+Rehovot
+Kostolac
+Kozarska Dubica
+MO
+LJUBLJANA
+Šehovići
+Tuzla
+Golubac
+Wien
+Mariupolj
+Inostranstvo

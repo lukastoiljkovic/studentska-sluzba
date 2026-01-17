@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.21.2.final using JasperReports Library version 6.21.2-8434a0bd7c3bbc37cbf916f2968d35e4b165821a  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="sviStudenti" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="7fae7ac7-b54c-46e8-9c58-3889413ed9d2">
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<field name="ime" class="java.lang.String"/>
+	<field name="prezime" class="java.lang.String"/>
+	<field name="godinaUpisa" class="java.lang.Integer"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="91" splitType="Stretch">
+			<staticText>
+				<reportElement x="200" y="21" width="160" height="49" forecolor="#030303" uuid="4b409f2e-411d-4011-8bce-7355fcd55c0e"/>
+				<textElement>
+					<font size="30"/>
+				</textElement>
+				<text><![CDATA[STUDENTI]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="35" splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="65" splitType="Stretch">
+			<staticText>
+				<reportElement x="100" y="30" width="100" height="30" uuid="bc315718-64b1-431d-bf15-58c8d5ce8ecf">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="c5ce6383-3d01-4be4-acc9-9013f4c76b5c"/>
+				</reportElement>
+				<text><![CDATA[ime]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="220" y="30" width="100" height="30" uuid="151e1d32-a713-4684-820f-5bcd8a1307a7">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="597069ba-0a84-4f7e-8e01-5e8d3f01a82f"/>
+				</reportElement>
+				<text><![CDATA[prezime]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="340" y="30" width="100" height="30" uuid="718e8b1c-ad1a-44b6-8ce5-038ada3840f5">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="8f0b6ef3-3ab8-4bf2-90a1-cf1b2e213d5e"/>
+				</reportElement>
+				<text><![CDATA[godinaUpisa]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="35" splitType="Stretch">
+			<textField>
+				<reportElement x="100" y="0" width="100" height="30" uuid="1ab33b28-342b-4f7a-93f0-0999abf287de">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="c5ce6383-3d01-4be4-acc9-9013f4c76b5c"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{ime}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="220" y="0" width="100" height="30" uuid="164ad1ed-2b49-4827-b5af-5626f0fd2de3">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="597069ba-0a84-4f7e-8e01-5e8d3f01a82f"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{prezime}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="340" y="0" width="100" height="30" uuid="ad772ad7-56ce-4aa0-811b-f45660c5e8db">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="8f0b6ef3-3ab8-4bf2-90a1-cf1b2e213d5e"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{godinaUpisa}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="45" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="54" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>

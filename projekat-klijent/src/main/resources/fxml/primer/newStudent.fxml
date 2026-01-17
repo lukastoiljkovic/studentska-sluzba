@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.text.Text?>
+<?import javafx.geometry.*?>
+
+<BorderPane fx:id="mainPane" xmlns:fx="http://javafx.com/fxml" fx:controller="org.raflab.studsluzbadesktopclient.controllers.primer.StudentController">
+
+    <top>
+        <fx:include source="../menuBar.fxml"/>
+    </top>
+
+    <center>
+        <BorderPane>
+            <center>
+                <fx:include source="studentPodaciTabPane.fxml"/>
+            </center>
+            <bottom>
+                <GridPane alignment="center" hgap="10" vgap="10">
+                    <padding><Insets top="20" right="0" bottom="10" left="0"/></padding>
+                    <Button  onAction="#handleSaveStudent" text="Sačuvaj"
+                             GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                    <Text text="                                " fx:id="actionTarget" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                </GridPane>
+            </bottom>
+        </BorderPane>
+    </center>
+
+
+</BorderPane>

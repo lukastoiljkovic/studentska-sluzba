@@ -1,0 +1,10 @@
+RN
+RI
+RM
+RD
+NN
+S
+O
+D
+M
+P
