@@ -1,11 +1,13 @@
 package org.raflab.studsluzbadesktopclient.services;
 
 import lombok.RequiredArgsConstructor;
-import org.raflab.studsluzbadesktopclient.dto.PredmetDTO;
+import org.raflab.studsluzba.dtos.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -13,33 +15,26 @@ public class PredmetService {
 
     private final WebClient webClient;
 
-    public Flux<PredmetDTO> getAll() {
-        return webClient.get()
-                .uri("/api/predmet/all")
-                .retrieve()
-                .bodyToFlux(PredmetDTO.class);
-    }
-
-    public Mono<PredmetDTO> getById(Long id) {
+    public Mono<PredmetResponse> getById(Long id) {
         return webClient.get()
                 .uri("/api/predmet/{id}", id)
                 .retrieve()
-                .bodyToMono(PredmetDTO.class);
+                .bodyToMono(PredmetResponse.class);
     }
 
-    public Flux<PredmetDTO> getPredmetiZaProgram(Long studProgramId) {
+    public Flux<PredmetResponse> getPredmetiZaProgram(Long studProgramId) {
         return webClient.get()
                 .uri("/api/studprogram/{id}/predmeti", studProgramId)
                 .retrieve()
-                .bodyToFlux(PredmetDTO.class);
+                .bodyToFlux(PredmetResponse.class);
     }
 
-    public Mono<Long> save(PredmetDTO predmet) {
-        return webClient.post()
-                .uri("/api/predmet/add")
-                .bodyValue(predmet)
+    public Mono<List<PredmetResponse>> getPredmetiNaStudijskomProgramu(Long studProgramId) {
+        return webClient.get()
+                .uri("/api/studprogram/{id}/predmeti", studProgramId)
                 .retrieve()
-                .bodyToMono(Long.class);
+                .bodyToFlux(PredmetResponse.class)
+                .collectList();
     }
 
     public Mono<Void> delete(Long id) {
@@ -47,6 +42,22 @@ public class PredmetService {
                 .uri("/api/predmet/{id}", id)
                 .retrieve()
                 .bodyToMono(Void.class);
+    }
+
+
+    public Flux<PredmetResponse> getAll() {
+        return webClient.get()
+                .uri("/api/predmet/all")
+                .retrieve()
+                .bodyToFlux(PredmetResponse.class);
+    }
+
+    public Mono<Long> save(PredmetRequest req) {
+        return webClient.post()
+                .uri("/api/predmet/add")
+                .bodyValue(req)
+                .retrieve()
+                .bodyToMono(Long.class);
     }
 
     public Mono<Double> getProsecnaOcena(Long predmetId, Integer fromYear, Integer toYear) {
@@ -59,4 +70,6 @@ public class PredmetService {
                 .retrieve()
                 .bodyToMono(Double.class);
     }
+
+
 }

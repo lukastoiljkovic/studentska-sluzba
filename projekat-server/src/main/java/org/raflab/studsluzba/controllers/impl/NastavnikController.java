@@ -4,8 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import lombok.AllArgsConstructor;
-import org.raflab.studsluzba.controllers.request.NastavnikRequest;
-import org.raflab.studsluzba.controllers.response.NastavnikResponse;
+import org.raflab.studsluzba.dtos.*;
 import org.raflab.studsluzba.model.entities.Nastavnik;
 import org.raflab.studsluzba.services.NastavnikService;
 import org.raflab.studsluzba.utils.Converters;

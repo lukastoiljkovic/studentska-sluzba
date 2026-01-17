@@ -1,9 +1,7 @@
 package org.raflab.studsluzbadesktopclient.services;
 
 import lombok.RequiredArgsConstructor;
-import org.raflab.studsluzbadesktopclient.dto.SkolskaGodinaDTO;
-import org.raflab.studsluzbadesktopclient.dto.SrednjaSkolaDTO;
-import org.raflab.studsluzbadesktopclient.dto.StudijskiProgramDTO;
+import org.raflab.studsluzba.dtos.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
@@ -17,11 +15,11 @@ public class SifarniciService {
 
     // ========== STUDIJSKI PROGRAMI ==========
 
-    public Flux<StudijskiProgramDTO> getAllStudijskiProgrami() {
+    public Flux<StudijskiProgramResponse> getAllStudijskiProgrami() {
         return webClient.get()
                 .uri("/api/studprogram/all/sorted")
                 .retrieve()
-                .bodyToFlux(StudijskiProgramDTO.class);
+                .bodyToFlux(StudijskiProgramResponse.class);
     }
 
     public Flux<String> getStudijskiProgramiOznake() {
@@ -33,34 +31,41 @@ public class SifarniciService {
 
     // ========== ŠKOLSKE GODINE ==========
 
-    public Flux<SkolskaGodinaDTO> getAllSkolskeGodine() {
+    public Flux<SkolskaGodinaResponse> getAllSkolskeGodine() {
         return webClient.get()
                 .uri("/api/skolskaGodina/all")
                 .retrieve()
-                .bodyToFlux(SkolskaGodinaDTO.class);
+                .bodyToFlux(SkolskaGodinaResponse.class);
     }
 
-    public Mono<SkolskaGodinaDTO> getSkolskaGodinaById(Long id) {
+    public Mono<SkolskaGodinaResponse> getSkolskaGodinaById(Long id) {
         return webClient.get()
                 .uri("/api/skolskaGodina/{id}", id)
                 .retrieve()
-                .bodyToMono(SkolskaGodinaDTO.class);
+                .bodyToMono(SkolskaGodinaResponse.class);
     }
 
     // ========== SREDNJE ŠKOLE ==========
 
-    public Flux<SrednjaSkolaDTO> getAllSrednjeSkole() {
+    public Flux<SrednjaSkolaResponse> getAllSrednjeSkole() {
         return webClient.get()
                 .uri("/api/srednjaSkola/all")
                 .retrieve()
-                .bodyToFlux(SrednjaSkolaDTO.class);
+                .bodyToFlux(SrednjaSkolaResponse.class);
     }
 
-    public Mono<Long> saveSrednjaSkola(SrednjaSkolaDTO skola) {
+    public Mono<Long> saveSrednjaSkola(SrednjaSkolaResponse skola) {
         return webClient.post()
                 .uri("/api/srednjaSkola/add")
                 .bodyValue(skola)
                 .retrieve()
                 .bodyToMono(Long.class);
+    }
+
+    public Flux<StudentPodaciResponse> getStudentiPoSrednjojSkoli(String nazivSkole) {
+        return webClient.post()
+                .uri("/api/student/po-srednjoj-skoli?naziv=" + nazivSkole)
+                .retrieve()
+                .bodyToFlux(StudentPodaciResponse.class);
     }
 }

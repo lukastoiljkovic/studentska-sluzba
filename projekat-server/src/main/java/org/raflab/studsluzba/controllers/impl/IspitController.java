@@ -1,13 +1,7 @@
 package org.raflab.studsluzba.controllers.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.raflab.studsluzba.controllers.request.IspitIzlazakRequest;
-import org.raflab.studsluzba.controllers.request.IspitPrijavaRequest;
-import org.raflab.studsluzba.controllers.request.IspitRequest;
-import org.raflab.studsluzba.controllers.response.IspitPrijavaResponse;
-import org.raflab.studsluzba.controllers.response.IspitResponse;
-import org.raflab.studsluzba.controllers.response.IspitRezultatResponse;
-import org.raflab.studsluzba.controllers.response.PredispitniPoeniStudentResponse;
+import org.raflab.studsluzba.dtos.*;
 import org.raflab.studsluzba.model.entities.Ispit;
 import org.raflab.studsluzba.services.IspitService;
 import org.raflab.studsluzba.utils.Converters;

@@ -1,7 +1,7 @@
 package org.raflab.studsluzba.services;
 
 import lombok.AllArgsConstructor;
-import org.raflab.studsluzba.controllers.response.StudentPodaciResponse;
+import org.raflab.studsluzba.dtos.*;
 import org.raflab.studsluzba.model.entities.StudentIndeks;
 import org.raflab.studsluzba.model.entities.StudentPodaci;
 import org.raflab.studsluzba.repositories.StudentIndeksRepository;

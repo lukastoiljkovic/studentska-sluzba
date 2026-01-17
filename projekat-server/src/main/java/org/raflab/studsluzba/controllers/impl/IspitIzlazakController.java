@@ -1,8 +1,7 @@
 package org.raflab.studsluzba.controllers.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.raflab.studsluzba.controllers.request.IspitIzlazakRequest;
-import org.raflab.studsluzba.controllers.response.IspitIzlazakResponse;
+import org.raflab.studsluzba.dtos.*;
 import org.raflab.studsluzba.model.entities.IspitIzlazak;
 import org.raflab.studsluzba.services.IspitIzlazakService;
 import org.raflab.studsluzba.utils.Converters;

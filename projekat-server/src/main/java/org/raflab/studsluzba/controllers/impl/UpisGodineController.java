@@ -1,8 +1,7 @@
 package org.raflab.studsluzba.controllers.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.raflab.studsluzba.controllers.request.UpisGodineRequest;
-import org.raflab.studsluzba.controllers.response.UpisGodineResponse;
+import org.raflab.studsluzba.dtos.*;
 import org.raflab.studsluzba.services.UpisGodineService;
 import org.springframework.web.bind.annotation.*;
 

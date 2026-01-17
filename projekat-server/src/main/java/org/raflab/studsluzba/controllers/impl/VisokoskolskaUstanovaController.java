@@ -1,8 +1,7 @@
 package org.raflab.studsluzba.controllers.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.raflab.studsluzba.controllers.request.VisokoskolskaUstanovaRequest;
-import org.raflab.studsluzba.controllers.response.VisokoskolskaUstanovaResponse;
+import org.raflab.studsluzba.dtos.*;
 import org.raflab.studsluzba.model.entities.VisokoskolskaUstanova;
 import org.raflab.studsluzba.services.VisokoskolskaUstanovaService;
 import org.raflab.studsluzba.utils.Converters;

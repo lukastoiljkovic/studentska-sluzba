@@ -1,7 +1,7 @@
 package org.raflab.studsluzba.services;
 
 import lombok.AllArgsConstructor;
-import org.raflab.studsluzba.controllers.request.PredispitnaIzlazakRequest;
+import org.raflab.studsluzba.dtos.*;
 import org.raflab.studsluzba.model.entities.PredispitnaIzlazak;
 import org.raflab.studsluzba.model.entities.PredispitnaObaveza;
 import org.raflab.studsluzba.model.entities.SlusaPredmet;

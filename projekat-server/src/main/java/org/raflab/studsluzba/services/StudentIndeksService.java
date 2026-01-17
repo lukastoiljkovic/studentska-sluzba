@@ -1,8 +1,7 @@
 package org.raflab.studsluzba.services;
 
 import lombok.AllArgsConstructor;
-import org.raflab.studsluzba.controllers.request.StudentIndeksRequest;
-import org.raflab.studsluzba.controllers.response.StudentIndeksResponse;
+import org.raflab.studsluzba.dtos.*;
 import org.raflab.studsluzba.model.entities.StudentIndeks;
 import org.raflab.studsluzba.model.entities.StudentPodaci;
 import org.raflab.studsluzba.model.entities.StudijskiProgram;
@@ -18,7 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.server.ResponseStatusException;
-
+import org.raflab.studsluzba.dtos.*;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;

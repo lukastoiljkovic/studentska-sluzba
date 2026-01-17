@@ -52,34 +52,18 @@ public class MenuBarController {
 
     @FXML
     public void openPredmetList() {
-        mainWindowController.show("predmetList");
+        mainWindowController.show("studijskiProgramList");
     }
 
     @FXML
     public void openNewPredmet() {
         mainWindowController.show("predmetForm");
     }
-
-    @FXML
-    public void openStudijskiProgrami() {
-        mainWindowController.show("studijskiProgramList");
-    }
-
     // ========== ISPITI ==========
-
-    @FXML
-    public void openIspitList() {
-        mainWindowController.show("ispitList");
-    }
 
     @FXML
     public void openNewIspit() {
         mainWindowController.show("ispitForm");
-    }
-
-    @FXML
-    public void openIspitniRokovi() {
-        mainWindowController.show("ispitniRokList");
     }
 
     @FXML
@@ -125,6 +109,22 @@ public class MenuBarController {
     public void reportProsecneOcene() {
         mainView.openModal("reports/prosecneOcene", "Izveštaj - Prosečne ocene", 800, 600);
     }
+
+    @FXML
+    public void openIspitniRokovi() {
+        mainWindowController.show("ispitniRokUpravljanje");
+    }
+
+    @FXML
+    public void openIspitList() {
+        mainWindowController.show("ispitniRokList");
+    }
+
+    @FXML
+    public void openStudijskiProgrami() {
+        mainWindowController.show("studijskiProgramList");
+    }
+
 
 
 }

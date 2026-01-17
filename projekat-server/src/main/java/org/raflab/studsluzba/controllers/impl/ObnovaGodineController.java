@@ -1,12 +1,7 @@
 package org.raflab.studsluzba.controllers.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.raflab.studsluzba.controllers.request.NastavnikRequest;
-import org.raflab.studsluzba.controllers.request.ObnovaGodineRequest;
-import org.raflab.studsluzba.controllers.request.ObnovaGodineRequest;
-import org.raflab.studsluzba.controllers.response.NastavnikResponse;
-import org.raflab.studsluzba.controllers.response.ObnovaGodineResponse;
-import org.raflab.studsluzba.controllers.response.ObnovaGodineResponse;
+import org.raflab.studsluzba.dtos.*;
 import org.raflab.studsluzba.model.entities.Nastavnik;
 import org.raflab.studsluzba.model.entities.ObnovaGodine;
 import org.raflab.studsluzba.services.ObnovaGodineService;

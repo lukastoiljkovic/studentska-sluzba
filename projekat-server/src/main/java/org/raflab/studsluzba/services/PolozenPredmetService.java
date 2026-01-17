@@ -1,9 +1,7 @@
 package org.raflab.studsluzba.services;
 
 import lombok.AllArgsConstructor;
-import org.raflab.studsluzba.controllers.request.PolozenPredmetRequest;
-import org.raflab.studsluzba.controllers.response.NepolozenPredmetResponse;
-import org.raflab.studsluzba.controllers.response.PolozenPredmetResponse;
+import org.raflab.studsluzba.dtos.*;
 import org.raflab.studsluzba.model.entities.*;
 import org.raflab.studsluzba.repositories.*;
 import org.raflab.studsluzba.utils.Converters;

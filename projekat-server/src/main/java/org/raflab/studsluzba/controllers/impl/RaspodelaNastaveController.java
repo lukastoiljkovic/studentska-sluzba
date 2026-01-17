@@ -3,7 +3,7 @@ package org.raflab.studsluzba.controllers.impl;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
-import org.raflab.studsluzba.controllers.response.PredmetResponse;
+import org.raflab.studsluzba.dtos.*;
 import org.raflab.studsluzba.model.entities.DrziPredmet;
 import org.raflab.studsluzba.model.entities.Predmet;
 import org.raflab.studsluzba.model.entities.SlusaPredmet;

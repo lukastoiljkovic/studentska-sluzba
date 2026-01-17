@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.raflab.studsluzbadesktopclient.controllers.IspitPrijavaDialogController"
+      spacing="10" style="-fx-padding: 20;">
+
+    <Label text="Prijava na ispit" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+
+    <Separator/>
+
+    <Label fx:id="studentLabel" text="Student"/>
+
+    <GridPane hgap="10" vgap="10">
+        <columnConstraints>
+            <ColumnConstraints minWidth="100" prefWidth="100"/>
+            <ColumnConstraints minWidth="350" hgrow="ALWAYS"/>
+        </columnConstraints>
+
+        <Label text="Ispit:" GridPane.rowIndex="0"/>
+        <ComboBox fx:id="ispitCb" GridPane.columnIndex="1" GridPane.rowIndex="0"
+                  prefWidth="350" promptText="Izaberite ispit"/>
+
+        <Label text="Datum prijave:" GridPane.rowIndex="1"/>
+        <DatePicker fx:id="datumDp" GridPane.columnIndex="1" GridPane.rowIndex="1"
+                    prefWidth="150"/>
+
+        <Label text="Napomena:" GridPane.rowIndex="2"/>
+        <TextArea fx:id="napomenaTa" GridPane.columnIndex="1" GridPane.rowIndex="2"
+                  prefRowCount="3" wrapText="true"/>
+    </GridPane>
+
+    <Label fx:id="errorLabel" textFill="red" style="-fx-font-weight: bold;"/>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button fx:id="saveBtn" text="Prijavi" onAction="#handleSave"
+                style="-fx-background-color: #2ecc71; -fx-text-fill: white;"/>
+        <Button fx:id="cancelBtn" text="Otkaži" onAction="#handleCancel"/>
+    </HBox>
+
+</VBox>

@@ -1,7 +1,7 @@
 package org.raflab.studsluzba.services;
 
 import lombok.RequiredArgsConstructor;
-import org.raflab.studsluzba.controllers.request.VisokoskolskaUstanovaRequest;
+import org.raflab.studsluzba.dtos.*;
 import org.raflab.studsluzba.model.entities.VisokoskolskaUstanova;
 import org.raflab.studsluzba.repositories.VisokoskolskaUstanovaRepository;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -20,14 +20,6 @@ import java.util.stream.StreamSupport;
 public class VisokoskolskaUstanovaService {
 
     private final VisokoskolskaUstanovaRepository repo;
-
-    public Long add(VisokoskolskaUstanovaRequest req) {
-        VisokoskolskaUstanova v = new VisokoskolskaUstanova();
-        v.setNaziv(req.getNaziv());
-        v.setMesto(req.getMesto());
-        v.setVrsta(req.getVrsta());
-        return repo.save(v).getId();
-    }
 
     public Optional<VisokoskolskaUstanova> findById(Long id) {
         return repo.findById(id);
@@ -50,5 +42,18 @@ public class VisokoskolskaUstanovaService {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "Ne može se obrisati entitet jer postoje povezani zapisi.");
         }
+    }
+
+    public Long add(VisokoskolskaUstanovaRequest req) {
+        VisokoskolskaUstanova v = new VisokoskolskaUstanova();
+        v.setNaziv(req.getNaziv());
+        v.setMesto(req.getMesto());
+
+        // Mapiranje enum-a
+        if (req.getVrsta() != null) {
+            v.setVrsta(VisokoskolskaUstanova.Vrsta.valueOf(req.getVrsta().name()));
+        }
+
+        return repo.save(v).getId();
     }
 }

@@ -6,70 +6,77 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import lombok.RequiredArgsConstructor;
+
+import org.raflab.studsluzba.dtos.SrednjaSkolaResponse;
+import org.raflab.studsluzba.dtos.StudentIndeksResponse;
 import org.raflab.studsluzbadesktopclient.app.MainView;
-import org.raflab.studsluzbadesktopclient.dto.StudentSearchResultDTO;
+import org.raflab.studsluzbadesktopclient.dtos.StudentDTO;
 import org.raflab.studsluzbadesktopclient.services.StudentService;
+import org.raflab.studsluzbadesktopclient.services.SifarniciService;
 import org.raflab.studsluzbadesktopclient.utils.AlertHelper;
 import org.raflab.studsluzbadesktopclient.utils.ValidationHelper;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.util.List;
+
 
 @Component
 @RequiredArgsConstructor
 public class StudentSearchController {
 
     private final StudentService studentService;
+    private final SifarniciService sifarniciService;
     private final MainView mainView;
 
     @FXML private TextField imeTf;
     @FXML private TextField prezimeTf;
-    @FXML private TextField studProgramTf;
-    @FXML private TextField godinaTf;
-    @FXML private TextField brojTf;
     @FXML private TextField fastSearchTf;
+    @FXML private ComboBox<SrednjaSkolaResponse> srednjaSkolaCb;
 
-    @FXML private TableView<StudentSearchResultDTO> resultTable;
-    @FXML private TableColumn<StudentSearchResultDTO, String> imeCol;
-    @FXML private TableColumn<StudentSearchResultDTO, String> prezimeCol;
-    @FXML private TableColumn<StudentSearchResultDTO, String> indeksCol;
-    @FXML private TableColumn<StudentSearchResultDTO, Integer> godinaCol;
-    @FXML private TableColumn<StudentSearchResultDTO, Boolean> aktivanCol;
+    @FXML private TableView<StudentDTO> resultTable;
+    @FXML private TableColumn<StudentDTO, String> imeCol;
+    @FXML private TableColumn<StudentDTO, String> prezimeCol;
+    @FXML private TableColumn<StudentDTO, String> indeksCol;
+    @FXML private TableColumn<StudentDTO, Integer> godinaCol;
+    @FXML private TableColumn<StudentDTO, Boolean> aktivanCol;
 
     @FXML private Label statusLabel;
     @FXML private Pagination pagination;
-
-    private int currentPage = 0;
-    private final int pageSize = 20;
 
     @FXML
     public void initialize() {
         setupTable();
         setupFastSearch();
         setupDoubleClick();
-        loadData();
+        setupSrednjaSkolaCombo();
+        loadSrednjeSkole();
     }
 
     private void setupTable() {
-        imeCol.setCellValueFactory(data ->
-                new javafx.beans.property.SimpleStringProperty(data.getValue().getIme()));
-        prezimeCol.setCellValueFactory(data ->
-                new javafx.beans.property.SimpleStringProperty(data.getValue().getPrezime()));
-        indeksCol.setCellValueFactory(data ->
-                new javafx.beans.property.SimpleStringProperty(data.getValue().getIndeksFormatirano()));
-        godinaCol.setCellValueFactory(data ->
-                new javafx.beans.property.SimpleObjectProperty<>(data.getValue().getGodinaUpisa()));
+        imeCol.setCellValueFactory(d -> new javafx.beans.property.SimpleStringProperty(d.getValue().getIme()));
+        prezimeCol.setCellValueFactory(d -> new javafx.beans.property.SimpleStringProperty(d.getValue().getPrezime()));
 
-        aktivanCol.setCellValueFactory(data ->
-                new javafx.beans.property.SimpleBooleanProperty(data.getValue().isAktivanIndeks()));
-        aktivanCol.setCellFactory(col -> new TableCell<StudentSearchResultDTO, Boolean>() {
+        indeksCol.setCellValueFactory(d ->
+                new javafx.beans.property.SimpleStringProperty(
+                        d.getValue().getStudProgramOznaka()
+                                + d.getValue().getBroj()
+                                + "/" + (d.getValue().getGodinaUpisa() % 100)
+                )
+        );
+
+        godinaCol.setCellValueFactory(d ->
+                new javafx.beans.property.SimpleObjectProperty<>(d.getValue().getGodinaUpisa()));
+
+        aktivanCol.setCellValueFactory(d ->
+                new javafx.beans.property.SimpleBooleanProperty(d.getValue().isAktivanIndeks()));
+
+        aktivanCol.setCellFactory(col -> new TableCell<>() {
             @Override
             protected void updateItem(Boolean item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
-                    setText(item ? "Da" : "Ne");
-                    setStyle(item ? "-fx-text-fill: green;" : "-fx-text-fill: gray;");
-                }
+                setText(empty || item == null ? null : (item ? "Da" : "Ne"));
             }
         });
     }
@@ -79,38 +86,121 @@ public class StudentSearchController {
     }
 
     private void setupDoubleClick() {
-        resultTable.setOnMouseClicked(event -> {
-            if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
-                StudentSearchResultDTO selected = resultTable.getSelectionModel().getSelectedItem();
-                if (selected != null) {
-                    openStudentProfile(selected.getIdIndeks());
-                }
+        resultTable.setOnMouseClicked(e -> {
+            if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() == 2) {
+                StudentDTO s = resultTable.getSelectionModel().getSelectedItem();
+                if (s != null) openStudentProfile(s.getIdIndeks());
             }
         });
     }
 
+    private void setupSrednjaSkolaCombo() {
+        srednjaSkolaCb.setConverter(new javafx.util.StringConverter<>() {
+            @Override
+            public String toString(SrednjaSkolaResponse skola) {
+                return skola == null ? "" : skola.getNaziv();
+            }
+
+            @Override
+            public SrednjaSkolaResponse fromString(String s) {
+                return null;
+            }
+        });
+    }
+
+
+    private void loadSrednjeSkole() {
+        sifarniciService.getAllSrednjeSkole()
+                .collectList()
+                .subscribe(
+                        list -> Platform.runLater(() ->
+                                srednjaSkolaCb.setItems(FXCollections.observableArrayList(list))),
+                        err -> AlertHelper.showException("Greška", (Exception) err)
+                );
+    }
+
+    // ================= SEARCH =================
+
     @FXML
-    public void handleSearch() {
+    public void handleSearchByImePrezime() {
         String ime = ValidationHelper.getTextOrNull(imeTf);
         String prezime = ValidationHelper.getTextOrNull(prezimeTf);
-        String studProgram = ValidationHelper.getTextOrNull(studProgramTf);
-        Integer godina = ValidationHelper.getIntegerOrNull(godinaTf);
-        Integer broj = ValidationHelper.getIntegerOrNull(brojTf);
 
-        statusLabel.setText("Pretraga u toku...");
+        if (ime == null && prezime == null) {
+            AlertHelper.showWarning("Upozorenje", "Unesite ime ili prezime.");
+            return;
+        }
 
-        studentService.searchSync(ime, prezime, studProgram, godina, broj, currentPage, pageSize)
+        statusLabel.setText("Pretraga...");
+
+        studentService.searchSync(ime, prezime, null, null, null, 0, 50)
                 .subscribe(
-                        results -> Platform.runLater(() -> {
-                            resultTable.setItems(FXCollections.observableArrayList(results));
-                            statusLabel.setText("Pronađeno: " + results.size() + " rezultata");
+                        res -> Platform.runLater(() -> {
+                            // mapiranje server DTO -> client DTO
+                            var clientList = res.stream().map(s -> {
+                                org.raflab.studsluzbadesktopclient.dtos.StudentDTO dto = new org.raflab.studsluzbadesktopclient.dtos.StudentDTO();
+                                dto.setIdIndeks(s.getIdIndeks());
+                                dto.setIdStudentPodaci(s.getIdStudentPodaci());
+                                dto.setIme(s.getIme());
+                                dto.setPrezime(s.getPrezime());
+                                dto.setGodinaUpisa(s.getGodinaUpisa());
+                                dto.setStudProgramOznaka(s.getStudProgramOznaka());
+                                dto.setBroj(s.getBroj());
+                                dto.setAktivanIndeks(s.isAktivanIndeks());
+                                return dto;
+                            }).toList();
+
+                            resultTable.setItems(FXCollections.observableArrayList(clientList));
+                            statusLabel.setText("Pronađeno: " + clientList.size());
                         }),
-                        error -> Platform.runLater(() -> {
-                            AlertHelper.showException("Greška pri pretrazi", (Exception) error);
-                            statusLabel.setText("Greška pri pretrazi");
+                        err -> Platform.runLater(() -> {
+                            AlertHelper.showException("Greška", (Exception) err);
+                            statusLabel.setText("");
+                        })
+                );
+
+    }
+
+    @FXML
+    public void handleSearchBySrednjaSkola() {
+        SrednjaSkolaResponse skola = srednjaSkolaCb.getValue();
+        if (skola == null) {
+            AlertHelper.showWarning("Upozorenje", "Izaberite srednju školu.");
+            return;
+        }
+
+        statusLabel.setText("Pretraga po srednjoj školi...");
+
+        sifarniciService.getStudentiPoSrednjojSkoli(skola.getNaziv())
+                .flatMap(studentPodaci ->
+                        studentService.getIndeksiForStudent(studentPodaci.getId())
+                                .filter(StudentIndeksResponse::isAktivan)
+                                .next()
+                                .map(indeks -> {
+                                    StudentDTO dto = new StudentDTO();
+                                    dto.setIdIndeks(indeks.getId());
+                                    dto.setIme(studentPodaci.getIme());
+                                    dto.setPrezime(studentPodaci.getPrezime());
+                                    dto.setStudProgramOznaka(indeks.getStudProgramOznaka());
+                                    dto.setBroj(indeks.getBroj());
+                                    dto.setGodinaUpisa(indeks.getGodina());
+                                    dto.setAktivanIndeks(indeks.isAktivan());
+                                    return dto;
+                                })
+                )
+                .collectList()
+                .subscribe(
+                        list -> Platform.runLater(() -> {
+                            resultTable.setItems(FXCollections.observableArrayList(list));
+                            statusLabel.setText("Pronađeno: " + list.size());
+                        }),
+                        err -> Platform.runLater(() -> {
+                            AlertHelper.showException("Greška", (Exception) err);
+                            statusLabel.setText("");
                         })
                 );
     }
+
 
     @FXML
     public void handleFastSearch() {
@@ -123,37 +213,52 @@ public class StudentSearchController {
         statusLabel.setText("Pretraga...");
 
         studentService.fastSearch(indeksShort)
+                .flatMap(indeks -> {
+                    if (indeks == null || indeks.getId() == null || indeks.getStudent() == null) {
+                        return Mono.empty();
+                    }
+
+                    Long indeksId = indeks.getId();
+                    Long studentPodaciId = indeks.getStudent().getId();
+
+                    return studentService.getStudentPodaciById(studentPodaciId)
+                            .map(podaci -> {
+                                StudentDTO dto = new StudentDTO();
+
+                                dto.setIdIndeks(indeksId);
+                                dto.setIme(podaci.getIme());
+                                dto.setPrezime(podaci.getPrezime());
+
+                                dto.setStudProgramOznaka(indeks.getStudProgramOznaka());
+                                dto.setBroj(indeks.getBroj());
+                                dto.setGodinaUpisa(indeks.getGodina());
+                                dto.setAktivanIndeks(indeks.isAktivan());
+
+                                return dto;
+                            });
+                })
+                .switchIfEmpty(Mono.fromRunnable(() -> Platform.runLater(() -> {
+                    AlertHelper.showInfo("Rezultat", "Student nije pronađen");
+                    resultTable.getItems().clear();
+                    statusLabel.setText("");
+                })).then(Mono.empty()))
                 .subscribe(
-                        indeks -> Platform.runLater(() -> {
-                            if (indeks != null && indeks.getId() != null) {
-                                openStudentProfile(indeks.getId());
-                            } else {
-                                AlertHelper.showInfo("Rezultat", "Student nije pronađen");
-                            }
-                            statusLabel.setText("");
+                        studentDto -> Platform.runLater(() -> {
+                            resultTable.setItems(FXCollections.observableArrayList(studentDto));
+                            resultTable.getSelectionModel().selectFirst();
+                            statusLabel.setText("Pronađeno: 1");
                         }),
-                        error -> Platform.runLater(() -> {
-                            AlertHelper.showError("Greška", "Student nije pronađen");
+                        err -> Platform.runLater(() -> {
+                            AlertHelper.showException("Greška", (Exception) err);
                             statusLabel.setText("");
                         })
                 );
     }
 
-    @FXML
-    public void handleClear() {
-        imeTf.clear();
-        prezimeTf.clear();
-        studProgramTf.clear();
-        godinaTf.clear();
-        brojTf.clear();
-        fastSearchTf.clear();
-        resultTable.getItems().clear();
-        statusLabel.setText("");
-    }
 
     @FXML
     public void handleOpenProfile() {
-        StudentSearchResultDTO selected = resultTable.getSelectionModel().getSelectedItem();
+        StudentDTO selected = resultTable.getSelectionModel().getSelectedItem();
         if (selected == null) {
             AlertHelper.showWarning("Upozorenje", "Izaberite studenta iz tabele!");
             return;
@@ -163,15 +268,24 @@ public class StudentSearchController {
 
     @FXML
     public void handleNewStudent() {
-        mainView.changeRoot("student/studentForm");
+        mainView.changeRoot("studentForm");
+    }
+
+
+    @FXML
+    public void handleClear() {
+        imeTf.clear();
+        prezimeTf.clear();
+        fastSearchTf.clear();
+        srednjaSkolaCb.getSelectionModel().clearSelection();
+        resultTable.getItems().clear();
+        statusLabel.setText("");
     }
 
     private void openStudentProfile(Long indeksId) {
-        // TODO: Implementirati prikaz profila studenta
-        mainView.openModal("student/studentProfile", "Profil studenta", 900, 700);
-    }
-
-    private void loadData() {
-        handleSearch();
+        StudentProfileController c = mainView.openModalWithController(
+                "studentProfile", "Profil studenta", 1000, 700
+        );
+        if (c != null) c.setStudentIndeksId(indeksId);
     }
 }

@@ -1,7 +1,7 @@
 package org.raflab.studsluzba.services;
 
 import lombok.RequiredArgsConstructor;
-import org.raflab.studsluzba.controllers.request.NastavnikZvanjeRequest;
+import org.raflab.studsluzba.dtos.NastavnikZvanjeRequest;
 import org.raflab.studsluzba.model.entities.Nastavnik;
 import org.raflab.studsluzba.model.entities.NastavnikZvanje;
 import org.raflab.studsluzba.repositories.NastavnikRepository;

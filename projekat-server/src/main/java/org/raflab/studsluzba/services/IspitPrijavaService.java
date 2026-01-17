@@ -1,7 +1,7 @@
 package org.raflab.studsluzba.services;
 
 import lombok.RequiredArgsConstructor;
-import org.raflab.studsluzba.controllers.request.IspitPrijavaRequest;
+import org.raflab.studsluzba.dtos.IspitPrijavaRequest;
 import org.raflab.studsluzba.model.entities.Ispit;
 import org.raflab.studsluzba.model.entities.IspitPrijava;
 import org.raflab.studsluzba.model.entities.StudentIndeks;
@@ -13,7 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-
+import org.raflab.studsluzba.dtos.*;
 import java.util.List;
 import java.util.Optional;
 

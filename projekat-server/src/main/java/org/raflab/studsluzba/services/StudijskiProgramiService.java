@@ -1,15 +1,14 @@
 package org.raflab.studsluzba.services;
 
 import lombok.AllArgsConstructor;
-import org.raflab.studsluzba.controllers.request.StudijskiProgramRequest;
-import org.raflab.studsluzba.controllers.response.StudijskiProgramResponse;
+import org.raflab.studsluzba.dtos.*;
 import org.raflab.studsluzba.model.entities.StudijskiProgram;
 import org.raflab.studsluzba.repositories.StudijskiProgramRepository;
 import org.raflab.studsluzba.utils.Converters;
 import org.raflab.studsluzba.utils.EntityMappers;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.raflab.studsluzba.dtos.*;
 import java.util.List;
 
 @AllArgsConstructor

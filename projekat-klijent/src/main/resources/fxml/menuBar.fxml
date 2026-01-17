@@ -16,44 +16,14 @@
         <MenuItem text="Uplate" onAction="#openUplate"/>
     </Menu>
 
-    <!-- NASTAVNICI Menu -->
-    <Menu text="Nastavnici">
-        <MenuItem text="Pretraga nastavnika" onAction="#openNastavnikSearch"/>
-        <MenuItem text="Novi nastavnik" onAction="#openNewNastavnik"/>
-    </Menu>
-
     <!-- PREDMETI Menu -->
     <Menu text="Predmeti">
-        <MenuItem text="Lista predmeta" onAction="#openPredmetList"/>
-        <MenuItem text="Novi predmet" onAction="#openNewPredmet"/>
-        <SeparatorMenuItem/>
         <MenuItem text="Studijski programi" onAction="#openStudijskiProgrami"/>
     </Menu>
 
     <!-- ISPITI Menu -->
     <Menu text="Ispiti">
         <MenuItem text="Lista ispita" onAction="#openIspitList"/>
-        <MenuItem text="Novi ispit" onAction="#openNewIspit"/>
-        <SeparatorMenuItem/>
-        <MenuItem text="Ispitni rokovi" onAction="#openIspitniRokovi"/>
-        <MenuItem text="Unos rezultata" onAction="#openUnosRezultata"/>
     </Menu>
-
-    <!-- ADMINISTRACIJA Menu -->
-    <Menu text="Administracija">
-        <MenuItem text="Školske godine" onAction="#openSkolskeGodine"/>
-        <MenuItem text="Grupe" onAction="#openGrupe"/>
-        <SeparatorMenuItem/>
-        <MenuItem text="Srednje škole" onAction="#openSrednjeSkole"/>
-        <MenuItem text="VS ustanove" onAction="#openVisokoskolskeUstanove"/>
-    </Menu>
-
-    <!-- IZVEŠTAJI Menu -->
-    <Menu text="Izveštaji">
-        <MenuItem text="Studenti po programu" onAction="#reportStudentiPoProgramu"/>
-        <MenuItem text="Rezultati ispita" onAction="#reportRezultatiIspita"/>
-        <MenuItem text="Prosečne ocene" onAction="#reportProsecneOcene"/>
-    </Menu>
-
 
 </MenuBar>

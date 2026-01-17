@@ -13,10 +13,11 @@ module stud_sluzba_desktop_client {
     requires reactor.core;
     requires static lombok;
     requires com.fasterxml.jackson.databind;
+    requires spring.data.commons;
 
     requires jasperreports;
     exports org.raflab.studsluzbadesktopclient;
-    exports org.raflab.studsluzbadesktopclient.dto;
+    exports org.raflab.studsluzbadesktopclient.dtos;
     exports org.raflab.studsluzbadesktopclient.controllers;
     exports org.raflab.studsluzbadesktopclient.services;
     opens org.raflab.studsluzbadesktopclient.services to spring.core, javafx.fxml;
@@ -26,7 +27,11 @@ module stud_sluzba_desktop_client {
     opens org.raflab.studsluzbadesktopclient.coder to javafx.fxml, spring.beans, spring.context, spring.core;
     exports org.raflab.studsluzbadesktopclient.app;
     opens org.raflab.studsluzbadesktopclient.app to javafx.fxml, spring.beans, spring.context, spring.core;
+    exports org.raflab.studsluzbadesktopclient.utils;
+    opens org.raflab.studsluzbadesktopclient.utils to javafx.fxml, spring.core;
 
     requires java.sql;
     requires java.desktop;
+    requires shared.dtos;
+    requires org.reactivestreams;
 }

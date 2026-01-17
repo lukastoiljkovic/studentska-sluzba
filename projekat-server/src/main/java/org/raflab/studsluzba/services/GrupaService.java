@@ -1,7 +1,7 @@
 package org.raflab.studsluzba.services;
-
+import org.raflab.studsluzba.dtos.*;
 import lombok.RequiredArgsConstructor;
-import org.raflab.studsluzba.controllers.request.GrupaRequest;
+import org.raflab.studsluzba.dtos.*;
 import org.raflab.studsluzba.model.entities.Grupa;
 import org.raflab.studsluzba.model.entities.SkolskaGodina;
 import org.raflab.studsluzba.model.entities.StudijskiProgram;

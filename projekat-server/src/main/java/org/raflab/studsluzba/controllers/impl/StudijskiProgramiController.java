@@ -3,9 +3,7 @@ package org.raflab.studsluzba.controllers.impl;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
-import org.raflab.studsluzba.controllers.request.StudijskiProgramRequest;
-import org.raflab.studsluzba.controllers.response.PredmetResponse;
-import org.raflab.studsluzba.controllers.response.StudijskiProgramResponse;
+import org.raflab.studsluzba.dtos.*;
 import org.raflab.studsluzba.model.entities.StudijskiProgram;
 import org.raflab.studsluzba.services.PredmetService;
 import org.raflab.studsluzba.services.StudijskiProgramiService;

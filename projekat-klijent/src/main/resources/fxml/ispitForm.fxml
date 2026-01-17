@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.raflab.studsluzbadesktopclient.controllers.IspitFormController"
+      spacing="10" style="-fx-padding: 20;">
+
+    <Label text="Novi ispit" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+
+    <Separator/>
+
+    <GridPane hgap="10" vgap="10">
+        <columnConstraints>
+            <ColumnConstraints minWidth="120" prefWidth="120"/>
+            <ColumnConstraints minWidth="300" hgrow="ALWAYS"/>
+        </columnConstraints>
+
+        <Label text="Ispitni rok:" GridPane.rowIndex="0"/>
+        <ComboBox fx:id="ispitniRokCb" GridPane.columnIndex="1" GridPane.rowIndex="0"
+                  prefWidth="300" promptText="Izaberite ispitni rok"/>
+
+        <Label text="Predmet:" GridPane.rowIndex="1"/>
+        <ComboBox fx:id="predmetCb" GridPane.columnIndex="1" GridPane.rowIndex="1"
+                  prefWidth="300" promptText="Izaberite predmet"/>
+
+        <Label text="Nastavnik:" GridPane.rowIndex="2"/>
+        <ComboBox fx:id="nastavnikCb" GridPane.columnIndex="1" GridPane.rowIndex="2"
+                  prefWidth="300" promptText="Izaberite nastavnika"/>
+
+        <Label text="Datum:" GridPane.rowIndex="3"/>
+        <DatePicker fx:id="datumDp" GridPane.columnIndex="1" GridPane.rowIndex="3"
+                    prefWidth="150"/>
+
+        <Label text="Vreme (HH:mm):" GridPane.rowIndex="4"/>
+        <TextField fx:id="vremeTf" GridPane.columnIndex="1" GridPane.rowIndex="4"
+                   prefWidth="100" promptText="09:00"/>
+
+        <Label text="Zaključen:" GridPane.rowIndex="5"/>
+        <CheckBox fx:id="zakljucenCb" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+    </GridPane>
+
+    <Label fx:id="errorLabel" textFill="red" style="-fx-font-weight: bold;"/>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button fx:id="saveBtn" text="Sačuvaj" onAction="#handleSave"
+                style="-fx-background-color: #2ecc71; -fx-text-fill: white;"/>
+        <Button fx:id="cancelBtn" text="Otkaži" onAction="#handleCancel"/>
+    </HBox>
+
+</VBox>

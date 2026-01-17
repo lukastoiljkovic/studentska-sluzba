@@ -1,14 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="CONTROLLER_NAME"
-            prefHeight="400.0" prefWidth="600.0">
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.raflab.studsluzbadesktopclient.controllers.PredmetFormController"
+      spacing="10" style="-fx-padding: 20;">
 
-</AnchorPane>
+    <Label fx:id="programLabel" text="Studijski program"
+           style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+
+    <Separator/>
+
+    <GridPane hgap="10" vgap="10">
+        <columnConstraints>
+            <ColumnConstraints minWidth="120" prefWidth="120"/>
+            <ColumnConstraints minWidth="300" hgrow="ALWAYS"/>
+        </columnConstraints>
+
+        <Label text="Šifra:" GridPane.rowIndex="0"/>
+        <TextField fx:id="sifraTf" GridPane.columnIndex="1" GridPane.rowIndex="0"
+                   promptText="npr. R101"/>
+
+        <Label text="Naziv:" GridPane.rowIndex="1"/>
+        <TextField fx:id="nazivTf" GridPane.columnIndex="1" GridPane.rowIndex="1"
+                   promptText="Naziv predmeta"/>
+
+        <Label text="Opis:" GridPane.rowIndex="2"/>
+        <TextArea fx:id="opisTa" GridPane.columnIndex="1" GridPane.rowIndex="2"
+                  prefRowCount="3" wrapText="true"/>
+
+        <Label text="ESPB:" GridPane.rowIndex="3"/>
+        <TextField fx:id="espbTf" GridPane.columnIndex="1" GridPane.rowIndex="3"
+                   prefWidth="80" promptText="6"/>
+
+        <Label text="Semestar:" GridPane.rowIndex="4"/>
+        <TextField fx:id="semestarTf" GridPane.columnIndex="1" GridPane.rowIndex="4"
+                   prefWidth="80" promptText="1-8"/>
+
+        <Label text="Fond predavanja:" GridPane.rowIndex="5"/>
+        <TextField fx:id="predavanjaTf" GridPane.columnIndex="1" GridPane.rowIndex="5"
+                   prefWidth="80" promptText="30"/>
+
+        <Label text="Fond vežbi:" GridPane.rowIndex="6"/>
+        <TextField fx:id="vezbeTf" GridPane.columnIndex="1" GridPane.rowIndex="6"
+                   prefWidth="80" promptText="30"/>
+
+        <Label text="Obavezan:" GridPane.rowIndex="7"/>
+        <CheckBox fx:id="obavezanCb" GridPane.columnIndex="1" GridPane.rowIndex="7"/>
+    </GridPane>
+
+    <Label fx:id="errorLabel" textFill="red" style="-fx-font-weight: bold;"/>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button fx:id="saveBtn" text="Sačuvaj" onAction="#handleSave"
+                style="-fx-background-color: #2ecc71; -fx-text-fill: white;"/>
+        <Button fx:id="cancelBtn" text="Otkaži" onAction="#handleCancel"/>
+    </HBox>
+
+</VBox>

@@ -91,7 +91,7 @@ public class MainView {
             stage.setTitle(title);
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setScene(modalScene);
-            stage.showAndWait();
+            stage.show();
 
             return loader.getController();
         } catch (IOException e) {
@@ -99,4 +99,5 @@ public class MainView {
             return null;
         }
     }
+
 }

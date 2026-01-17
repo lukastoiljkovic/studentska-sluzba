@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.raflab.studsluzbadesktopclient.controllers.PredmetListProgramController"
+      spacing="10" style="-fx-padding: 15;">
+
+    <Label fx:id="programLabel" text="Studijski program"
+           style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+
+    <TableView fx:id="predmetTable" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="sifraCol" text="Šifra" prefWidth="80"/>
+            <TableColumn fx:id="nazivCol" text="Naziv" prefWidth="250"/>
+            <TableColumn fx:id="semestarCol" text="Semestar" prefWidth="80"/>
+            <TableColumn fx:id="espbCol" text="ESPB" prefWidth="60"/>
+            <TableColumn fx:id="obavezanCol" text="Obavezan" prefWidth="80"/>
+            <TableColumn fx:id="predavanjaCol" text="Predavanja" prefWidth="90"/>
+            <TableColumn fx:id="vezbeCol" text="Vežbe" prefWidth="70"/>
+        </columns>
+    </TableView>
+
+    <Separator/>
+
+    <Label text="Prosečna ocena na predmetu" style="-fx-font-weight: bold;"/>
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Od godine:"/>
+        <TextField fx:id="fromYearTf" prefWidth="80" promptText="2020"/>
+        <Label text="Do godine:"/>
+        <TextField fx:id="toYearTf" prefWidth="80" promptText="2025"/>
+        <Button fx:id="prosekBtn" text="Prikaži prosek" onAction="#handleProsecnaOcena"/>
+        <Button fx:id="stampaBtn" text="Štampaj izveštaj" onAction="#handleStampaProseka"/>
+    </HBox>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="Zatvori" onAction="#handleRefresh"/>
+    </HBox>
+
+</VBox>

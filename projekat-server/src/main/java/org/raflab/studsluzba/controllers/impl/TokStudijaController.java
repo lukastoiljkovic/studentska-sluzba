@@ -2,8 +2,7 @@
 package org.raflab.studsluzba.controllers.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.raflab.studsluzba.controllers.request.TokStudijaRequest;
-import org.raflab.studsluzba.controllers.response.TokStudijaResponse;
+import org.raflab.studsluzba.dtos.*;
 import org.raflab.studsluzba.services.TokStudijaService;
 import org.springframework.web.bind.annotation.*;
 

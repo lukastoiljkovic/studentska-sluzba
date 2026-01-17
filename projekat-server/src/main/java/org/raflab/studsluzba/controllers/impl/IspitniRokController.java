@@ -1,8 +1,7 @@
 package org.raflab.studsluzba.controllers.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.raflab.studsluzba.controllers.request.IspitniRokRequest;
-import org.raflab.studsluzba.controllers.response.IspitniRokResponse;
+import org.raflab.studsluzba.dtos.*;
 import org.raflab.studsluzba.model.entities.IspitniRok;
 import org.raflab.studsluzba.services.IspitniRokService;
 import org.raflab.studsluzba.utils.Converters;

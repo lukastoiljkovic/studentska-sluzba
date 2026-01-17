@@ -1,8 +1,7 @@
 package org.raflab.studsluzba.services;
-
+import org.raflab.studsluzba.dtos.*;
 import lombok.RequiredArgsConstructor;
-import org.raflab.studsluzba.controllers.request.DrziPredmetNewRequest;
-import org.raflab.studsluzba.controllers.request.DrziPredmetRequest;
+import org.raflab.studsluzba.dtos.*;
 import org.raflab.studsluzba.model.entities.DrziPredmet;
 import org.raflab.studsluzba.model.entities.Nastavnik;
 import org.raflab.studsluzba.model.entities.Predmet;

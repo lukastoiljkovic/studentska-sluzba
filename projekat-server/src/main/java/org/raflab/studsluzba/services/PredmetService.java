@@ -1,8 +1,6 @@
 package org.raflab.studsluzba.services;
 
 import lombok.AllArgsConstructor;
-import org.raflab.studsluzba.controllers.request.PredmetRequest;
-import org.raflab.studsluzba.controllers.response.PredmetResponse;
 import org.raflab.studsluzba.model.entities.Predmet;
 import org.raflab.studsluzba.model.entities.StudijskiProgram;
 import org.raflab.studsluzba.repositories.PolozenPredmetRepository;
@@ -17,7 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-
+import org.raflab.studsluzba.dtos.*;
 import java.util.List;
 import java.util.Optional;
 

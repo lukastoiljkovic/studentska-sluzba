@@ -3,8 +3,7 @@ package org.raflab.studsluzba.controllers.impl;
 import lombok.AllArgsConstructor;
 import org.raflab.studsluzba.model.entities.SrednjaSkola;
 import org.raflab.studsluzba.services.SrednjaSkolaService;
-import org.raflab.studsluzba.controllers.request.SrednjaSkolaRequest;
-import org.raflab.studsluzba.controllers.response.SrednjaSkolaResponse;
+import org.raflab.studsluzba.dtos.*;
 import org.raflab.studsluzba.utils.Converters;
 import org.springframework.web.bind.annotation.*;
 

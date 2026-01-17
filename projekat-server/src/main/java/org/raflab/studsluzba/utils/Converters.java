@@ -2,14 +2,14 @@ package org.raflab.studsluzba.utils;
 
 import lombok.Data;
 
-import org.raflab.studsluzba.controllers.request.*;
-import org.raflab.studsluzba.controllers.response.*;
+import org.raflab.studsluzba.dtos.*;
+import org.raflab.studsluzba.dtos.enums.VrstaSkole;
+import org.raflab.studsluzba.dtos.enums.VrstaVisokoskolskeUstanove;
 import org.raflab.studsluzba.model.entities.*;
 import org.raflab.studsluzba.model.entities.IspitIzlazak;
-import org.raflab.studsluzba.controllers.response.IspitniRokResponse;
 import org.raflab.studsluzba.model.entities.IspitniRok;
 import org.raflab.studsluzba.repositories.StudijskiProgramRepository;
-
+import org.raflab.studsluzba.dtos.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -19,6 +19,22 @@ import java.util.stream.Collectors;
 
 public class Converters {
     // konvertovanje izmedju entity, request i response objekata
+
+    public static VisokoskolskaUstanovaResponse toVisokoskolskaUstanovaResponse(VisokoskolskaUstanova v) {
+        if (v == null) return null;
+        VisokoskolskaUstanovaResponse r = new VisokoskolskaUstanovaResponse();
+        r.setId(v.getId());
+        r.setNaziv(v.getNaziv());
+        r.setMesto(v.getMesto());
+
+        // Mapiranje enum-a
+        if (v.getVrsta() != null) {
+            r.setVrsta(VrstaVisokoskolskeUstanove.valueOf(v.getVrsta().name()));
+        }
+
+        return r;
+    }
+
 
     public static Nastavnik toNastavnik(NastavnikRequest nastavnikRequest) {
         Nastavnik nastavnik = new Nastavnik();
@@ -214,6 +230,26 @@ public class Converters {
         return lista;
     }
 
+    // ---------- UPLATA ----------
+
+    public static UplataResponse toUplataResponse(Uplata u) {
+        if (u == null) return null;
+
+        UplataResponse r = new UplataResponse();
+        r.setId((long) u.getId());
+        r.setDatum(u.getDatum());
+        r.setIznosEUR(u.getIznosEUR());
+        r.setIznosRSD(u.getIznosRSD());
+        r.setKurs(u.getKurs());
+        return r;
+    }
+
+    public static List<UplataResponse> toUplataResponseList(List<Uplata> lista) {
+        return lista.stream()
+                .map(Converters::toUplataResponse)
+                .collect(Collectors.toList());
+    }
+    
     // ---------- ISPIT IZLAZAK ----------
 
     public static IspitIzlazakResponse toIspitIzlazakResponse(IspitIzlazak e) {
@@ -322,12 +358,37 @@ public class Converters {
         r.setOcena(pp.getOcena());
         r.setPriznat(pp.isPriznat());
 
-        if(pp.getStudentIndeks() != null) r.setStudentIndeksId(pp.getStudentIndeks().getId());
-        if(pp.getPredmet() != null) r.setPredmetId(pp.getPredmet().getId());
-        if(pp.getIspitIzlazak() != null) r.setIspitIzlazakId(pp.getIspitIzlazak().getId());
+        if (pp.getStudentIndeks() != null) r.setStudentIndeksId(pp.getStudentIndeks().getId());
+
+        if (pp.getPredmet() != null) {
+            r.setPredmetId(pp.getPredmet().getId());
+            r.setPredmetSifra(pp.getPredmet().getSifra());
+            r.setPredmetNaziv(pp.getPredmet().getNaziv());
+            r.setEspb(pp.getPredmet().getEspb());
+            r.setSemestar(pp.getPredmet().getSemestar());
+        }
+
+        if (pp.getIspitIzlazak() != null) {
+            r.setIspitIzlazakId(pp.getIspitIzlazak().getId());
+
+            if (pp.getIspitIzlazak().getIspitPrijava() != null
+                    && pp.getIspitIzlazak().getIspitPrijava().getIspit() != null
+                    && pp.getIspitIzlazak().getIspitPrijava().getIspit().getDatumVremePocetka() != null) {
+
+                r.setDatumPolaganja(
+                        pp.getIspitIzlazak()
+                                .getIspitPrijava()
+                                .getIspit()
+                                .getDatumVremePocetka()
+                                .toLocalDate()
+                );
+            }
+        }
+
 
         return r;
     }
+
 
     public static List<PolozenPredmetResponse> toPolozenPredmetResponseList(List<PolozenPredmet> lista) {
         return lista.stream()
@@ -552,7 +613,11 @@ public class Converters {
         SrednjaSkola ss = new SrednjaSkola();
         ss.setNaziv(req.getNaziv());
         ss.setMesto(req.getMesto());
-        ss.setVrsta(req.getVrsta());
+
+        if (req.getVrsta() != null) {
+            ss.setVrsta(req.getVrsta() == null ? null : SrednjaSkola.VrstaSkole.valueOf(req.getVrsta().name()));
+        }
+
         return ss;
     }
 
@@ -561,9 +626,14 @@ public class Converters {
         resp.setId(ss.getId());
         resp.setNaziv(ss.getNaziv());
         resp.setMesto(ss.getMesto());
-        resp.setVrsta(ss.getVrsta());
+
+        if (ss.getVrsta() != null) {
+            resp.setVrsta(ss.getVrsta() == null ? null : org.raflab.studsluzba.dtos.enums.VrstaSkole.valueOf(ss.getVrsta().name()));
+        }
+
         return resp;
     }
+
 
     public static List<SrednjaSkolaResponse> toSrednjaSkolaResponseList(List<SrednjaSkola> lista){
         return lista.stream().map(Converters::toSrednjaSkolaResponse).collect(Collectors.toList());
@@ -656,16 +726,6 @@ public class Converters {
                 .collect(Collectors.toList());
     }
 
-    // ---- VISOKOSKOLSKA USTANOVA ----
-    public static VisokoskolskaUstanovaResponse toVisokoskolskaUstanovaResponse(VisokoskolskaUstanova v) {
-        if (v == null) return null;
-        VisokoskolskaUstanovaResponse r = new VisokoskolskaUstanovaResponse();
-        r.setId(v.getId());
-        r.setNaziv(v.getNaziv());
-        r.setMesto(v.getMesto());
-        r.setVrsta(v.getVrsta());
-        return r;
-    }
 
     public static java.util.List<VisokoskolskaUstanovaResponse> toVisokoskolskaUstanovaResponseList(
             java.util.List<VisokoskolskaUstanova> lista) {

@@ -1,8 +1,7 @@
 package org.raflab.studsluzba.services;
 
 import lombok.AllArgsConstructor;
-import org.raflab.studsluzba.controllers.response.StudentIndeksResponse;
-import org.raflab.studsluzba.model.dtos.StudentDTO;
+import org.raflab.studsluzba.dtos.*;
 import org.raflab.studsluzba.model.entities.StudentIndeks;
 import org.raflab.studsluzba.model.entities.StudentPodaci;
 import org.raflab.studsluzba.utils.EntityMappers;
@@ -20,21 +19,31 @@ public class StudentSearchService {
     private final StudentIndeksService studentIndeksService;
     private final EntityMappers entityMappers;
 
-    public Page<StudentDTO> search(@RequestParam(required = false) String ime,
-                                   @RequestParam (required = false) String prezime,
-                                   @RequestParam (required = false) String studProgram,
-                                   @RequestParam (required = false) Integer godina,
-                                   @RequestParam (required = false) Integer broj,
-                                   @RequestParam(defaultValue = "0") Integer page,
-                                   @RequestParam(defaultValue = "10") Integer size) {
+    public Page<StudentDTO> search(String ime,
+                                   String prezime,
+                                   String studProgram,
+                                   Integer godina,
+                                   Integer broj,
+                                   Integer page,
+                                   Integer size) {
 
-        if(studProgram==null && godina == null && broj==null) { // pretrazivanje studenata bez indeksa
-            Page<StudentPodaci> spList = studentPodaciService.findStudent(ime, prezime, PageRequest.of(page, size, Sort.by("id").descending()));
-            return spList.map(EntityMappers::fromStudentPodaciToDTO);
-        }
-        Page<StudentIndeks> siList = studentIndeksService.findStudentIndeks(ime, prezime, studProgram, godina, broj, PageRequest.of(page, size, Sort.by("id").descending()));
+        String imePattern = ime != null ? "%" + ime.toLowerCase() + "%" : null;
+        String prezimePattern = prezime != null ? "%" + prezime.toLowerCase() + "%" : null;
+        String studProgramPattern = studProgram != null ? "%" + studProgram.toLowerCase() + "%" : null;
+
+        Page<StudentIndeks> siList = studentIndeksService.findStudentIndeks(
+                imePattern,
+                prezimePattern,
+                studProgramPattern,
+                godina,
+                broj,
+                PageRequest.of(page, size, Sort.by("id").descending())
+        );
+
         return siList.map(EntityMappers::fromStudentIndeksToDTO);
     }
+
+
 
 
     public StudentIndeksResponse fastSearch(String indeksShort) {

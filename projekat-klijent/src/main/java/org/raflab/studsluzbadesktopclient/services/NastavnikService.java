@@ -1,7 +1,7 @@
 package org.raflab.studsluzbadesktopclient.services;
 
 import lombok.RequiredArgsConstructor;
-import org.raflab.studsluzbadesktopclient.dto.NastavnikDTO;
+import org.raflab.studsluzba.dtos.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
@@ -13,14 +13,14 @@ public class NastavnikService {
 
     private final WebClient webClient;
 
-    public Flux<NastavnikDTO> getAll() {
+    public Flux<NastavnikResponse> getAll() {
         return webClient.get()
                 .uri("/api/nastavnik/all")
                 .retrieve()
-                .bodyToFlux(NastavnikDTO.class);
+                .bodyToFlux(NastavnikResponse.class);
     }
 
-    public Flux<NastavnikDTO> search(String ime, String prezime) {
+    public Flux<NastavnikResponse> search(String ime, String prezime) {
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/api/nastavnik/search")
@@ -28,17 +28,17 @@ public class NastavnikService {
                         .queryParam("prezime", prezime)
                         .build())
                 .retrieve()
-                .bodyToFlux(NastavnikDTO.class);
+                .bodyToFlux(NastavnikResponse.class);
     }
 
-    public Mono<NastavnikDTO> getById(Long id) {
+    public Mono<NastavnikResponse> getById(Long id) {
         return webClient.get()
                 .uri("/api/nastavnik/{id}", id)
                 .retrieve()
-                .bodyToMono(NastavnikDTO.class);
+                .bodyToMono(NastavnikResponse.class);
     }
 
-    public Mono<Long> save(NastavnikDTO nastavnik) {
+    public Mono<Long> save(NastavnikResponse nastavnik) {
         return webClient.post()
                 .uri("/api/nastavnik/add")
                 .bodyValue(nastavnik)

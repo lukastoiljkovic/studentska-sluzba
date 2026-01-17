@@ -1,8 +1,7 @@
 package org.raflab.studsluzba.services;
 
 import lombok.AllArgsConstructor;
-import org.raflab.studsluzba.controllers.request.ObnovaGodineRequest;
-import org.raflab.studsluzba.controllers.response.ObnovaGodineResponse;
+import org.raflab.studsluzba.dtos.*;
 import org.raflab.studsluzba.model.entities.*;
 import org.raflab.studsluzba.repositories.*;
 import org.raflab.studsluzba.utils.Converters;

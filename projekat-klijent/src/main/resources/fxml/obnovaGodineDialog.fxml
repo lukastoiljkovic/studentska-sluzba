@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.raflab.studsluzbadesktopclient.controllers.ObnovaGodineDialogController"
+            prefWidth="800" prefHeight="600">
+
+    <top>
+        <VBox spacing="10" style="-fx-padding: 20;">
+            <Label text="Obnova Godine" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+
+            <HBox spacing="20">
+                <VBox spacing="5">
+                    <Label text="Student:"/>
+                    <Label fx:id="studentLabel" style="-fx-font-weight: bold;"/>
+                </VBox>
+
+                <VBox spacing="5">
+                    <Label text="Indeks:"/>
+                    <Label fx:id="indeksLabel" style="-fx-font-weight: bold;"/>
+                </VBox>
+
+                <VBox spacing="5">
+                    <Label fx:id="espbLabel"/>
+                </VBox>
+            </HBox>
+
+            <Separator/>
+
+            <GridPane hgap="10" vgap="10">
+                <Label text="Školska godina:*" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                <ComboBox fx:id="skolskaGodinaCb" prefWidth="200" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                <Label text="Godina studija:*" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                <ComboBox fx:id="godinaStudijaCb" prefWidth="200" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                <Label text="Datum:*" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                <DatePicker fx:id="datumDp" prefWidth="200" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+                <Label text="Napomena:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                <TextArea fx:id="napomenaTa" prefWidth="400" prefHeight="60" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+            </GridPane>
+        </VBox>
+    </top>
+
+    <center>
+        <SplitPane dividerPositions="0.3, 0.65">
+
+            <!-- NEPOLOŽENI PREDMETI (automatski) -->
+            <VBox spacing="10" style="-fx-padding: 10;">
+                <Label text="Nepoloženi predmeti (automatski uključeni)" style="-fx-font-weight: bold;"/>
+                <ListView fx:id="nepolozeniListView" VBox.vgrow="ALWAYS"/>
+            </VBox>
+
+            <!-- DOSTUPNI PREDMETI (iz naredne godine) -->
+            <VBox spacing="10" style="-fx-padding: 10;">
+                <Label text="Dostupni predmeti (naredna godina)" style="-fx-font-weight: bold;"/>
+                <ListView fx:id="dostupniPredmetiListView" VBox.vgrow="ALWAYS"/>
+                <HBox spacing="10" alignment="CENTER">
+                    <Button fx:id="dodajBtn" text="Dodaj >>" onAction="#handleDodaj"/>
+                    <Button fx:id="ukloniBtn" text="<< Ukloni" onAction="#handleUkloni"/>
+                </HBox>
+            </VBox>
+
+            <!-- ODABRANI PREDMETI -->
+            <VBox spacing="10" style="-fx-padding: 10;">
+                <Label text="Odabrani predmeti" style="-fx-font-weight: bold;"/>
+                <ListView fx:id="odabraniPredmetiListView" VBox.vgrow="ALWAYS"/>
+                <Label fx:id="ukupnoEspbLabel" style="-fx-font-weight: bold;"/>
+            </VBox>
+
+        </SplitPane>
+    </center>
+
+    <bottom>
+        <VBox spacing="10" style="-fx-padding: 20;">
+            <Label fx:id="errorLabel" style="-fx-text-fill: red;"/>
+            <HBox spacing="10" alignment="CENTER_RIGHT">
+                <Button fx:id="saveBtn" text="Sačuvaj" onAction="#handleSave" styleClass="success-button"/>
+                <Button fx:id="cancelBtn" text="Odustani" onAction="#handleCancel"/>
+            </HBox>
+        </VBox>
+    </bottom>
+
+</BorderPane>

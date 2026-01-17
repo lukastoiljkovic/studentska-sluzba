@@ -1,7 +1,7 @@
 package org.raflab.studsluzba.services;
 
 import lombok.AllArgsConstructor;
-import org.raflab.studsluzba.controllers.response.StudentPodaciResponse;
+import org.raflab.studsluzba.dtos.*;
 import org.raflab.studsluzba.model.entities.SrednjaSkola;
 import org.raflab.studsluzba.model.entities.StudentPodaci;
 import org.raflab.studsluzba.repositories.SrednjaSkolaRepository;
@@ -12,7 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-
+import org.raflab.studsluzba.dtos.*;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;

@@ -1,9 +1,7 @@
 package org.raflab.studsluzba.controllers.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.raflab.studsluzba.controllers.request.PolozenPredmetRequest;
-import org.raflab.studsluzba.controllers.response.NepolozenPredmetResponse;
-import org.raflab.studsluzba.controllers.response.PolozenPredmetResponse;
+import org.raflab.studsluzba.dtos.*;
 import org.raflab.studsluzba.model.entities.PolozenPredmet;
 import org.raflab.studsluzba.services.PolozenPredmetService;
 import org.raflab.studsluzba.utils.Converters;
@@ -17,29 +15,33 @@ import java.util.Optional;
 @CrossOrigin
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(path="/api/predmet/polozen")
+@RequestMapping(path = "/api/predmet/polozen")
 public class PolozenPredmetController {
 
     private final PolozenPredmetService polozenPredmetService;
 
-    /// - selekcija svih položenih ispita za broj indeksa studenta, paginirano
+    // selekcija svih položenih ispita za broj indeksa studenta, paginirano
     @GetMapping("/polozeni/{studentIndeksId}")
-    public Page<PolozenPredmetResponse> getPolozeni(
+    public PageResponse<PolozenPredmetResponse> getPolozeni(
             @PathVariable Long studentIndeksId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        return polozenPredmetService.getPolozeniIspiti(studentIndeksId, PageRequest.of(page, size));
+        Page<PolozenPredmetResponse> p = polozenPredmetService
+                .getPolozeniIspiti(studentIndeksId, PageRequest.of(page, size));
+        return toPageResponse(p, page, size);
     }
 
-    /// - selekcija svih nepoloženih ispita za broj indeksa studenta, paginirano
+    // selekcija svih nepoloženih ispita za broj indeksa studenta, paginirano
     @GetMapping("/nepolozeni/{studentIndeksId}")
-    public Page<NepolozenPredmetResponse> getNepolozeni(
+    public PageResponse<NepolozenPredmetResponse> getNepolozeni(
             @PathVariable Long studentIndeksId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        return polozenPredmetService.getNepolozeniIspiti(studentIndeksId, PageRequest.of(page, size));
+        Page<NepolozenPredmetResponse> p = polozenPredmetService
+                .getNepolozeniIspiti(studentIndeksId, PageRequest.of(page, size));
+        return toPageResponse(p, page, size);
     }
 
     @PostMapping("/add")
@@ -61,5 +63,17 @@ public class PolozenPredmetController {
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         polozenPredmetService.deleteById(id);
+    }
+
+    // helper: pretvara Spring Page u tvoj PageResponse (POJO)
+    private <T> PageResponse<T> toPageResponse(Page<T> p, int page, int size) {
+        PageResponse<T> dto = new PageResponse<>();
+        dto.setContent(p.getContent());
+        dto.setPage(page);
+        dto.setSize(size);
+        dto.setTotalElements(p.getTotalElements());
+        dto.setTotalPages(p.getTotalPages());
+        dto.setLast(p.isLast());
+        return dto;
     }
 }

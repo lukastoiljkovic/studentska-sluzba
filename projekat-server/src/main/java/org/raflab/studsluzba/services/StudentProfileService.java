@@ -1,13 +1,13 @@
 package org.raflab.studsluzba.services;
 
 import lombok.AllArgsConstructor;
-import org.raflab.studsluzba.model.dtos.SlusaPredmetDTO;
-import org.raflab.studsluzba.model.dtos.StudentIndeksDTO;
+import org.raflab.studsluzba.dtos.SlusaPredmetDTO;
+import org.raflab.studsluzba.dtos.StudentIndeksDTO;
 import org.raflab.studsluzba.model.entities.PolozenPredmet;
 import org.raflab.studsluzba.model.entities.SlusaPredmet;
 import org.raflab.studsluzba.model.entities.StudentIndeks;
-import org.raflab.studsluzba.model.dtos.StudentProfileDTO;
-import org.raflab.studsluzba.model.dtos.StudentWebProfileDTO;
+import org.raflab.studsluzba.dtos.StudentProfileDTO;
+import org.raflab.studsluzba.dtos.StudentWebProfileDTO;
 import org.raflab.studsluzba.repositories.PolozenPredmetRepository;
 import org.raflab.studsluzba.repositories.SlusaPredmetRepository;
 import org.raflab.studsluzba.repositories.StudentIndeksRepository;

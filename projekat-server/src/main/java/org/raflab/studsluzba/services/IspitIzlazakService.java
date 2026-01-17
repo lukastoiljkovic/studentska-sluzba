@@ -1,7 +1,6 @@
 package org.raflab.studsluzba.services;
-
+import org.raflab.studsluzba.dtos.*;
 import lombok.RequiredArgsConstructor;
-import org.raflab.studsluzba.controllers.request.IspitIzlazakRequest;
 import org.raflab.studsluzba.model.entities.IspitIzlazak;
 import org.raflab.studsluzba.model.entities.IspitPrijava;
 import org.raflab.studsluzba.model.entities.PolozenPredmet;

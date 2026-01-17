@@ -1,8 +1,7 @@
 package org.raflab.studsluzba.controllers.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.raflab.studsluzba.controllers.request.GrupaRequest;
-import org.raflab.studsluzba.controllers.response.GrupaResponse;
+import org.raflab.studsluzba.dtos.*;
 import org.raflab.studsluzba.model.entities.Grupa;
 import org.raflab.studsluzba.services.GrupaService;
 import org.raflab.studsluzba.utils.Converters;

@@ -1,7 +1,7 @@
 package org.raflab.studsluzba.controllers.impl;
 
 import lombok.AllArgsConstructor;
-import org.raflab.studsluzba.controllers.request.DrziPredmetRequest;
+import org.raflab.studsluzba.dtos.*;
 import org.raflab.studsluzba.services.DrziPredmetService;
 import org.springframework.web.bind.annotation.*;
 

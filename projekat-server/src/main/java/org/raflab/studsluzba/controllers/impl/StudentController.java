@@ -3,15 +3,7 @@ package org.raflab.studsluzba.controllers.impl;
 import java.util.*;
 
 import lombok.RequiredArgsConstructor;
-import org.raflab.studsluzba.controllers.request.SrednjaSkolaRequest;
-import org.raflab.studsluzba.controllers.request.StudentIndeksRequest;
-import org.raflab.studsluzba.controllers.request.StudentPodaciRequest;
-import org.raflab.studsluzba.controllers.response.StudentIndeksResponse;
-import org.raflab.studsluzba.controllers.response.StudentPodaciResponse;
-import org.raflab.studsluzba.controllers.response.UpisGodineResponse;
-import org.raflab.studsluzba.model.dtos.StudentDTO;
-import org.raflab.studsluzba.model.dtos.StudentProfileDTO;
-import org.raflab.studsluzba.model.dtos.StudentWebProfileDTO;
+import org.raflab.studsluzba.dtos.*;
 import org.raflab.studsluzba.model.entities.SkolskaGodina;
 import org.raflab.studsluzba.model.entities.SrednjaSkola;
 import org.raflab.studsluzba.model.entities.StudentIndeks;
@@ -81,7 +73,7 @@ public class StudentController {
         return upisGodineService.findUpisaneGodine(studProgramOznaka, godina, broj);
     }
 
-    @PostMapping("/po-srednjoj-skoli")
+    @GetMapping("/po-srednjoj-skoli")
     public List<StudentPodaciResponse> getStudentiPoSrednjojSkoli(@RequestParam String naziv) {
         Optional<SrednjaSkola> skolaOpt = srednjaSkolaService.findByNaziv(naziv);
 

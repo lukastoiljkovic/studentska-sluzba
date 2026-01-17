@@ -51,6 +51,7 @@ public class StudentPodaci {
 
     @ManyToOne
     private SrednjaSkola srednjaSkola; // iz šifarnika srednjih škola
+
     private Double uspehSrednjaSkola;
     private Double uspehPrijemni;
 

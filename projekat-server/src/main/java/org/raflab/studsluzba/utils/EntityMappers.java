@@ -1,10 +1,8 @@
 package org.raflab.studsluzba.utils;
 
-import org.raflab.studsluzba.controllers.response.StudentIndeksResponse;
-import org.raflab.studsluzba.controllers.response.StudentPodaciResponse;
+import org.raflab.studsluzba.dtos.*;
 import org.raflab.studsluzba.model.entities.StudentIndeks;
 import org.raflab.studsluzba.model.entities.StudentPodaci;
-import org.raflab.studsluzba.model.dtos.StudentDTO;
 import org.springframework.stereotype.Component;
 
 @Component
