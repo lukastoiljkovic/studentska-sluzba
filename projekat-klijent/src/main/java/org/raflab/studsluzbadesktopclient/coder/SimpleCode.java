@@ -9,7 +9,6 @@ public class SimpleCode extends AbstractCode {
 
     public SimpleCode(String code) {
         super(code);
-        // TODO Auto-generated constructor stub
     }
 
     @Override

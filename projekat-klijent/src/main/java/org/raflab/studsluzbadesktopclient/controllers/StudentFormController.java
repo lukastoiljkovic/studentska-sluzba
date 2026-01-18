@@ -4,6 +4,7 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.util.StringConverter;
 import lombok.RequiredArgsConstructor;
 import org.raflab.studsluzba.dtos.*;
 import org.raflab.studsluzbadesktopclient.app.MainView;
@@ -14,6 +15,7 @@ import org.raflab.studsluzbadesktopclient.services.SifarniciService;
 import org.raflab.studsluzbadesktopclient.services.StudentService;
 import org.raflab.studsluzbadesktopclient.utils.AlertHelper;
 import org.raflab.studsluzbadesktopclient.utils.ValidationHelper;
+import org.raflab.studsluzbadesktopclient.app.GlobalExceptionHandler;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -25,7 +27,7 @@ public class StudentFormController {
     private final StudentService studentService;
     private final SifarniciService sifarniciService;
     private final MainView mainView;
-    private final CoderFactory coderFactory; // ⭐ DODAJ OVO
+    private final CoderFactory coderFactory;
 
     // LIČNI PODACI
     @FXML private TextField imeTf;
@@ -55,7 +57,7 @@ public class StudentFormController {
     @FXML private TextField licnuKartuIzdaoTf;
 
     // OBRAZOVANJE
-    @FXML private ComboBox<SimpleCode> srednjaSkolaCb; // ⭐ IZMENJENO - sad koristi SimpleCode
+    @FXML private ComboBox<SimpleCode> srednjaSkolaCb;
     @FXML private TextField uspehSrednjaSkolaTf;
     @FXML private TextField uspehPrijemniTf;
 
@@ -69,12 +71,15 @@ public class StudentFormController {
 
     @FXML
     public void initialize() {
+        System.out.println("✅ StudentFormController initialized!");
         setupValidation();
         loadSifarnici();
         setupDefaultValues();
+        setupComboBoxConverters();
     }
 
     private void setupValidation() {
+        // JMBG - samo cifre, max 13
         jmbgTf.textProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null && !newVal.matches("\\d*")) {
                 jmbgTf.setText(oldVal);
@@ -84,6 +89,7 @@ public class StudentFormController {
             }
         });
 
+        // Email validacija
         emailFakultetskiTf.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (!newVal && !ValidationHelper.isEmpty(emailFakultetskiTf)) {
                 if (!ValidationHelper.isValidEmail(emailFakultetskiTf.getText())) {
@@ -95,22 +101,45 @@ public class StudentFormController {
         });
     }
 
+    private void setupComboBoxConverters() {
+        // StringConverter za StudijskiProgram
+        studProgramCb.setConverter(new StringConverter<StudijskiProgramResponse>() {
+            @Override
+            public String toString(StudijskiProgramResponse program) {
+                if (program == null) return "";
+                return program.getOznaka() + " - " + program.getNaziv();
+            }
+
+            @Override
+            public StudijskiProgramResponse fromString(String string) {
+                return null;
+            }
+        });
+    }
+
     private void loadSifarnici() {
-        // ⭐ IZMENJENO - Učitaj srednje škole iz CODER-a umesto sa servera
+        System.out.println("📚 Loading šifarnici...");
+
+        // Srednje škole iz CODER-a
         var srednjeSkoleCoder = coderFactory.getSimpleCoder(CoderType.SREDNJA_SKOLA);
         if (srednjeSkoleCoder != null) {
             srednjaSkolaCb.setItems(FXCollections.observableArrayList(srednjeSkoleCoder.getCodes()));
+            System.out.println("✅ Loaded " + srednjeSkoleCoder.getCodes().size() + " srednjih škola");
         }
 
-        // Učitaj studijske programe
-        sifarniciService.getAllStudijskiProgrami()
-                .collectList()
-                .subscribe(
-                        programi -> Platform.runLater(() ->
-                                studProgramCb.setItems(FXCollections.observableArrayList(programi))
-                        ),
-                        error -> AlertHelper.showException("Greška pri učitavanju studijskih programa", (Exception) error)
-                );
+        // Studijski programi sa servera
+        GlobalExceptionHandler.wrapWithErrorHandling(
+                sifarniciService.getAllStudijskiProgrami().collectList()
+        ).subscribe(
+                programi -> Platform.runLater(() -> {
+                    studProgramCb.setItems(FXCollections.observableArrayList(programi));
+                    System.out.println("✅ Loaded " + programi.size() + " studijskih programa");
+                }),
+                error -> {
+                    System.err.println("❌ Failed to load studijski programi: " + error.getMessage());
+                    AlertHelper.showException("Greška pri učitavanju studijskih programa", (Exception) error);
+                }
+        );
 
         // Načini finansiranja
         nacinFinansiranjaCb.setItems(FXCollections.observableArrayList(
@@ -128,7 +157,8 @@ public class StudentFormController {
 
     @FXML
     public void handleSave() {
-        // Validacija
+        System.out.println("💾 Saving student...");
+
         String validationError = validateForm();
         if (validationError != null) {
             errorLabel.setText(validationError);
@@ -136,41 +166,36 @@ public class StudentFormController {
             return;
         }
 
-        // Kreiranje DTO objekta za StudentPodaci
         StudentPodaciResponse podaci = createStudentPodaciDTO();
 
         errorLabel.setText("Čuvanje u toku...");
         saveBtn.setDisable(true);
 
-        // Prvo sačuvaj osnovne podatke
-        studentService.saveStudentPodaci(podaci)
-                .subscribe(
-                        studentId -> {
-                            // Zatim sačuvaj indeks
+        GlobalExceptionHandler.wrapWithErrorHandling(
+                studentService.saveStudentPodaci(podaci)
+                        .flatMap(studentId -> {
+                            System.out.println("✅ Student saved with ID: " + studentId);
                             StudentIndeksRequest indeks = createStudentIndeksDTO(studentId);
-                            studentService.saveIndeks(indeks)
-                                    .subscribe(
-                                            indeksId -> Platform.runLater(() -> {
-                                                AlertHelper.showInfo("Uspeh",
-                                                        "Student je uspešno sačuvan!\nID: " + studentId +
-                                                                "\nIndeks ID: " + indeksId);
-                                                handleClear();
-                                                errorLabel.setText("");
-                                                saveBtn.setDisable(false);
-                                            }),
-                                            error -> Platform.runLater(() -> {
-                                                AlertHelper.showException("Greška pri čuvanju indeksa", (Exception) error);
-                                                errorLabel.setText("Greška pri čuvanju indeksa");
-                                                saveBtn.setDisable(false);
-                                            })
-                                    );
-                        },
-                        error -> Platform.runLater(() -> {
-                            AlertHelper.showException("Greška pri čuvanju", (Exception) error);
-                            errorLabel.setText("Greška pri čuvanju");
-                            saveBtn.setDisable(false);
+                            return studentService.saveIndeks(indeks)
+                                    .map(indeksId -> new SaveResult(studentId, indeksId));
                         })
-                );
+        ).subscribe(
+                result -> Platform.runLater(() -> {
+                    System.out.println("✅ Complete! StudentID=" + result.studentId + ", IndeksID=" + result.indeksId);
+                    AlertHelper.showInfo("Uspeh",
+                            "Student je uspešno sačuvan!\n\n" +
+                                    "Student ID: " + result.studentId + "\n" +
+                                    "Indeks ID: " + result.indeksId);
+                    handleClear();
+                    errorLabel.setText("");
+                    saveBtn.setDisable(false);
+                }),
+                error -> Platform.runLater(() -> {
+                    System.err.println("❌ Save failed: " + error.getMessage());
+                    errorLabel.setText("Greška pri čuvanju");
+                    saveBtn.setDisable(false);
+                })
+        );
     }
 
     private String validateForm() {
@@ -218,10 +243,9 @@ public class StudentFormController {
         dto.setBrojLicneKarte(ValidationHelper.getTextOrNull(brojLicneKarteTf));
         dto.setLicnuKartuIzdao(ValidationHelper.getTextOrNull(licnuKartuIzdaoTf));
 
-        // ⭐ IZMENJENO - Uzmi naziv škole iz SimpleCode objekta
         SimpleCode skola = ValidationHelper.getSelectedOrNull(srednjaSkolaCb);
         if (skola != null) {
-            dto.setSrednjaSkola(skola.getCode()); // getCode() vraća naziv škole
+            dto.setSrednjaSkola(skola.getCode());
         }
         dto.setUspehSrednjaSkola(ValidationHelper.getDoubleOrNull(uspehSrednjaSkolaTf));
         dto.setUspehPrijemni(ValidationHelper.getDoubleOrNull(uspehPrijemniTf));
@@ -238,8 +262,6 @@ public class StudentFormController {
         dto.setNacinFinansiranja(nacinFinansiranjaCb.getSelectionModel().getSelectedItem());
         dto.setAktivan(true);
         dto.setVaziOd(LocalDate.now());
-
-        // Backend očekuje ID studenta, ne ceo objekat
         dto.setStudentId(studentId);
 
         return dto;
@@ -281,7 +303,16 @@ public class StudentFormController {
 
     @FXML
     public void handleCancel() {
+        System.out.println("❌ Cancelled - returning to search");
         mainView.changeRoot("studentSearch");
     }
 
+    private static class SaveResult {
+        final Long studentId;
+        final Long indeksId;
+        SaveResult(Long studentId, Long indeksId) {
+            this.studentId = studentId;
+            this.indeksId = indeksId;
+        }
+    }
 }

@@ -1,9 +1,9 @@
 package org.raflab.studsluzbadesktopclient.controllers;
+
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
@@ -14,7 +14,6 @@ import javafx.scene.layout.StackPane;
 import lombok.RequiredArgsConstructor;
 import org.raflab.studsluzbadesktopclient.app.MainView;
 import org.raflab.studsluzbadesktopclient.services.NavigationHistoryService;
-import org.raflab.studsluzbadesktopclient.utils.AlertHelper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -40,19 +39,15 @@ public class MainWindowController {
     public void initialize() {
         setupKeyboardNavigation();
         setupMouseNavigation();
+        setupTouchpadGestures();
     }
 
-    /**
-     * Postavlja tastaturne prečice za navigaciju
-     */
     private void setupKeyboardNavigation() {
-        // Ctrl + [ za nazad
         KeyCombination backCombo = new KeyCodeCombination(
                 KeyCode.OPEN_BRACKET,
                 KeyCombination.CONTROL_DOWN
         );
 
-        // Ctrl + ] za napred
         KeyCombination forwardCombo = new KeyCodeCombination(
                 KeyCode.CLOSE_BRACKET,
                 KeyCombination.CONTROL_DOWN
@@ -68,37 +63,28 @@ public class MainWindowController {
             }
         });
 
-        // Omogući da mainPane dobije focus
         Platform.runLater(() -> mainPane.requestFocus());
     }
 
-    /**
-     * Postavlja navigaciju mišem (dugmići 4 i 5)
-     */
     private void setupMouseNavigation() {
         mainPane.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
-            // Mouse button 4 = BACK
             if (event.getButton().toString().equals("BACK")) {
                 handleNavigateBack();
                 event.consume();
             }
-            // Mouse button 5 = FORWARD
             else if (event.getButton().toString().equals("FORWARD")) {
                 handleNavigateForward();
                 event.consume();
             }
         });
 
-        // Alternativno, možeš koristiti i button codes
         mainPane.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
             int buttonCode = event.getButton().ordinal();
 
-            // Button 4 (BACK) - ordinal je obično 3
             if (buttonCode == 3) {
                 handleNavigateBack();
                 event.consume();
             }
-            // Button 5 (FORWARD) - ordinal je obično 4
             else if (buttonCode == 4) {
                 handleNavigateForward();
                 event.consume();
@@ -106,9 +92,6 @@ public class MainWindowController {
         });
     }
 
-    /**
-     * Navigacija nazad
-     */
     private void handleNavigateBack() {
         try {
             if (!historyService.canGoBack()) {
@@ -117,18 +100,16 @@ public class MainWindowController {
 
             NavigationHistoryService.NavigationEntry entry = historyService.goBack();
 
-            if (entry != null && entry.getContent() != null) {
+            if (entry != null) {
                 restoreNavigationEntry(entry);
-                setStatus("Nazad: " + entry.getTitle());
+                setStatus("⬅️ Nazad: " + entry.getTitle());
             }
         } catch (Exception e) {
             System.err.println("Navigation back error (silently handled): " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    /**
-     * Navigacija napred
-     */
     private void handleNavigateForward() {
         try {
             if (!historyService.canGoForward()) {
@@ -137,59 +118,81 @@ public class MainWindowController {
 
             NavigationHistoryService.NavigationEntry entry = historyService.goForward();
 
-            if (entry != null && entry.getContent() != null) {
+            if (entry != null) {
                 restoreNavigationEntry(entry);
-                setStatus("Napred: " + entry.getTitle());
+                setStatus("➡️ Napred: " + entry.getTitle());
             }
         } catch (Exception e) {
             System.err.println("Navigation forward error (silently handled): " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    /**
-     * Vraća navigation entry u UI
-     */
     private void restoreNavigationEntry(NavigationHistoryService.NavigationEntry entry) {
+        System.out.println("🔄 Restoring: " + entry.getTitle() + " (type: " + entry.getType() + ")");
+
         switch (entry.getType()) {
             case TAB:
                 restoreTab(entry);
                 break;
             case LIST_ITEM:
             case TABLE_ITEM:
-                // Ako je list/table item, samo prikaži sadržaj
-                setContent(entry.getContent());
+                if (entry.getContent() != null) {
+                    setContent(entry.getContent());
+                }
                 break;
             case PAGE:
             default:
-                setContent(entry.getContent());
+                if (entry.getContent() != null) {
+                    setContent(entry.getContent());
+                }
                 break;
         }
     }
 
-    /**
-     * Vraća tab selekciju
-     */
+
     private void restoreTab(NavigationHistoryService.NavigationEntry entry) {
-        // viewPath: "tabpane:studentProfileTabs" npr.
-        String viewPath = entry.getViewPath();
-        if (!viewPath.startsWith("tabpane:")) {
+        if (!(entry.getState() instanceof NavigationHistoryService.TabState)) {
+            System.err.println("️State is not TabState!");
             return;
         }
 
-        String tabPaneId = viewPath.substring("tabpane:".length());
-        Object st = entry.getState();
-        if (!(st instanceof Integer)) {
+        NavigationHistoryService.TabState st =
+                (NavigationHistoryService.TabState) entry.getState();
+
+        Node lookupRoot = contentPane.getChildren().isEmpty()
+                ? mainPane
+                : contentPane.getChildren().get(0);
+
+        TabPane tabPane = (TabPane) lookupRoot.lookup("#" + st.tabPaneId());
+
+        if (tabPane == null) {
+            System.err.println("TabPane not found: #" + st.tabPaneId());
             return;
         }
-        int tabIndex = (Integer) st;
 
-        // lookup po #id
-        Node n = mainPane.getScene().lookup("#" + tabPaneId);
-        if (n instanceof TabPane tabPane) {
-            int safeIndex = Math.max(0, Math.min(tabIndex, tabPane.getTabs().size() - 1));
-            tabPane.getSelectionModel().select(safeIndex);
-
+        int idx = st.tabIndex();
+        if (idx < 0 || idx >= tabPane.getTabs().size()) {
+            System.err.println("Tab index out of bounds: " + idx);
+            return;
         }
+
+        Platform.runLater(() -> {
+            tabPane.getSelectionModel().select(idx);
+            System.out.println("Tab restored: " + tabPane.getTabs().get(idx).getText() + " (index: " + idx + ")");
+        });
+    }
+
+    private void setupTouchpadGestures() {
+        mainPane.setOnSwipeLeft(event -> {
+            handleNavigateForward();
+            event.consume();
+        });
+
+        mainPane.setOnSwipeRight(event -> {
+            handleNavigateBack();
+            event.consume();
+        });
     }
 
     public void setStatus(String status) {
@@ -202,7 +205,6 @@ public class MainWindowController {
         contentPane.getChildren().clear();
         contentPane.getChildren().add(content);
 
-        // Vrati focus na glavni pane za tastaturnu navigaciju
         Platform.runLater(() -> mainPane.requestFocus());
     }
 
@@ -211,3 +213,4 @@ public class MainWindowController {
         setContent(view);
     }
 }
+

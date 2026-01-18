@@ -41,9 +41,10 @@ public class StudentService {
 
     public Mono<List<StudentDTO>> searchSync(String ime, String prezime,
                                              String studProgram, Integer godina,
-                                             Integer broj, Integer page, Integer size) {
-        return search(ime, prezime, studProgram, godina, broj, page, size)
-                .collectList();
+                                             Integer broj, String srednjaSkola,
+                                             Integer page, Integer size) {
+        return searchPage(ime, prezime, studProgram, godina, broj, srednjaSkola, page, size)
+                .map(PageResponse::getContent);
     }
 
     public Mono<StudentIndeksResponse> fastSearch(String indeksShort) {
@@ -52,6 +53,7 @@ public class StudentService {
                 .retrieve()
                 .bodyToMono(StudentIndeksResponse.class);
     }
+
 
     public Mono<StudentIndeksResponse> emailSearch(String studEmail) {
         return webClient.get()
@@ -236,4 +238,32 @@ public class StudentService {
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<Map<String, Double>>() {});
     }
+
+
+    public Mono<PageResponse<StudentDTO>> searchPage(
+            String ime,
+            String prezime,
+            String studProgram,
+            Integer godina,
+            Integer broj,
+            String srednjaSkola,
+            Integer page,
+            Integer size) {
+
+        return webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/api/student/search")
+                        .queryParam("ime", ime)
+                        .queryParam("prezime", prezime)
+                        .queryParam("studProgram", studProgram)
+                        .queryParam("godina", godina)
+                        .queryParam("broj", broj)
+                        .queryParam("srednjaSkola", srednjaSkola)
+                        .queryParam("page", page)
+                        .queryParam("size", size)
+                        .build())
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<PageResponse<StudentDTO>>() {});
+    }
+
 }

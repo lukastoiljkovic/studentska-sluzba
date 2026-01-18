@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.raflab.studsluzba.dtos.*;
 import org.raflab.studsluzbadesktopclient.dtos.ZapisnikHeaderDTO;
 import org.raflab.studsluzbadesktopclient.services.IspitService;
-import org.raflab.studsluzbadesktopclient.services.ReportService;
+import org.raflab.studsluzbadesktopclient.reports.ReportService;
 import org.raflab.studsluzbadesktopclient.utils.AlertHelper;
 import org.springframework.stereotype.Component;
 
@@ -128,7 +128,7 @@ public class IspitRezultatiController {
 
     @FXML
     public void handleStampaj() {
-        /*if (ispit == null) {
+        if (ispit == null) {
             AlertHelper.showWarning("Greška", "Nema učitanog ispita!");
             return;
         }
@@ -168,7 +168,7 @@ public class IspitRezultatiController {
                             stampajBtn.setDisable(false);
                             stampajBtn.setText("Štampaj");
                         })
-                );*/
+                );
     }
 
     @FXML

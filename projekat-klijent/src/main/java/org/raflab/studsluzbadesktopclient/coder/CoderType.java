@@ -6,7 +6,7 @@ public enum CoderType {
     DRZAVLJANSTVO,
     DRZAVA (TextFileSimpleCoder.class,"coders/drzave.txt"),
     TIP_SREDNJE_SKOLE(TextFileSimpleCoder.class,"coders/tipsrednjeskole.txt"),
-    SREDNJA_SKOLA(TextFileSimpleCoder.class,"coders/srednjeskole.txt"), // ⭐ DODAJ OVO
+    SREDNJA_SKOLA(TextFileSimpleCoder.class,"coders/srednjeskole.txt"),
     VISOKOSKOLSKA_USTANOVA,
     NASTAVNO_ZVANJE,
     VRSTA_STUDIJA ,
@@ -35,6 +35,6 @@ public enum CoderType {
         this.path = path;
     }
     private Class<? extends Coder<? extends AbstractCode>> tip;
-    private String path; // fajl za tekst file codere ili REST path za backend sifarnike
+    private String path;
 
 }

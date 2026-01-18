@@ -113,9 +113,6 @@ public class MainView {
         }
     }
 
-    /**
-     * Generiše naziv stranice na osnovu putanje
-     */
     private String getTitleForPath(String fxmlPath) {
         // Možeš dodati custom logiku za različite putanje
         return switch (fxmlPath) {

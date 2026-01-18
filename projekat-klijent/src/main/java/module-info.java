@@ -28,7 +28,13 @@ module stud_sluzba_desktop_client {
     opens org.raflab.studsluzbadesktopclient.app to javafx.fxml, spring.beans, spring.context, spring.core;
     exports org.raflab.studsluzbadesktopclient.utils;
     opens org.raflab.studsluzbadesktopclient.utils to javafx.fxml, spring.core;
+    exports org.raflab.studsluzbadesktopclient.reports;
+    opens org.raflab.studsluzbadesktopclient.reports to javafx.fxml, spring.core;
 
+    requires jasperreports;
+    requires java.xml;
+    requires com.fasterxml.jackson.annotation;
+    requires com.fasterxml.jackson.core;
     requires java.sql;
     requires java.desktop;
     requires shared.dtos;

@@ -2,10 +2,6 @@ package org.raflab.studsluzbadesktopclient.dtos;
 
 import lombok.Data;
 
-/**
- * Wrapper oko org.raflab.studsluzba.dtos.StudentDTO
- * koji dodaje dodatna polja potrebna za klijentsku aplikaciju
- */
 @Data
 public class StudentDTO extends org.raflab.studsluzba.dtos.StudentDTO {
 

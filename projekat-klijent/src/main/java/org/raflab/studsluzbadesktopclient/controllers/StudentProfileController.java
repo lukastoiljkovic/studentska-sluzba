@@ -11,13 +11,19 @@ import javafx.beans.property.SimpleStringProperty;
 import lombok.RequiredArgsConstructor;
 import org.raflab.studsluzba.dtos.*;
 import org.raflab.studsluzbadesktopclient.app.MainView;
+import org.raflab.studsluzbadesktopclient.dtos.IspitZDTO;
+import org.raflab.studsluzbadesktopclient.dtos.PolozeniIspitiDTO;
 import org.raflab.studsluzbadesktopclient.dtos.StudentProfileDTO;
+import org.raflab.studsluzbadesktopclient.dtos.UverenjeOStudiranjuDTO;
+import org.raflab.studsluzbadesktopclient.reports.ReportService;
 import org.raflab.studsluzbadesktopclient.services.*;
 import org.raflab.studsluzbadesktopclient.utils.AlertHelper;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
+import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 
 @Component
@@ -27,93 +33,146 @@ public class StudentProfileController {
     private final StudentService studentService;
     private final IspitService ispitService;
     private final UpisGodineService upisGodineService;
-    private final ObnovaGodineService obnovaGodineService;
     private final SifarniciService sifarniciService;
     private final MainView mainView;
     private final UplataService uplataService;
+    private final NavigationHistoryService historyService;
 
     private Long currentStudentIndeksId;
     private StudentProfileDTO currentProfile;
 
     // OSNOVNI PODACI
-    @FXML private Label imeLabel;
-    @FXML private Label prezimeLabel;
-    @FXML private Label indeksLabel;
-    @FXML private Label jmbgLabel;
-    @FXML private Label emailLabel;
-    @FXML private Label studProgramLabel;
-    @FXML private Label espbLabel;
-    @FXML private Label prosekLabel;
-    @FXML private Label statusLabel;
+    @FXML
+    private Label imeLabel;
+    @FXML
+    private Label prezimeLabel;
+    @FXML
+    private Label indeksLabel;
+    @FXML
+    private Label jmbgLabel;
+    @FXML
+    private Label emailLabel;
+    @FXML
+    private Label studProgramLabel;
+    @FXML
+    private Label espbLabel;
+    @FXML
+    private Label prosekLabel;
+    @FXML
+    private Label statusLabel;
 
     // TAB PANE
-    @FXML private TabPane tabPane;
+    @FXML
+    private TabPane tabPane;
 
     // TAB: LIČNI PODACI
-    @FXML private Tab licniPodaciTab;
-    @FXML private TextField imeTf;
-    @FXML private TextField prezimeTf;
-    @FXML private TextField srednjeImeTf;
-    @FXML private TextField jmbgTf;
-    @FXML private DatePicker datumRodjenjaDp;
-    @FXML private TextField mestoRodjenjaTf;
-    @FXML private TextField drzavaRodjenjaTf;
-    @FXML private TextField adresaTf;
-    @FXML private TextField telefonTf;
-    @FXML private TextField emailPrivatniTf;
-    @FXML private TextField emailFakultetskiTf;
-    @FXML private TextField srednjaSkolaTf;
+    @FXML
+    private Tab licniPodaciTab;
+    @FXML
+    private TextField imeTf;
+    @FXML
+    private TextField prezimeTf;
+    @FXML
+    private TextField srednjeImeTf;
+    @FXML
+    private TextField jmbgTf;
+    @FXML
+    private DatePicker datumRodjenjaDp;
+    @FXML
+    private TextField mestoRodjenjaTf;
+    @FXML
+    private TextField drzavaRodjenjaTf;
+    @FXML
+    private TextField adresaTf;
+    @FXML
+    private TextField telefonTf;
+    @FXML
+    private TextField emailPrivatniTf;
+    @FXML
+    private TextField emailFakultetskiTf;
+    @FXML
+    private TextField srednjaSkolaTf;
 
     // TAB: POLOŽENI ISPITI
-    @FXML private Tab polozeniTab;
-    @FXML private TableView<PolozenPredmetResponse> polozeniTable;
-    @FXML private TableColumn<PolozenPredmetResponse, String> polPredmetCol;
-    @FXML private TableColumn<PolozenPredmetResponse, Integer> polOcenaCol;
-    @FXML private TableColumn<PolozenPredmetResponse, Integer> polEspbCol;
-    @FXML private TableColumn<PolozenPredmetResponse, String> polDatumCol;
-    @FXML private Pagination polozeniPagination;
+    @FXML
+    private Tab polozeniTab;
+    @FXML
+    private TableView<PolozenPredmetResponse> polozeniTable;
+    @FXML
+    private TableColumn<PolozenPredmetResponse, String> polPredmetCol;
+    @FXML
+    private TableColumn<PolozenPredmetResponse, Integer> polOcenaCol;
+    @FXML
+    private TableColumn<PolozenPredmetResponse, Integer> polEspbCol;
+    @FXML
+    private TableColumn<PolozenPredmetResponse, String> polDatumCol;
+    @FXML
+    private Pagination polozeniPagination;
 
     // TAB: NEPOLOŽENI ISPITI
-    @FXML private Tab nepolozeniTab;
-    @FXML private TableView<NepolozenPredmetResponse> nepolozeniTable;
-    @FXML private TableColumn<NepolozenPredmetResponse, String> nepolPredmetCol;
-    @FXML private TableColumn<NepolozenPredmetResponse, Integer> nepolEspbCol;
-    @FXML private TableColumn<NepolozenPredmetResponse, Integer> nepolIzlasciCol;
-    @FXML private Pagination nepolozeniPagination;
+    @FXML
+    private Tab nepolozeniTab;
+    @FXML
+    private TableView<NepolozenPredmetResponse> nepolozeniTable;
+    @FXML
+    private TableColumn<NepolozenPredmetResponse, String> nepolPredmetCol;
+    @FXML
+    private TableColumn<NepolozenPredmetResponse, Integer> nepolEspbCol;
+    @FXML
+    private TableColumn<NepolozenPredmetResponse, Integer> nepolIzlasciCol;
+    @FXML
+    private Pagination nepolozeniPagination;
 
     // TAB: UPISANE GODINE
-    @FXML private Tab upisaneGodineTab;
-    @FXML private TableView<UpisGodineResponse> upisaneGodineTable;
-    @FXML private TableColumn<UpisGodineResponse, String> ugSkolskaGodinaCol;
-    @FXML private TableColumn<UpisGodineResponse, Integer> ugGodinaStudijaCol;
-    @FXML private TableColumn<UpisGodineResponse, String> ugDatumCol;
-    @FXML private TableColumn<UpisGodineResponse, String> ugNapomenaCol;
-
-    // TAB: OBNOVE GODINE
-    @FXML private Tab obnoveTab;
-    @FXML private TableView<ObnovaGodineResponseExtended> obnoveTable;
-    @FXML private TableColumn<ObnovaGodineResponseExtended, String> obSkolskaGodinaCol;
-    @FXML private TableColumn<ObnovaGodineResponseExtended, Integer> obGodinaStudijaCol;
-    @FXML private TableColumn<ObnovaGodineResponseExtended, String> obDatumCol;
-    @FXML private TableColumn<ObnovaGodineResponseExtended, String> obNapomenaCol;
+    @FXML
+    private Tab upisaneGodineTab;
+    @FXML
+    private TableView<UpisGodineResponse> upisaneGodineTable;
+    @FXML
+    private TableColumn<UpisGodineResponse, String> ugSkolskaGodinaCol;
+    @FXML
+    private TableColumn<UpisGodineResponse, Integer> ugGodinaStudijaCol;
+    @FXML
+    private TableColumn<UpisGodineResponse, String> ugDatumCol;
+    @FXML
+    private TableColumn<UpisGodineResponse, String> ugNapomenaCol;
 
     // TAB: UPLATE
-    @FXML private Tab uplateTab;
-    @FXML private TableView<UplataResponse> uplateTable;
-    @FXML private TableColumn<UplataResponse, String> uplDatumCol;
-    @FXML private TableColumn<UplataResponse, Double> uplIznosEURCol;
-    @FXML private TableColumn<UplataResponse, Double> uplIznosRSDCol;
-    @FXML private TableColumn<UplataResponse, Double> uplKursCol;
-    @FXML private Label preostaloEURLabel;
-    @FXML private Label preostaloRSDLabel;
+    @FXML
+    private Tab uplateTab;
+    @FXML
+    private TableView<UplataResponse> uplateTable;
+    @FXML
+    private TableColumn<UplataResponse, String> uplDatumCol;
+    @FXML
+    private TableColumn<UplataResponse, Double> uplIznosEURCol;
+    @FXML
+    private TableColumn<UplataResponse, Double> uplIznosRSDCol;
+    @FXML
+    private TableColumn<UplataResponse, Double> uplKursCol;
+    @FXML
+    private Label preostaloEURLabel;
+    @FXML
+    private Label preostaloRSDLabel;
 
     // AKCIONI DUGMIĆI
-    @FXML private Button upisGodineBtn;
-    @FXML private Button obnovaGodineBtn;
-    @FXML private Button dodajUplatuBtn;
-    @FXML private Button refreshBtn;
-    @FXML private Button prijaviIspitBtn;
-    @FXML private Button closeBtn;
+    @FXML
+    private Button upisGodineBtn;
+    @FXML
+    private Button dodajUplatuBtn;
+    @FXML
+    private Button refreshBtn;
+    @FXML
+    private Button uverenjeOStudiranjuBtn;
+    @FXML
+    private Button polozeniIspitiBtn;
+    @FXML
+    private Button prijaviIspitBtn;
+    @FXML
+    private Button closeBtn;
+
+    private final ReportService reportService;
+
 
     private static final DateTimeFormatter DATE_FORMATTER =
             DateTimeFormatter.ofPattern("dd.MM.yyyy");
@@ -179,30 +238,6 @@ public class StudentProfileController {
                 new SimpleStringProperty(d.getValue().getNapomena())
         );
 
-        // ===== OBNOVE =====
-        obSkolskaGodinaCol.setCellValueFactory(d -> {
-            Long skGodId = d.getValue().getSkolskaGodinaId();
-            if (skGodId != null) {
-                return new SimpleStringProperty(skGodId.toString());
-            }
-            return new SimpleStringProperty("");
-        });
-
-        obGodinaStudijaCol.setCellValueFactory(d ->
-                new SimpleObjectProperty<>(d.getValue().getGodinaStudija())
-        );
-        obDatumCol.setCellValueFactory(d -> {
-            if (d.getValue().getDatum() != null) {
-                return new SimpleStringProperty(
-                        d.getValue().getDatum().format(DATE_FORMATTER)
-                );
-            }
-            return new SimpleStringProperty("");
-        });
-        obNapomenaCol.setCellValueFactory(d ->
-                new SimpleStringProperty(d.getValue().getNapomena())
-        );
-
         // ===== UPLATE =====
         uplDatumCol.setCellValueFactory(d -> {
             if (d.getValue().getDatum() != null) {
@@ -250,7 +285,6 @@ public class StudentProfileController {
                             loadPolozeniPage(0);
                             loadNepolozeniPage(0);
                             loadUpisaneGodine();
-                            loadObnove();
                             loadUplate();
                             statusLabel.setText("Profil učitan");
                         }),
@@ -336,89 +370,6 @@ public class StudentProfileController {
     }
 
 
-    private void loadObnove() {
-        if (currentStudentIndeksId == null) return;
-
-        obnovaGodineService.getObnoveForStudent(currentStudentIndeksId)
-                .collectList()
-                .subscribe(
-                        obnove -> {
-                            // Prvo učitaj nazive školskih godina za sve obnove
-                            if (!obnove.isEmpty()) {
-                                // Kreiraj mapu školskih godina
-                                java.util.Map<Long, String> skolskeGodineMap = new java.util.HashMap<>();
-
-                                // Učitaj sve školske godine paralelno
-                                java.util.List<Mono<Void>> requests = obnove.stream()
-                                        .map(ObnovaGodineResponse::getSkolskaGodinaId)
-                                        .filter(java.util.Objects::nonNull)
-                                        .distinct()
-                                        .map(skGodId ->
-                                                sifarniciService.getSkolskaGodinaById(skGodId)
-                                                        .doOnNext(sg -> skolskeGodineMap.put(skGodId, sg.getNaziv()))
-                                                        .then()
-                                        )
-                                        .collect(java.util.stream.Collectors.toList());
-
-                                // Sačekaj da se sve učitaju, pa onda popuni tabelu
-                                Mono.when(requests).subscribe(
-                                        unused -> Platform.runLater(() -> {
-                                            // Sada kreiraj proširene response objekte sa nazivima
-                                            java.util.List<ObnovaGodineResponseExtended> extended =
-                                                    obnove.stream()
-                                                            .map(o -> {
-                                                                ObnovaGodineResponseExtended ext =
-                                                                        new ObnovaGodineResponseExtended(o);
-                                                                if (o.getSkolskaGodinaId() != null) {
-                                                                    ext.setSkolskaGodinaNaziv(
-                                                                            skolskeGodineMap.get(o.getSkolskaGodinaId())
-                                                                    );
-                                                                }
-                                                                return ext;
-                                                            })
-                                                            .collect(java.util.stream.Collectors.toList());
-
-                                            obnoveTable.setItems(
-                                                    FXCollections.observableArrayList(extended)
-                                            );
-                                        }),
-                                        error -> Platform.runLater(() ->
-                                                AlertHelper.showException("Greška", (Exception) error))
-                                );
-                            } else {
-                                Platform.runLater(() ->
-                                        obnoveTable.setItems(FXCollections.observableArrayList())
-                                );
-                            }
-                        },
-                        error -> Platform.runLater(() ->
-                                AlertHelper.showException("Greška", (Exception) error))
-                );
-    }
-
-    // Inner klasa za prošireni response
-    public static class ObnovaGodineResponseExtended extends ObnovaGodineResponse {
-        private String skolskaGodinaNaziv;
-
-        public ObnovaGodineResponseExtended(ObnovaGodineResponse original) {
-            this.setId(original.getId());
-            this.setGodinaStudija(original.getGodinaStudija());
-            this.setDatum(original.getDatum());
-            this.setNapomena(original.getNapomena());
-            this.setStudentIndeksId(original.getStudentIndeksId());
-            this.setSkolskaGodinaId(original.getSkolskaGodinaId());
-            this.setPredmetiKojeObnavljaIds(original.getPredmetiKojeObnavljaIds());
-        }
-
-        public String getSkolskaGodinaNaziv() {
-            return skolskaGodinaNaziv;
-        }
-
-        public void setSkolskaGodinaNaziv(String naziv) {
-            this.skolskaGodinaNaziv = naziv;
-        }
-    }
-
     private void loadUplate() {
         if (currentProfile == null) return;
 
@@ -480,23 +431,6 @@ public class StudentProfileController {
     }
 
     @FXML
-    public void handleObnovaGodine() {
-        if (currentProfile == null) return;
-
-        ObnovaGodineDialogController controller = mainView.openModalWithController(
-                "student/obnovaGodineDialog",
-                "Obnova Godine",
-                800,
-                600
-        );
-
-        if (controller != null) {
-            controller.setStudentIndeks(currentProfile);
-            controller.setOnSaveCallback(this::loadStudentProfile);
-        }
-    }
-
-    @FXML
     public void handleDodajUplatu() {
         if (currentProfile == null || currentProfile.getStudentId() == null) {
             AlertHelper.showWarning("Greška", "Nema učitanog profila studenta");
@@ -540,5 +474,124 @@ public class StudentProfileController {
     public void handleClose() {
         Stage stage = (Stage) closeBtn.getScene().getWindow();
         stage.close();
+    }
+
+    @FXML
+    public void handleUverenjeOStudiranju() {
+        if (currentProfile == null) {
+            AlertHelper.showWarning("Greška", "Nema učitanog profila studenta");
+            return;
+        }
+
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy.");
+            String danas = sdf.format(new Date());
+
+            UverenjeOStudiranjuDTO dto = new UverenjeOStudiranjuDTO(
+                    currentProfile.getIme(),
+                    currentProfile.getPrezime(),
+                    currentProfile.getJmbg(),
+                    currentProfile.getIndeksFormatirano(),
+                    currentProfile.getStudProgramNaziv(),
+                    currentProfile.getProsecnaOcena(),
+                    currentProfile.getOstvarenoEspb(),
+                    danas  // datumIzdavanja
+            );
+
+            System.out.println("📄 DTO za Uverenje o studiranju:");
+            System.out.println("   Ime: " + dto.getIme());
+            System.out.println("   Prezime: " + dto.getPrezime());
+            System.out.println("   JMBG: " + dto.getJmbg());
+            System.out.println("   Indeks: " + dto.getIndeksFormatirano());
+            System.out.println("   Program: " + dto.getStudProgramNaziv());
+            System.out.println("   Prosek: " + dto.getProsecnaOcena());
+            System.out.println("   ESPB: " + dto.getOstvarenoEspb());
+            System.out.println("   Datum izdavanja: " + dto.getDatumIzdavanja());
+
+            reportService.generateAndOpenUverenjeOStudiranju(dto);
+            AlertHelper.showInfo("Uspeh", "Uverenje je uspešno generisano!");
+
+        } catch (Exception e) {
+            e.printStackTrace(); // vidi stack trace u konzoli
+            AlertHelper.showException("Greška pri generisanju uverenja", e);
+        }
+    }
+
+    @FXML
+    public void handlePolozeniIspiti() {
+        if (currentProfile == null || currentStudentIndeksId == null) {
+            AlertHelper.showWarning("Greška", "Nema učitanog profila studenta");
+            return;
+        }
+
+        polozeniIspitiBtn.setDisable(true);
+        polozeniIspitiBtn.setText("Generisanje...");
+
+        // Učitaj SVE položene ispite (ne samo prvu stranicu)
+        studentService.getPolozeniIspiti(currentStudentIndeksId, 0, 1000)
+                .subscribe(
+                        page -> Platform.runLater(() -> {
+                            try {
+                                List<IspitZDTO> ispiti = page.getContent().stream()
+                                        .map(p -> new IspitZDTO(
+                                                p.getPredmetNaziv(),
+                                                p.getOcena(),
+                                                p.getEspb(),
+                                                p.getDatumPolaganja() != null ?
+                                                        p.getDatumPolaganja().format(DATE_FORMATTER) : "",
+                                                p.getSemestar()
+                                        ))
+                                        .collect(java.util.stream.Collectors.toList());
+
+                                if (!ispiti.isEmpty()) {
+                                    IspitZDTO prvi = ispiti.get(0);
+                                    System.out.println("   Prvi ispit u listi:");
+                                    System.out.println("   Predmet: " + prvi.getPredmetNaziv());
+                                    System.out.println("   Ocena: " + prvi.getOcena());
+                                    System.out.println("   ESPB: " + prvi.getEspb());
+                                    System.out.println("   Datum: " + prvi.getDatumPolaganja());
+                                    System.out.println("   Semestar: " + prvi.getSemestar());
+                                }
+
+                                PolozeniIspitiDTO dto = new PolozeniIspitiDTO(
+                                        currentProfile.getIme(),
+                                        currentProfile.getPrezime(),
+                                        currentProfile.getIndeksFormatirano(),
+                                        currentProfile.getProsecnaOcena(),
+                                        currentProfile.getOstvarenoEspb(),
+                                        ispiti
+                                );
+
+                                System.out.println("  Ukupno ispita za izveštaj: " + ispiti.size());
+
+                                reportService.generateAndOpenPolozeniIspiti(dto);
+                                AlertHelper.showInfo("Uspeh", "Izveštaj je uspešno generisan!");
+
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                AlertHelper.showException("Greška pri generisanju izveštaja", e);
+                            } finally {
+                                polozeniIspitiBtn.setDisable(false);
+                                polozeniIspitiBtn.setText("Položeni ispiti");
+                            }
+                        }),
+                        error -> Platform.runLater(() -> {
+                            error.printStackTrace();
+                            AlertHelper.showException("Greška pri učitavanju ispita", (Exception) error);
+                            polozeniIspitiBtn.setDisable(false);
+                            polozeniIspitiBtn.setText("Položeni ispiti");
+                        })
+                );
+    }
+
+    /**
+     * Helper metoda za izračunavanje godine studija
+     */
+    private Integer calculateGodinaStudija(Integer espb) {
+        if (espb == null || espb == 0) return 1;
+
+        // Pretpostavka: 60 ESPB po godini
+        int godina = (espb / 60) + 1;
+        return Math.min(godina, 4); // max 4. godina
     }
 }

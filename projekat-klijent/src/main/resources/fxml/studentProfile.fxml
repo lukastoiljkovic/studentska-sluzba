@@ -54,7 +54,7 @@
             <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
 
             <!-- TAB: LIČNI PODACI -->
-            <Tab fx:id="licniPodaciTab" text="Lični podaci">
+            <Tab fx:id="licniPodaciTab" id="LicniPodaciTabPane" text="Lični podaci">
                 <ScrollPane fitToWidth="true">
                     <VBox spacing="15">
                         <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
@@ -133,7 +133,7 @@
             </Tab>
 
             <!-- TAB: POLOŽENI ISPITI -->
-            <Tab fx:id="polozeniTab" text="Položeni ispiti">
+            <Tab fx:id="polozeniTab" id= "LicniPodaciTabPane" text="Položeni ispiti">
                 <VBox spacing="10">
                     <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
 
@@ -151,7 +151,7 @@
             </Tab>
 
             <!-- TAB: NEPOLOŽENI ISPITI -->
-            <Tab fx:id="nepolozeniTab" text="Nepoloženi ispiti">
+            <Tab fx:id="nepolozeniTab" id= "NepolozeniIspitiTabPane" text="Nepoloženi ispiti">
                 <VBox spacing="10">
                     <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
 
@@ -168,7 +168,7 @@
             </Tab>
 
             <!-- TAB: UPISANE GODINE -->
-            <Tab fx:id="upisaneGodineTab" text="Upisane godine">
+            <Tab fx:id="upisaneGodineTab" id="UpisaneGodineTabPane" text="Upisane godine">
                 <VBox spacing="10">
                     <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
 
@@ -183,24 +183,8 @@
                 </VBox>
             </Tab>
 
-            <!-- TAB: OBNOVE GODINE -->
-            <Tab fx:id="obnoveTab" text="Obnove godine">
-                <VBox spacing="10">
-                    <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
-
-                    <TableView fx:id="obnoveTable" VBox.vgrow="ALWAYS">
-                        <columns>
-                            <TableColumn fx:id="obSkolskaGodinaCol" text="Školska godina" prefWidth="150"/>
-                            <TableColumn fx:id="obGodinaStudijaCol" text="Godina studija" prefWidth="120"/>
-                            <TableColumn fx:id="obDatumCol" text="Datum" prefWidth="120"/>
-                            <TableColumn fx:id="obNapomenaCol" text="Napomena" prefWidth="300"/>
-                        </columns>
-                    </TableView>
-                </VBox>
-            </Tab>
-
             <!-- TAB: UPLATE -->
-            <Tab fx:id="uplateTab" text="Uplate">
+            <Tab fx:id="uplateTab" id="UplateTabPane" text="Uplate">
                 <VBox spacing="10">
                     <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
 
@@ -228,9 +212,10 @@
             <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
 
             <Button fx:id="upisGodineBtn" text="Upis godine" onAction="#handleUpisGodine" styleClass="primary-button"/>
-            <Button fx:id="obnovaGodineBtn" text="Obnova godine" onAction="#handleObnovaGodine" styleClass="warning-button"/>
             <Button fx:id="dodajUplatuBtn" text="Dodaj uplatu" onAction="#handleDodajUplatu" styleClass="success-button"/>
             <Button fx:id="prijaviIspitBtn" text="Prijavi ispit" onAction="#handlePrijaviIspit" styleClass="primary-button"/>
+            <Button fx:id="uverenjeOStudiranjuBtn" text="Uverenje o studiranju" onAction="#handleUverenjeOStudiranju"/>
+            <Button fx:id="polozeniIspitiBtn" text="Položeni ispiti" onAction="#handlePolozeniIspiti"/>
             <Button fx:id="refreshBtn" text="Refresh" onAction="#handleRefresh"/>
             <Button fx:id="closeBtn" text="Zatvori" onAction="#handleClose" styleClass="danger-button"/>
         </HBox>

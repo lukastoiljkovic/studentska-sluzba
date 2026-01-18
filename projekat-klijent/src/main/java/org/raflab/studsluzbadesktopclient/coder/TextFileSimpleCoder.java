@@ -10,12 +10,6 @@ import java.util.Scanner;
 
 import org.raflab.studsluzbadesktopclient.app.MainView;
 
-/**
- * Šifarnici koji se čitaju iz tektualnog fajla gde je jedan red šifra u šifarniku
- * primer: države, mesta
- * @author bojanads
- *
- */
 public class TextFileSimpleCoder extends Coder<SimpleCode> {
 
     private String filePath;

@@ -1,28 +1,34 @@
 package org.raflab.studsluzbadesktopclient.utils;
-
-import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import org.raflab.studsluzbadesktopclient.services.NavigationHistoryService;
 
 public class TabNavigationHelper {
 
-    /**
-     * Postavi automatsko praćenje tab promena
-     */
-    public static void setupTabNavigation(TabPane tabPane, NavigationHistoryService historyService) {
-        if (tabPane.getId() == null || tabPane.getId().isBlank()) {
-            throw new IllegalStateException("TabPane mora imati setId() ili fx:id da bi history radio.");
-        }
+    public static void setupTabNavigation(TabPane tabPane,
+                                          NavigationHistoryService historyService) {
 
-        tabPane.getSelectionModel().selectedIndexProperty().addListener((obs, oldIdx, newIdx) -> {
-            if (newIdx == null) return;
-            if (historyService.isNavigating()) return;
+        tabPane.getSelectionModel().selectedIndexProperty().addListener(
+                (obs, oldIdx, newIdx) -> {
+                    if (newIdx == null) return;
+                    if (historyService.isNavigating()) return;
 
-            int idx = newIdx.intValue();
-            Tab tab = tabPane.getTabs().get(idx);
+                    String tabPaneId = tabPane.getId();
+                    if (tabPaneId == null || tabPaneId.isBlank()) {
+                        System.err.println("TabPane nema ID! Dodaj id=\"...\" u FXML!");
+                        return;
+                    }
 
-            // bitno: content ovde ne treba!
-            historyService.pushTab(tabPane.getId(), idx, tab.getText());
-        });
+                    int idx = newIdx.intValue();
+                    if (idx < 0 || idx >= tabPane.getTabs().size()) return;
+
+                    String title = tabPane.getTabs().get(idx).getText();
+
+                    historyService.pushTab(tabPaneId, idx, title);
+
+                    System.out.println("📑 Tab changed: " + title + " (index: " + idx + ")");
+                }
+        );
+
+        System.out.println("Tab navigation setup for TabPane ID: " + tabPane.getId());
     }
 }

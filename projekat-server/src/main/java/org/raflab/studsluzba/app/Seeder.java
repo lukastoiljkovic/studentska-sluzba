@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @AllArgsConstructor
 @Component
@@ -89,6 +90,9 @@ public class Seeder implements CommandLineRunner {
 
         // PRIJAVE, IZLASCI, POLOŽENI
         createIspitePrijaveIzlaskePolozene(ispiti, slusaPredmete, indeksi);
+
+        // MINA (RI 102/24) - spec data za testiranje
+        seedOneStudentWithLotsOfData("RI", 102, 2024, indeksi, programi, grupe, drziPredmete, sg, eurRate, ispiti);
     }
 
     private SkolskaGodina createSkolskaGodina(String naziv, boolean aktivna) {
@@ -363,8 +367,19 @@ public class Seeder implements CommandLineRunner {
             idx.setOstvarenoEspb(0);
             idx.setStudent(studenti.get(i));
 
+            // **GENERISANJE EMAILA**
+            StudentPodaci s = studenti.get(i);
+            String fakultetskiEmail =
+                    s.getIme().substring(0,1).toLowerCase() +
+                            s.getPrezime().toLowerCase() +
+                            idx.getBroj() +
+                            idx.getGodina() +
+                            prog.getOznaka().toLowerCase() + "@raf.rs";
+            s.setEmailFakultetski(fakultetskiEmail);
+
             liste.add(studentIndeksRepository.save(idx));
         }
+
         return liste;
     }
 
@@ -707,4 +722,178 @@ public class Seeder implements CommandLineRunner {
         u.setIznosRSD(eurAmount * middleRate);
         return u;
     }
+
+    private void seedOneStudentWithLotsOfData(
+            String oznakaPrograma,
+            int brojIndeksa,
+            int godinaIndeksa,
+            List<StudentIndeks> indeksi,
+            List<StudijskiProgram> programi,
+            List<Grupa> grupe,
+            List<DrziPredmet> drziPredmeti,
+            SkolskaGodina aktivnaSg,
+            double eurRate,
+            List<Ispit> ispiti
+    ) {
+        StudentIndeks idx = indeksi.stream()
+                .filter(i -> oznakaPrograma.equalsIgnoreCase(i.getStudProgramOznaka()))
+                .filter(i -> Objects.equals(i.getBroj(), brojIndeksa))
+                .filter(i -> Objects.equals(i.getGodina(), godinaIndeksa))
+                .findFirst()
+                .orElse(null);
+
+        if (idx == null) return;
+
+        // Forsiraj samofinansiranje da ima uplate (bez obzira šta je random dao)
+        idx.setNacinFinansiranja("Samofinansiranje");
+        studentIndeksRepository.save(idx);
+
+        // Dodatne školske godine da ima istoriju
+        SkolskaGodina sgPrev1 = createSkolskaGodina("2022/2023.", false);
+        SkolskaGodina sgPrev2 = createSkolskaGodina("2023/2024.", false);
+
+        // Upisi / obnove (namerno “šareno”)
+        UpisGodine upis1 = new UpisGodine();
+        upis1.setStudentIndeks(idx);
+        upis1.setSkolskaGodina(sgPrev1);
+        upis1.setGodinaStudija(1);
+        upis1.setDatum(LocalDate.of(2022, 10, 1));
+        upis1.setNapomena("Test: upis 1. godine (2022/2023)");
+        upis1 = upisGodineRepository.save(upis1);
+
+        ObnovaGodine obnova1 = new ObnovaGodine();
+        obnova1.setStudentIndeks(idx);
+        obnova1.setSkolskaGodina(sgPrev2);
+        obnova1.setGodinaStudija(1);
+        obnova1.setDatum(LocalDate.of(2023, 10, 1));
+        obnova1.setNapomena("Test: obnova 1. godine (2023/2024)");
+        obnova1 = obnovaGodineRepository.save(obnova1);
+
+        UpisGodine upis2 = new UpisGodine();
+        upis2.setStudentIndeks(idx);
+        upis2.setSkolskaGodina(aktivnaSg);
+        upis2.setGodinaStudija(2);
+        upis2.setDatum(LocalDate.of(2024, 10, 5));
+        upis2.setNapomena("Test: upis 2. godine (2024/2025)");
+        upis2 = upisGodineRepository.save(upis2);
+
+        // Više uplata (različiti datumi) — super za filtere/izveštaje
+        Uplata u1 = makeUplata(upis2, 900.0, eurRate);
+        u1.setDatum(LocalDate.of(2024, 10, 10));
+        uplataRepository.save(u1);
+
+        Uplata u2 = makeUplata(upis2, 700.0, eurRate);
+        u2.setDatum(LocalDate.of(2024, 11, 20));
+        uplataRepository.save(u2);
+
+        Uplata u3 = makeUplata(upis2, 500.0, eurRate);
+        u3.setDatum(LocalDate.of(2025, 1, 15));
+        uplataRepository.save(u3);
+
+        // Tok studija (ako ti entitet očekuje oba seta)
+        TokStudija tok = new TokStudija();
+        tok.setStudentIndeks(idx);
+        tok.setUpisi(new HashSet<>(Arrays.asList(upis1, upis2)));
+        tok.setObnove(new HashSet<>(Collections.singletonList(obnova1)));
+        tokStudijaRepositorySafeSave(tok);
+
+        // Osiguraj da sluša sve predmete svog programa u aktivnoj godini
+        StudijskiProgram prog = idx.getStudijskiProgram();
+
+        List<Grupa> progGrupe = grupe.stream()
+                .filter(g -> g.getStudijskiProgram().equals(prog))
+                .filter(g -> g.getSkolskaGodina().equals(aktivnaSg))
+                .collect(Collectors.toList());
+
+        Grupa grupa = progGrupe.isEmpty() ? grupe.get(0) : progGrupe.get(0);
+
+        List<DrziPredmet> dpProg = drziPredmeti.stream()
+                .filter(dp -> dp.getSkolskaGodina().equals(aktivnaSg))
+                .filter(dp -> dp.getPredmet().getStudProgram().equals(prog))
+                .collect(Collectors.toList());
+
+        // postojeće što već ima
+        Set<Long> vecSlusa = StreamSupport
+                .stream(slusaPredmetRepository.findAll().spliterator(), false)
+                .filter(sp -> sp.getStudentIndeks().equals(idx))
+                .filter(sp -> sp.getSkolskaGodina().equals(aktivnaSg))
+                .map(sp -> sp.getDrziPredmet().getPredmet().getId())
+                .collect(Collectors.toSet());
+
+        for (DrziPredmet dp : dpProg) {
+            Long predmetId = dp.getPredmet().getId();
+            if (vecSlusa.contains(predmetId)) continue;
+
+            SlusaPredmet sp = new SlusaPredmet();
+            sp.setStudentIndeks(idx);
+            sp.setDrziPredmet(dp);
+            sp.setSkolskaGodina(aktivnaSg);
+            sp.setGrupa(grupa);
+            slusaPredmetRepository.save(sp);
+        }
+
+        // Ispitni scenariji: položio, pao, poništen, prijavio-nije izašao
+        // Uzmi 3-4 ispita iz programa (ako postoje u listi)
+        List<Ispit> ispitiPrograma = ispiti.stream()
+                .filter(i -> i.getPredmet().getStudProgram().equals(prog))
+                .limit(4)
+                .collect(Collectors.toList());
+
+        if (ispitiPrograma.size() >= 1) {
+            addExamOutcome(idx, ispitiPrograma.get(0), 45, false, true, 9);   // položio
+        }
+        if (ispitiPrograma.size() >= 2) {
+            addExamOutcome(idx, ispitiPrograma.get(1), 10, false, false, null); // pao
+        }
+        if (ispitiPrograma.size() >= 3) {
+            addExamOutcome(idx, ispitiPrograma.get(2), 55, true, false, null); // poništen
+        }
+        if (ispitiPrograma.size() >= 4) {
+            // prijava bez izlaska
+            Ispit is = ispitiPrograma.get(3);
+            IspitPrijava p = new IspitPrijava();
+            p.setIspit(is);
+            p.setStudentIndeks(idx);
+            p.setDatum(is.getDatumVremePocetka().toLocalDate().minusDays(6));
+            ispitPrijavaRepository.save(p);
+        }
+    }
+
+    private void addExamOutcome(
+            StudentIndeks idx,
+            Ispit ispit,
+            int poeniIspit,
+            boolean ponistava,
+            boolean polozen,
+            Integer ocenaIfPolozen
+    ) {
+        IspitPrijava prijava = new IspitPrijava();
+        prijava.setIspit(ispit);
+        prijava.setStudentIndeks(idx);
+        prijava.setDatum(ispit.getDatumVremePocetka().toLocalDate().minusDays(7));
+        prijava = ispitPrijavaRepository.save(prijava);
+
+        IspitIzlazak izlazak = new IspitIzlazak();
+        izlazak.setIspitPrijava(prijava);
+        izlazak.setStudentIndeks(idx);
+        izlazak.setBrojPoena(poeniIspit);
+        izlazak.setPonistava(ponistava);
+        izlazak.setNapomena(ponistava ? "Test: poništen" : (polozen ? "Test: položio" : "Test: pao"));
+        izlazak = ispitIzlazakRepository.save(izlazak);
+
+        if (polozen && !ponistava) {
+            PolozenPredmet pp = new PolozenPredmet();
+            pp.setStudentIndeks(idx);
+            pp.setPredmet(ispit.getPredmet());
+            pp.setOcena(ocenaIfPolozen != null ? ocenaIfPolozen : 6);
+            pp.setPriznat(false);
+            pp.setIspitIzlazak(izlazak);
+            polozenPredmetRepository.save(pp);
+
+            idx.setOstvarenoEspb(idx.getOstvarenoEspb() + ispit.getPredmet().getEspb());
+            studentIndeksRepository.save(idx);
+        }
+    }
+
+
 }
