@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import org.raflab.studsluzbadesktopclient.dtos.ZapisnikHeaderDTO;
+import java.time.format.DateTimeFormatter;
 
 import java.util.Map;
 
@@ -14,6 +16,8 @@ import java.util.Map;
 public class IspitService {
 
     private final WebClient webClient;
+    private static final DateTimeFormatter FORMATTER =
+            DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
     public Flux<IspitResponse> getAll() {
         return webClient.get()
@@ -107,5 +111,43 @@ public class IspitService {
                         .build())
                 .retrieve()
                 .bodyToMono(Long.class);
+    }
+
+    public Mono<ZapisnikHeaderDTO> getZapisnikHeader(Long ispitId) {
+        return getById(ispitId)
+                .flatMap(ispit -> {
+                    ZapisnikHeaderDTO header = new ZapisnikHeaderDTO();
+
+                    // Osnovni podaci
+                    header.setPredmetNaziv(ispit.getPredmetNaziv());
+                    header.setIspitniRokNaziv(ispit.getIspitniRokNaziv());
+                    header.setNastavnikImePrezime(ispit.getNastavnikIme());
+
+                    // Formatiraj datum
+                    if (ispit.getDatumVremePocetka() != null) {
+                        header.setDatumIspita(
+                                ispit.getDatumVremePocetka().format(FORMATTER)
+                        );
+                    }
+
+                    // Dobavi statistiku
+                    return Mono.zip(
+                            getRezultati(ispitId).collectList(),
+                            getProsecnaOcena(ispitId)
+                    ).map(tuple -> {
+                        var rezultati = tuple.getT1();
+                        var prosek = tuple.getT2();
+
+                        header.setUkupnoPrijavljenih(rezultati.size());
+                        header.setUkupnoPolozilo(
+                                (int) rezultati.stream()
+                                        .filter(r -> r.getUkupno() >= 51)
+                                        .count()
+                        );
+                        header.setProsecnaOcena(prosek);
+
+                        return header;
+                    });
+                });
     }
 }

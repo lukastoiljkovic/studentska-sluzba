@@ -18,7 +18,6 @@ public class StudentService {
 
     private final WebClient webClient;
     private final StudentProfileMapper profileMapper;
-    private final PolozenPredmetService polozenPredmetService;
 
     // ========== PRETRAGA ==========
 
@@ -63,23 +62,17 @@ public class StudentService {
 
     // ========== PROFIL ==========
 
-    /**
-     * Učitava kompletan profil studenta kombinirajući više API poziva
-     */
     public Mono<org.raflab.studsluzbadesktopclient.dtos.StudentProfileDTO> getStudentProfile(Long studentIndeksId) {
-        // 1. Učitaj osnovni profil sa servera
         Mono<org.raflab.studsluzba.dtos.StudentProfileDTO> serverProfileMono = webClient.get()
                 .uri("/api/student/profile/{studentIndeksId}", studentIndeksId)
                 .retrieve()
                 .bodyToMono(org.raflab.studsluzba.dtos.StudentProfileDTO.class);
 
-        // 2. Učitaj StudentIndeksResponse
         Mono<StudentIndeksResponse> indeksResponseMono = webClient.get()
                 .uri("/api/student/indeks/{id}", studentIndeksId)
                 .retrieve()
                 .bodyToMono(StudentIndeksResponse.class);
 
-        // 3. Učitaj StudentPodaciResponse (potreban je ID studenta iz indeksa)
         Mono<StudentPodaciResponse> podaciResponseMono = indeksResponseMono
                 .flatMap(indeks -> {
                     if (indeks.getStudent() != null && indeks.getStudent().getId() != null) {
@@ -91,17 +84,9 @@ public class StudentService {
                     return Mono.empty();
                 });
 
-        // 4. Učitaj položene predmete
-        Mono<List<PolozenPredmetResponse>> polozeniMono = polozenPredmetService
-                .getPolozeniIspiti(studentIndeksId, 0, 1000)
-                .map(PageResponse::getContent);
+        Mono<PageResponse<PolozenPredmetResponse>> polozeniMono = getPolozeniIspiti(studentIndeksId, 0, 1000);
+        Mono<PageResponse<NepolozenPredmetResponse>> nepolozeniMono = getNepolozeniIspiti(studentIndeksId, 0, 1000);
 
-        // 5. Učitaj nepoložene predmete
-        Mono<List<NepolozenPredmetResponse>> nepolozeniMono = polozenPredmetService
-                .getNepolozeniIspiti(studentIndeksId, 0, 1000)
-                .map(PageResponse::getContent);
-
-        // 6. Učitaj upisane godine
         Mono<List<UpisGodineResponse>> upisiMono = webClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/api/upis-godine/all")
@@ -111,42 +96,32 @@ public class StudentService {
                 .bodyToFlux(UpisGodineResponse.class)
                 .collectList();
 
-        // 7. Učitaj obnove godine
         Mono<List<ObnovaGodineResponse>> obnoveMono = webClient.get()
                 .uri("/api/obnova/student/{studentIndeksId}", studentIndeksId)
                 .retrieve()
                 .bodyToFlux(ObnovaGodineResponse.class)
                 .collectList();
 
-        Mono<List<UplataResponse>> uplateMono = upisiMono.flatMapMany(upisi ->
-                Flux.fromIterable(upisi)
-                        .flatMap(upis ->
-                                webClient.get()
-                                        .uri("/api/uplate/upis-godine/{id}", upis.getId())
-                                        .retrieve()
-                                        .bodyToFlux(UplataResponse.class)
-                        )
-        ).collectList();
+        Mono<List<UplataResponse>> uplateMono = Mono.just(java.util.Collections.emptyList());
 
-        // Kombinuj sve Mono objekte
         return Mono.zip(
                 serverProfileMono,
                 indeksResponseMono,
                 podaciResponseMono,
-                polozeniMono,
-                nepolozeniMono,
+                polozeniMono.map(PageResponse::getContent),
+                nepolozeniMono.map(PageResponse::getContent),
                 upisiMono,
                 obnoveMono,
                 uplateMono
         ).map(tuple -> profileMapper.mapToClientDTO(
-                tuple.getT1(), // server profile
-                tuple.getT2(), // indeks response
-                tuple.getT3(), // podaci response
-                tuple.getT4(), // polozeni
-                tuple.getT5(), // nepolozeni
-                tuple.getT6(), // upisi
-                tuple.getT7(), // obnove
-                tuple.getT8()  // uplate
+                tuple.getT1(),
+                tuple.getT2(),
+                tuple.getT3(),
+                tuple.getT4(),
+                tuple.getT5(),
+                tuple.getT6(),
+                tuple.getT7(),
+                tuple.getT8()
         ));
     }
 
@@ -162,6 +137,30 @@ public class StudentService {
                 .uri("/api/student/webprofile/email?studEmail=" + studEmail)
                 .retrieve()
                 .bodyToMono(StudentWebProfileDTO.class);
+    }
+
+    // ========== POLOŽENI I NEPOLOŽENI ISPITI ==========
+
+    public Mono<PageResponse<PolozenPredmetResponse>> getPolozeniIspiti(Long studentIndeksId, int page, int size) {
+        return webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/api/predmet/polozen/polozeni/{studentIndeksId}")
+                        .queryParam("page", page)
+                        .queryParam("size", size)
+                        .build(studentIndeksId))
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<PageResponse<PolozenPredmetResponse>>() {});
+    }
+
+    public Mono<PageResponse<NepolozenPredmetResponse>> getNepolozeniIspiti(Long studentIndeksId, int page, int size) {
+        return webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/api/predmet/polozen/nepolozeni/{studentIndeksId}")
+                        .queryParam("page", page)
+                        .queryParam("size", size)
+                        .build(studentIndeksId))
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<PageResponse<NepolozenPredmetResponse>>() {});
     }
 
     // ========== CRUD ==========
@@ -185,6 +184,15 @@ public class StudentService {
                 .uri("/api/student/indeksi/{idStudentPodaci}", studentPodaciId)
                 .retrieve()
                 .bodyToFlux(StudentIndeksResponse.class);
+    }
+
+
+    public Mono<Long> saveStudentPodaci(StudentPodaciCreateRequest student) {
+        return webClient.post()
+                .uri("/api/student/add")
+                .bodyValue(student)
+                .retrieve()
+                .bodyToMono(Long.class);
     }
 
     public Mono<Long> saveStudentPodaci(StudentPodaciResponse student) {
@@ -228,14 +236,4 @@ public class StudentService {
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<Map<String, Double>>() {});
     }
-
-    public Mono<Long> saveStudentPodaci(StudentPodaciCreateRequest request) {
-        return webClient.post()
-                .uri("/api/student/add")
-                .bodyValue(request)
-                .retrieve()
-                .bodyToMono(Long.class);
-    }
-
-
 }

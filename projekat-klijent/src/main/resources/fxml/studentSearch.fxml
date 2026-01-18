@@ -17,7 +17,7 @@
             <!-- FAST SEARCH (OSTAJE) -->
             <HBox spacing="10" alignment="CENTER_LEFT">
                 <Label text="Brza pretraga (indeks):" style="-fx-font-weight: bold;"/>
-                <TextField fx:id="fastSearchTf" promptText="RN2401" prefWidth="200"/>
+                <TextField fx:id="fastSearchTf" promptText="Broj indeksa" prefWidth="200"/>
                 <Button text="Pronađi" onAction="#handleFastSearch" styleClass="primary-button"/>
             </HBox>
 

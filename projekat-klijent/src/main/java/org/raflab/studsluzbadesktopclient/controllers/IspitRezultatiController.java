@@ -7,9 +7,13 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import lombok.RequiredArgsConstructor;
 import org.raflab.studsluzba.dtos.*;
+import org.raflab.studsluzbadesktopclient.dtos.ZapisnikHeaderDTO;
 import org.raflab.studsluzbadesktopclient.services.IspitService;
+import org.raflab.studsluzbadesktopclient.services.ReportService;
 import org.raflab.studsluzbadesktopclient.utils.AlertHelper;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -32,6 +36,8 @@ public class IspitRezultatiController {
     @FXML private Label polozioLabel;
     @FXML private Button stampajBtn;
     @FXML private Button refreshBtn;
+
+    private final ReportService reportService;
 
     public void setIspit(IspitResponse ispit) {
         this.ispit = ispit;
@@ -122,13 +128,47 @@ public class IspitRezultatiController {
 
     @FXML
     public void handleStampaj() {
-        AlertHelper.showInfo("Info",
-                "Funkcionalnost štampanja zapisnika sa ispita biće implementirana naknadno.\n\n" +
-                        "Zapisnik će sadržati:\n" +
-                        "- Podatke o ispitu (predmet, rok, datum, nastavnik)\n" +
-                        "- Listu studenata sa rezultatima\n" +
-                        "- Prosečnu ocenu\n" +
-                        "- Broj položenih/palo");
+        /*if (ispit == null) {
+            AlertHelper.showWarning("Greška", "Nema učitanog ispita!");
+            return;
+        }
+
+        // Prikaži loading indicator
+        stampajBtn.setDisable(true);
+        stampajBtn.setText("Generisanje...");
+
+        // Učitaj header i rezultate
+        ispitService.getZapisnikHeader(ispit.getId())
+                .zipWith(
+                        ispitService.getRezultati(ispit.getId()).collectList()
+                )
+                .subscribe(
+                        tuple -> Platform.runLater(() -> {
+                            try {
+                                ZapisnikHeaderDTO header = tuple.getT1();
+                                List<IspitRezultatResponse> rezultati = tuple.getT2();
+
+                                // Generiši PDF
+                                reportService.generateAndOpenZapisnik(header, rezultati);
+
+                                AlertHelper.showInfo("Uspeh",
+                                        "Zapisnik je uspešno generisan i otvoren!");
+
+                            } catch (Exception e) {
+                                AlertHelper.showException(
+                                        "Greška pri generisanju zapisnika", e);
+                            } finally {
+                                stampajBtn.setDisable(false);
+                                stampajBtn.setText("Štampaj");
+                            }
+                        }),
+                        error -> Platform.runLater(() -> {
+                            AlertHelper.showException(
+                                    "Greška pri učitavanju podataka", (Exception) error);
+                            stampajBtn.setDisable(false);
+                            stampajBtn.setText("Štampaj");
+                        })
+                );*/
     }
 
     @FXML

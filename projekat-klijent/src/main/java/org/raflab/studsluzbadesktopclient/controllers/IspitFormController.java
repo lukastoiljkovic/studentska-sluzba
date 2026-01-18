@@ -5,6 +5,7 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 import lombok.RequiredArgsConstructor;
 import org.raflab.studsluzba.dtos.*;
 import org.raflab.studsluzbadesktopclient.services.*;
@@ -45,6 +46,7 @@ public class IspitFormController {
 
     @FXML
     public void initialize() {
+        setupComboBoxes();
         loadIspitniRokovi();
         loadPredmeti();
         loadNastavnici();
@@ -54,10 +56,65 @@ public class IspitFormController {
         zakljucenCb.setSelected(false);
     }
 
+    private void setupComboBoxes() {
+        // Ispitni rok ComboBox
+        ispitniRokCb.setConverter(new StringConverter<IspitniRokResponse>() {
+            @Override
+            public String toString(IspitniRokResponse rok) {
+                if (rok == null) return "";
+                return rok.getNaziv() + " (" + rok.getSkolskaGodinaNaziv() + ")";
+            }
+
+            @Override
+            public IspitniRokResponse fromString(String string) {
+                return null;
+            }
+        });
+
+        // Predmet ComboBox
+        predmetCb.setConverter(new StringConverter<PredmetResponse>() {
+            @Override
+            public String toString(PredmetResponse predmet) {
+                if (predmet == null) return "";
+                return predmet.getSifra() + " - " + predmet.getNaziv();
+            }
+
+            @Override
+            public PredmetResponse fromString(String string) {
+                return null;
+            }
+        });
+
+        // Nastavnik ComboBox
+        nastavnikCb.setConverter(new StringConverter<NastavnikResponse>() {
+            @Override
+            public String toString(NastavnikResponse nastavnik) {
+                if (nastavnik == null) return "";
+                return nastavnik.getIme() + " " + nastavnik.getPrezime();
+            }
+
+            @Override
+            public NastavnikResponse fromString(String string) {
+                return null;
+            }
+        });
+    }
+
     private void loadIspitniRokovi() {
-        // TODO: dodaj servis metodu za ispitne rokove
-        // Za sada možeš kreirati dummy listu ili učitati sa servera
-        AlertHelper.showInfo("Info", "Učitavanje ispitnih rokova nije implementirano");
+        ispitniRokService.getAll()
+                .collectList()
+                .subscribe(
+                        rokovi -> Platform.runLater(() -> {
+                            ispitniRokCb.setItems(FXCollections.observableArrayList(rokovi));
+                            if (!rokovi.isEmpty()) {
+                                ispitniRokCb.getSelectionModel().selectFirst();
+                            }
+                        }),
+                        error -> Platform.runLater(() -> {
+                            AlertHelper.showException("Greška pri učitavanju rokova", (Exception) error);
+                            errorLabel.setText("Nije moguće učitati ispitne rokove!");
+                        })
+                );
     }
 
     private void loadPredmeti() {
@@ -68,7 +125,7 @@ public class IspitFormController {
                                 predmetCb.setItems(FXCollections.observableArrayList(predmeti))
                         ),
                         error -> Platform.runLater(() ->
-                                AlertHelper.showException("Greška", (Exception) error))
+                                AlertHelper.showException("Greška pri učitavanju predmeta", (Exception) error))
                 );
     }
 
@@ -80,7 +137,7 @@ public class IspitFormController {
                                 nastavnikCb.setItems(FXCollections.observableArrayList(nastavnici))
                         ),
                         error -> Platform.runLater(() ->
-                                AlertHelper.showException("Greška", (Exception) error))
+                                AlertHelper.showException("Greška pri učitavanju nastavnika", (Exception) error))
                 );
     }
 

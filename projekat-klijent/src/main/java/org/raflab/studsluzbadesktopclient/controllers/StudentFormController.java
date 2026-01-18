@@ -7,6 +7,9 @@ import javafx.scene.control.*;
 import lombok.RequiredArgsConstructor;
 import org.raflab.studsluzba.dtos.*;
 import org.raflab.studsluzbadesktopclient.app.MainView;
+import org.raflab.studsluzbadesktopclient.coder.CoderFactory;
+import org.raflab.studsluzbadesktopclient.coder.CoderType;
+import org.raflab.studsluzbadesktopclient.coder.SimpleCode;
 import org.raflab.studsluzbadesktopclient.services.SifarniciService;
 import org.raflab.studsluzbadesktopclient.services.StudentService;
 import org.raflab.studsluzbadesktopclient.utils.AlertHelper;
@@ -22,6 +25,7 @@ public class StudentFormController {
     private final StudentService studentService;
     private final SifarniciService sifarniciService;
     private final MainView mainView;
+    private final CoderFactory coderFactory; // ⭐ DODAJ OVO
 
     // LIČNI PODACI
     @FXML private TextField imeTf;
@@ -51,7 +55,7 @@ public class StudentFormController {
     @FXML private TextField licnuKartuIzdaoTf;
 
     // OBRAZOVANJE
-    @FXML private ComboBox<SrednjaSkolaResponse> srednjaSkolaCb;
+    @FXML private ComboBox<SimpleCode> srednjaSkolaCb; // ⭐ IZMENJENO - sad koristi SimpleCode
     @FXML private TextField uspehSrednjaSkolaTf;
     @FXML private TextField uspehPrijemniTf;
 
@@ -92,15 +96,13 @@ public class StudentFormController {
     }
 
     private void loadSifarnici() {
-        sifarniciService.getAllSrednjeSkole()
-                .collectList()
-                .subscribe(
-                        skole -> Platform.runLater(() ->
-                                srednjaSkolaCb.setItems(FXCollections.observableArrayList(skole))
-                        ),
-                        error -> AlertHelper.showException("Greška pri učitavanju srednjih škola", (Exception) error)
-                );
+        // ⭐ IZMENJENO - Učitaj srednje škole iz CODER-a umesto sa servera
+        var srednjeSkoleCoder = coderFactory.getSimpleCoder(CoderType.SREDNJA_SKOLA);
+        if (srednjeSkoleCoder != null) {
+            srednjaSkolaCb.setItems(FXCollections.observableArrayList(srednjeSkoleCoder.getCodes()));
+        }
 
+        // Učitaj studijske programe
         sifarniciService.getAllStudijskiProgrami()
                 .collectList()
                 .subscribe(
@@ -110,6 +112,7 @@ public class StudentFormController {
                         error -> AlertHelper.showException("Greška pri učitavanju studijskih programa", (Exception) error)
                 );
 
+        // Načini finansiranja
         nacinFinansiranjaCb.setItems(FXCollections.observableArrayList(
                 "Budžet", "Samofinansiranje"
         ));
@@ -125,6 +128,7 @@ public class StudentFormController {
 
     @FXML
     public void handleSave() {
+        // Validacija
         String validationError = validateForm();
         if (validationError != null) {
             errorLabel.setText(validationError);
@@ -132,17 +136,19 @@ public class StudentFormController {
             return;
         }
 
-        // ✅ KORISTI NOVI REQUEST DTO
-        StudentPodaciCreateRequest podaciReq = createStudentPodaciRequest();
+        // Kreiranje DTO objekta za StudentPodaci
+        StudentPodaciResponse podaci = createStudentPodaciDTO();
 
         errorLabel.setText("Čuvanje u toku...");
         saveBtn.setDisable(true);
 
-        studentService.saveStudentPodaci(podaciReq)
+        // Prvo sačuvaj osnovne podatke
+        studentService.saveStudentPodaci(podaci)
                 .subscribe(
                         studentId -> {
-                            StudentIndeksRequest indeksReq = createStudentIndeksDTO(studentId);
-                            studentService.saveIndeks(indeksReq)
+                            // Zatim sačuvaj indeks
+                            StudentIndeksRequest indeks = createStudentIndeksDTO(studentId);
+                            studentService.saveIndeks(indeks)
                                     .subscribe(
                                             indeksId -> Platform.runLater(() -> {
                                                 AlertHelper.showInfo("Uspeh",
@@ -186,41 +192,41 @@ public class StudentFormController {
         return null;
     }
 
-    // ✅ NOVA METODA - koristi StudentPodaciCreateRequest
-    private StudentPodaciCreateRequest createStudentPodaciRequest() {
-        StudentPodaciCreateRequest req = new StudentPodaciCreateRequest();
+    private StudentPodaciResponse createStudentPodaciDTO() {
+        StudentPodaciResponse dto = new StudentPodaciResponse();
 
-        req.setIme(imeTf.getText().trim());
-        req.setPrezime(prezimeTf.getText().trim());
-        req.setSrednjeIme(ValidationHelper.getTextOrNull(srednjeImeTf));
-        req.setPol(muskiRb.isSelected() ? 'M' : 'Ž');
+        dto.setIme(imeTf.getText().trim());
+        dto.setPrezime(prezimeTf.getText().trim());
+        dto.setSrednjeIme(ValidationHelper.getTextOrNull(srednjeImeTf));
+        dto.setPol(muskiRb.isSelected() ? 'M' : 'Ž');
 
-        req.setJmbg(jmbgTf.getText().trim());
-        req.setDatumRodjenja(datumRodjenjaDp.getValue());
-        req.setMestoRodjenja(ValidationHelper.getTextOrNull(mestoRodjenjaTf));
-        req.setDrzavaRodjenja(ValidationHelper.getTextOrNull(drzavaRodjenjaTf));
-        req.setDrzavljanstvo(ValidationHelper.getTextOrNull(drzavljanstvoTf));
-        req.setNacionalnost(ValidationHelper.getTextOrNull(nacionalnostTf));
+        dto.setJmbg(jmbgTf.getText().trim());
+        dto.setDatumRodjenja(datumRodjenjaDp.getValue());
+        dto.setMestoRodjenja(ValidationHelper.getTextOrNull(mestoRodjenjaTf));
+        dto.setDrzavaRodjenja(ValidationHelper.getTextOrNull(drzavaRodjenjaTf));
+        dto.setDrzavljanstvo(ValidationHelper.getTextOrNull(drzavljanstvoTf));
+        dto.setNacionalnost(ValidationHelper.getTextOrNull(nacionalnostTf));
 
-        req.setMestoPrebivalista(ValidationHelper.getTextOrNull(mestoPrebivalistaTf));
-        req.setAdresaPrebivalista(ValidationHelper.getTextOrNull(adresaPrebivalistaTf));
-        req.setBrojTelefonaMobilni(ValidationHelper.getTextOrNull(brojTelefonaMobilniTf));
-        req.setBrojTelefonaFiksni(ValidationHelper.getTextOrNull(brojTelefonaFiksniTf));
+        dto.setMestoPrebivalista(ValidationHelper.getTextOrNull(mestoPrebivalistaTf));
+        dto.setAdresaPrebivalista(ValidationHelper.getTextOrNull(adresaPrebivalistaTf));
+        dto.setBrojTelefonaMobilni(ValidationHelper.getTextOrNull(brojTelefonaMobilniTf));
+        dto.setBrojTelefonaFiksni(ValidationHelper.getTextOrNull(brojTelefonaFiksniTf));
 
-        req.setEmailFakultetski(emailFakultetskiTf.getText().trim());
-        req.setEmailPrivatni(ValidationHelper.getTextOrNull(emailPrivatniTf));
+        dto.setEmailFakultetski(emailFakultetskiTf.getText().trim());
+        dto.setEmailPrivatni(ValidationHelper.getTextOrNull(emailPrivatniTf));
 
-        req.setBrojLicneKarte(ValidationHelper.getTextOrNull(brojLicneKarteTf));
-        req.setLicnuKartuIzdao(ValidationHelper.getTextOrNull(licnuKartuIzdaoTf));
+        dto.setBrojLicneKarte(ValidationHelper.getTextOrNull(brojLicneKarteTf));
+        dto.setLicnuKartuIzdao(ValidationHelper.getTextOrNull(licnuKartuIzdaoTf));
 
-        SrednjaSkolaResponse skola = ValidationHelper.getSelectedOrNull(srednjaSkolaCb);
+        // ⭐ IZMENJENO - Uzmi naziv škole iz SimpleCode objekta
+        SimpleCode skola = ValidationHelper.getSelectedOrNull(srednjaSkolaCb);
         if (skola != null) {
-            req.setSrednjaSkola(skola.getNaziv());  // ✅ samo String
+            dto.setSrednjaSkola(skola.getCode()); // getCode() vraća naziv škole
         }
-        req.setUspehSrednjaSkola(ValidationHelper.getDoubleOrNull(uspehSrednjaSkolaTf));
-        req.setUspehPrijemni(ValidationHelper.getDoubleOrNull(uspehPrijemniTf));
+        dto.setUspehSrednjaSkola(ValidationHelper.getDoubleOrNull(uspehSrednjaSkolaTf));
+        dto.setUspehPrijemni(ValidationHelper.getDoubleOrNull(uspehPrijemniTf));
 
-        return req;
+        return dto;
     }
 
     private StudentIndeksRequest createStudentIndeksDTO(Long studentId) {
@@ -232,6 +238,8 @@ public class StudentFormController {
         dto.setNacinFinansiranja(nacinFinansiranjaCb.getSelectionModel().getSelectedItem());
         dto.setAktivan(true);
         dto.setVaziOd(LocalDate.now());
+
+        // Backend očekuje ID studenta, ne ceo objekat
         dto.setStudentId(studentId);
 
         return dto;
@@ -276,9 +284,4 @@ public class StudentFormController {
         mainView.changeRoot("studentSearch");
     }
 
-    @FXML
-    public void handleAddSrednjaSkola() {
-        mainView.openModal("common/srednjaSkolaForm", "Dodaj srednju školu", 500, 400);
-        loadSifarnici();
-    }
 }

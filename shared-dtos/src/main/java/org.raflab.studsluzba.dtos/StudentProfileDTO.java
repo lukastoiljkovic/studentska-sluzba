@@ -1,6 +1,7 @@
 package org.raflab.studsluzba.dtos;
 
 import java.util.List;
+import org.raflab.studsluzba.dtos.UplataResponse;
 
 import lombok.Data;
 
@@ -23,5 +24,6 @@ public class StudentProfileDTO {
     private StudentIndeksDTO indeks;
     private List<SlusaPredmetDTO> slusaPredmete;
     private List<String> nepolozeniPredmeti; // samo nazivi predmeta
+    private List<UplataResponse> uplate;
 }
 

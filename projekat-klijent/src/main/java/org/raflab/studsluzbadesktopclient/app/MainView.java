@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import lombok.RequiredArgsConstructor;
+import org.raflab.studsluzbadesktopclient.services.NavigationHistoryService;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -17,6 +18,7 @@ import java.util.Objects;
 public class MainView {
 
     private final ContextFXMLLoader fxmlLoader;
+    private final NavigationHistoryService historyService;
     private Scene scene;
 
     public Scene createScene() {
@@ -24,7 +26,8 @@ public class MainView {
             FXMLLoader loader = fxmlLoader.getLoader("/fxml/main.fxml");
             Parent root = loader.load();
             this.scene = new Scene(root, 1000, 600);
-            scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/css/stylesheet.css")).toExternalForm());
+            scene.getStylesheets().add(Objects.requireNonNull(
+                    getClass().getResource("/css/stylesheet.css")).toExternalForm());
             return scene;
         } catch (IOException e) {
             e.printStackTrace();
@@ -35,7 +38,12 @@ public class MainView {
     public void changeRoot(String fxmlPath) {
         try {
             FXMLLoader loader = fxmlLoader.getLoader("/fxml/" + fxmlPath + ".fxml");
-            scene.setRoot(loader.load());
+            Node content = loader.load();
+
+            // Dodaj u istoriju
+            historyService.pushPage(fxmlPath, getTitleForPath(fxmlPath), content);
+
+            scene.setRoot((Parent) content);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -44,7 +52,12 @@ public class MainView {
     public Node loadPane(String fxmlPath) {
         try {
             FXMLLoader loader = fxmlLoader.getLoader("/fxml/" + fxmlPath + ".fxml");
-            return loader.load();
+            Node content = loader.load();
+
+            // Dodaj u istoriju
+            historyService.pushPage(fxmlPath, getTitleForPath(fxmlPath), content);
+
+            return content;
         } catch (IOException e) {
             e.printStackTrace();
             return null;
@@ -100,4 +113,19 @@ public class MainView {
         }
     }
 
+    /**
+     * Generiše naziv stranice na osnovu putanje
+     */
+    private String getTitleForPath(String fxmlPath) {
+        // Možeš dodati custom logiku za različite putanje
+        return switch (fxmlPath) {
+            case "studentSearch" -> "Pretraga studenata";
+            case "studentForm" -> "Forma za studenta";
+            case "studentProfile" -> "Profil studenta";
+            case "ispitniRokList" -> "Ispitni rokovi";
+            case "ispitForm" -> "Kreiranje ispita";
+            case "studijskiProgramList" -> "Studijski programi";
+            default -> "Stranica";
+        };
+    }
 }

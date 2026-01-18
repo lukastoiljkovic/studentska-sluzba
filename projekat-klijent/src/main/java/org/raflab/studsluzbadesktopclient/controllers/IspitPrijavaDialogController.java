@@ -5,6 +5,7 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 import lombok.RequiredArgsConstructor;
 import org.raflab.studsluzba.dtos.*;
 import org.raflab.studsluzbadesktopclient.services.IspitService;
@@ -12,9 +13,6 @@ import org.raflab.studsluzbadesktopclient.services.PolozenPredmetService;
 import org.raflab.studsluzbadesktopclient.services.StudentService;
 import org.raflab.studsluzbadesktopclient.utils.AlertHelper;
 import org.springframework.stereotype.Component;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.cell.PropertyValueFactory;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -56,33 +54,20 @@ public class IspitPrijavaDialogController {
     public void initialize() {
         datumDp.setValue(LocalDate.now());
 
-        // Custom cell factory za ComboBox da prikaže predmet + datum
-        ispitCb.setCellFactory(lv -> new ListCell<>() {
+        // Custom StringConverter za ispite
+        ispitCb.setConverter(new StringConverter<IspitResponse>() {
             @Override
-            protected void updateItem(IspitResponse item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
-                    setText(String.format("%s - %s (%s)",
-                            item.getPredmetNaziv(),
-                            item.getIspitniRokNaziv(),
-                            item.getDatumVremePocetka().format(FORMATTER)));
-                }
+            public String toString(IspitResponse ispit) {
+                if (ispit == null) return "";
+                return String.format("%s - %s (%s)",
+                        ispit.getPredmetNaziv(),
+                        ispit.getIspitniRokNaziv(),
+                        ispit.getDatumVremePocetka().format(FORMATTER));
             }
-        });
 
-        ispitCb.setButtonCell(new ListCell<>() {
             @Override
-            protected void updateItem(IspitResponse item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
-                    setText(String.format("%s - %s",
-                            item.getPredmetNaziv(),
-                            item.getIspitniRokNaziv()));
-                }
+            public IspitResponse fromString(String string) {
+                return null;
             }
         });
     }
@@ -103,7 +88,8 @@ public class IspitPrijavaDialogController {
                                         indeks.getGodina() % 100));
                             }
                         }),
-                        error -> {}
+                        error -> Platform.runLater(() ->
+                                studentLabel.setText("Student ID: " + studentIndeksId))
                 );
 
         // Učitaj sve AKTIVNE ispite koje student može da prijavi
@@ -111,28 +97,35 @@ public class IspitPrijavaDialogController {
                 .collectList()
                 .subscribe(
                         ispiti -> {
-                            // Prvo dobavi položene predmete
+                            // prvo dobavi polozene predmete
                             polozenPredmetService.getPolozeniIspiti(studentIndeksId, 0, 1000)
                                     .subscribe(
                                             polozeniPage -> Platform.runLater(() -> {
-                                                // Ekstraktuj ID-eve položenih predmeta
+                                                // ekstraktuj id-eve polozenih predmeta
                                                 java.util.Set<Long> polozeniPredmetiIds = polozeniPage.getContent()
                                                         .stream()
-                                                        .map(org.raflab.studsluzba.dtos.PolozenPredmetResponse::getPredmetId)
-                                                        .collect(java.util.stream.Collectors.toSet());
+                                                        .map(PolozenPredmetResponse::getPredmetId)
+                                                        .collect(Collectors.toSet());
 
-                                                // Filtriraj ispite:
-                                                // 1. Nije zaključen
-                                                // 2. Predmet nije položen
+                                                // filtriraj ispite:
+                                                // 1. nije zakljucen
+                                                // 2. predmet nije polozen
                                                 var dostupni = ispiti.stream()
                                                         .filter(i -> !i.isZakljucen())
                                                         .filter(i -> !polozeniPredmetiIds.contains(i.getPredmetId()))
-                                                        .collect(java.util.stream.Collectors.toList());
+                                                        .sorted((a, b) ->
+                                                                a.getDatumVremePocetka()
+                                                                        .compareTo(b.getDatumVremePocetka()))
+                                                        .collect(Collectors.toList());
 
-                                                ispitCb.setItems(FXCollections.observableArrayList(dostupni));
+                                                ispitCb.setItems(
+                                                        FXCollections.observableArrayList(dostupni)
+                                                );
 
                                                 if (dostupni.isEmpty()) {
                                                     errorLabel.setText("Nema dostupnih ispita za prijavu!");
+                                                } else {
+                                                    errorLabel.setText("");
                                                 }
                                             }),
                                             error -> Platform.runLater(() ->
@@ -144,7 +137,6 @@ public class IspitPrijavaDialogController {
                 );
     }
 
-    @FXML
     public void handleSave() {
         if (ispitCb.getValue() == null) {
             errorLabel.setText("Izaberite ispit!");
@@ -154,11 +146,6 @@ public class IspitPrijavaDialogController {
             errorLabel.setText("Izaberite datum!");
             return;
         }
-
-        IspitPrijavaRequest req = new IspitPrijavaRequest();
-        req.setStudentIndeksId(studentIndeksId);
-        req.setIspitId(ispitCb.getValue().getId());
-        req.setDatum(datumDp.getValue());
 
         errorLabel.setText("Prijava u toku...");
         saveBtn.setDisable(true);

@@ -11,9 +11,6 @@
     <Menu text="Studenti">
         <MenuItem text="Pretraga studenata" onAction="#openStudentSearch"/>
         <MenuItem text="Novi student" onAction="#openNewStudent"/>
-        <SeparatorMenuItem/>
-        <MenuItem text="Prijava ispita" onAction="#openIspitPrijava"/>
-        <MenuItem text="Uplate" onAction="#openUplate"/>
     </Menu>
 
     <!-- PREDMETI Menu -->

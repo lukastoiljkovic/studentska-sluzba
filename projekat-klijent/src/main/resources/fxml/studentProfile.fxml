@@ -1,178 +1,238 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="org.raflab.studsluzbadesktopclient.controllers.StudentProfileController"
-            prefWidth="1000" prefHeight="700">
+            prefHeight="700.0" prefWidth="1000.0">
 
     <!-- HEADER -->
     <top>
-        <VBox spacing="10" style="-fx-padding: 20;">
+        <VBox spacing="10" styleClass="card">
+            <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
+
             <HBox spacing="20" alignment="CENTER_LEFT">
-                <VBox spacing="5">
-                    <Label text="Student:" style="-fx-font-weight: bold;"/>
-                    <Label fx:id="imeLabel" style="-fx-font-size: 18px;"/>
-                    <Label fx:id="prezimeLabel" style="-fx-font-size: 18px;"/>
-                </VBox>
+                <Label text="IME:" style="-fx-font-weight: bold;"/>
+                <Label fx:id="imeLabel" text="-" style="-fx-font-size: 16px;"/>
 
-                <VBox spacing="5">
-                    <Label text="Indeks:" style="-fx-font-weight: bold;"/>
-                    <Label fx:id="indeksLabel" style="-fx-font-size: 16px;"/>
-                </VBox>
-                <VBox spacing="5">
-                    <Label text="JMBG:" style="-fx-font-weight: bold;"/>
-                    <Label fx:id="jmbgLabel"/>
-                </VBox>
+                <Label text="PREZIME:" style="-fx-font-weight: bold;"/>
+                <Label fx:id="prezimeLabel" text="-" style="-fx-font-size: 16px;"/>
 
-                <VBox spacing="5">
-                    <Label text="Email:" style="-fx-font-weight: bold;"/>
-                    <Label fx:id="emailLabel"/>
-                </VBox>
-
-                <VBox spacing="5">
-                    <Label text="Program:" style="-fx-font-weight: bold;"/>
-                    <Label fx:id="studProgramLabel"/>
-                </VBox>
-
-                <VBox spacing="5">
-                    <Label text="ESPB:" style="-fx-font-weight: bold;"/>
-                    <Label fx:id="espbLabel" style="-fx-font-size: 16px; -fx-text-fill: green;"/>
-                </VBox>
-
-                <VBox spacing="5">
-                    <Label text="Prosek:" style="-fx-font-weight: bold;"/>
-                    <Label fx:id="prosekLabel" style="-fx-font-size: 16px; -fx-text-fill: blue;"/>
-                </VBox>
+                <Label text="INDEKS:" style="-fx-font-weight: bold;"/>
+                <Label fx:id="indeksLabel" text="-" style="-fx-font-size: 16px;"/>
             </HBox>
 
-            <!-- AKCIONI DUGMIĆI -->
-            <HBox spacing="10">
-                <Button fx:id="upisGodineBtn" text="Upis Godine" onAction="#handleUpisGodine" styleClass="success-button"/>
-                <Button fx:id="obnovaGodineBtn" text="Obnova Godine" onAction="#handleObnovaGodine" styleClass="warning-button"/>
-                <Button fx:id="dodajUplatuBtn" text="Dodaj Uplatu" onAction="#handleDodajUplatu" styleClass="primary-button"/>
-                <Button fx:id="refreshBtn" text="Osveži" onAction="#handleRefresh"/>
-                <Button fx:id="closeBtn" text="Zatvori" onAction="#handleClose" styleClass="danger-button"/>
+            <HBox spacing="20" alignment="CENTER_LEFT">
+                <Label text="JMBG:" style="-fx-font-weight: bold;"/>
+                <Label fx:id="jmbgLabel" text="-"/>
+
+                <Label text="Email:" style="-fx-font-weight: bold;"/>
+                <Label fx:id="emailLabel" text="-"/>
+
+                <Label text="Program:" style="-fx-font-weight: bold;"/>
+                <Label fx:id="studProgramLabel" text="-"/>
+            </HBox>
+
+            <HBox spacing="20" alignment="CENTER_LEFT">
+                <Label text="ESPB:" style="-fx-font-weight: bold;"/>
+                <Label fx:id="espbLabel" text="0"/>
+
+                <Label text="Prosek:" style="-fx-font-weight: bold;"/>
+                <Label fx:id="prosekLabel" text="0.00"/>
+
+                <Label fx:id="statusLabel" text="Status" style="-fx-text-fill: #666;"/>
             </HBox>
         </VBox>
     </top>
 
-    <!-- TAB PANE -->
+    <!-- MAIN CONTENT - TAB PANE -->
     <center>
-        <TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE">
+        <TabPane fx:id="tabPane" id="StudentProfileTabPane" tabClosingPolicy="UNAVAILABLE">
+            <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
 
             <!-- TAB: LIČNI PODACI -->
-            <Tab fx:id="licniPodaciTab" text="Lični Podaci">
+            <Tab fx:id="licniPodaciTab" text="Lični podaci">
                 <ScrollPane fitToWidth="true">
-                    <GridPane hgap="10" vgap="10" style="-fx-padding: 20;">
-                        <Label text="Ime:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-                        <TextField fx:id="imeTf" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                    <VBox spacing="15">
+                        <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
 
-                        <Label text="Prezime:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-                        <TextField fx:id="prezimeTf" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                        <Label text="OSNOVNI PODACI" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                        <Separator/>
 
-                        <Label text="Srednje ime:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-                        <TextField fx:id="srednjeImeTf" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                        <GridPane hgap="10" vgap="10">
+                            <columnConstraints>
+                                <ColumnConstraints minWidth="120" prefWidth="120"/>
+                                <ColumnConstraints minWidth="200" prefWidth="250" hgrow="SOMETIMES"/>
+                                <ColumnConstraints minWidth="120" prefWidth="120"/>
+                                <ColumnConstraints minWidth="200" prefWidth="250" hgrow="SOMETIMES"/>
+                            </columnConstraints>
 
-                        <Label text="JMBG:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-                        <TextField fx:id="jmbgTf" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                            <Label text="Ime:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                            <TextField fx:id="imeTf" editable="false" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
-                        <Label text="Datum rođenja:" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
-                        <DatePicker fx:id="datumRodjenjaDp" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+                            <Label text="Prezime:" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                            <TextField fx:id="prezimeTf" editable="false" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
 
-                        <Label text="Mesto rođenja:" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
-                        <TextField fx:id="mestoRodjenjaTf" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+                            <Label text="Srednje ime:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                            <TextField fx:id="srednjeImeTf" editable="false" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-                        <Label text="Država rođenja:" GridPane.columnIndex="0" GridPane.rowIndex="6"/>
-                        <TextField fx:id="drzavaRodjenjaTf" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="6"/>
+                            <Label text="JMBG:" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                            <TextField fx:id="jmbgTf" editable="false" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
 
-                        <Label text="Adresa:" GridPane.columnIndex="0" GridPane.rowIndex="7"/>
-                        <TextField fx:id="adresaTf" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="7"/>
+                            <Label text="Datum rođenja:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                            <DatePicker fx:id="datumRodjenjaDp" editable="false" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 
-                        <Label text="Telefon:" GridPane.columnIndex="0" GridPane.rowIndex="8"/>
-                        <TextField fx:id="telefonTf" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="8"/>
+                            <Label text="Mesto rođenja:" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
+                            <TextField fx:id="mestoRodjenjaTf" editable="false" GridPane.rowIndex="2" GridPane.columnIndex="3"/>
 
-                        <Label text="Email privatni:" GridPane.columnIndex="0" GridPane.rowIndex="9"/>
-                        <TextField fx:id="emailPrivatniTf" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="9"/>
+                            <Label text="Država rođenja:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                            <TextField fx:id="drzavaRodjenjaTf" editable="false" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                        </GridPane>
 
-                        <Label text="Email fakultetski:" GridPane.columnIndex="0" GridPane.rowIndex="10"/>
-                        <TextField fx:id="emailFakultetskiTf" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="10"/>
+                        <Label text="KONTAKT" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                        <Separator/>
 
-                        <Label text="Srednja škola:" GridPane.columnIndex="0" GridPane.rowIndex="11"/>
-                        <TextField fx:id="srednjaSkolaTf" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="11"/>
-                    </GridPane>
+                        <GridPane hgap="10" vgap="10">
+                            <columnConstraints>
+                                <ColumnConstraints minWidth="120" prefWidth="120"/>
+                                <ColumnConstraints minWidth="200" prefWidth="250" hgrow="SOMETIMES"/>
+                                <ColumnConstraints minWidth="120" prefWidth="120"/>
+                                <ColumnConstraints minWidth="200" prefWidth="250" hgrow="SOMETIMES"/>
+                            </columnConstraints>
+
+                            <Label text="Adresa:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                            <TextField fx:id="adresaTf" editable="false" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                            <Label text="Telefon:" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                            <TextField fx:id="telefonTf" editable="false" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
+
+                            <Label text="Email fakultetski:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                            <TextField fx:id="emailFakultetskiTf" editable="false" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                            <Label text="Email privatni:" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                            <TextField fx:id="emailPrivatniTf" editable="false" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+                        </GridPane>
+
+                        <Label text="OBRAZOVANJE" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                        <Separator/>
+
+                        <GridPane hgap="10" vgap="10">
+                            <columnConstraints>
+                                <ColumnConstraints minWidth="120" prefWidth="120"/>
+                                <ColumnConstraints minWidth="200" prefWidth="250" hgrow="SOMETIMES"/>
+                            </columnConstraints>
+
+                            <Label text="Srednja škola:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                            <TextField fx:id="srednjaSkolaTf" editable="false" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                        </GridPane>
+                    </VBox>
                 </ScrollPane>
             </Tab>
 
             <!-- TAB: POLOŽENI ISPITI -->
-            <Tab fx:id="polozeniTab" text="Položeni Ispiti">
-                <TableView fx:id="polozeniTable">
-                    <columns>
-                        <TableColumn fx:id="polPredmetCol" text="Predmet" prefWidth="300"/>
-                        <TableColumn fx:id="polOcenaCol" text="Ocena" prefWidth="80"/>
-                        <TableColumn fx:id="polDatumCol" text="Datum" prefWidth="120"/>
-                        <TableColumn fx:id="polEspbCol" text="ESPB" prefWidth="80"/>
-                    </columns>
-                </TableView>
+            <Tab fx:id="polozeniTab" text="Položeni ispiti">
+                <VBox spacing="10">
+                    <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+
+                    <TableView fx:id="polozeniTable" VBox.vgrow="ALWAYS">
+                        <columns>
+                            <TableColumn fx:id="polPredmetCol" text="Predmet" prefWidth="300"/>
+                            <TableColumn fx:id="polOcenaCol" text="Ocena" prefWidth="80"/>
+                            <TableColumn fx:id="polEspbCol" text="ESPB" prefWidth="80"/>
+                            <TableColumn fx:id="polDatumCol" text="Datum" prefWidth="120"/>
+                        </columns>
+                    </TableView>
+
+                    <Pagination fx:id="polozeniPagination" pageCount="1"/>
+                </VBox>
             </Tab>
 
             <!-- TAB: NEPOLOŽENI ISPITI -->
-            <Tab fx:id="nepolozeniTab" text="Nepoloženi Ispiti">
-                <TableView fx:id="nepolozeniTable">
-                    <columns>
-                        <TableColumn fx:id="nepolPredmetCol" text="Predmet" prefWidth="300"/>
-                        <TableColumn fx:id="nepolEspbCol" text="ESPB" prefWidth="80"/>
-                        <TableColumn fx:id="nepolIzlasciCol" text="Broj izlazaka" prefWidth="120"/>
-                    </columns>
-                </TableView>
+            <Tab fx:id="nepolozeniTab" text="Nepoloženi ispiti">
+                <VBox spacing="10">
+                    <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+
+                    <TableView fx:id="nepolozeniTable" VBox.vgrow="ALWAYS">
+                        <columns>
+                            <TableColumn fx:id="nepolPredmetCol" text="Predmet" prefWidth="300"/>
+                            <TableColumn fx:id="nepolEspbCol" text="ESPB" prefWidth="80"/>
+                            <TableColumn fx:id="nepolIzlasciCol" text="Broj izlazaka" prefWidth="120"/>
+                        </columns>
+                    </TableView>
+
+                    <Pagination fx:id="nepolozeniPagination" pageCount="1"/>
+                </VBox>
             </Tab>
 
             <!-- TAB: UPISANE GODINE -->
-            <Tab fx:id="upisaneGodineTab" text="Upisane Godine">
-                <TableView fx:id="upisaneGodineTable">
-                    <columns>
-                        <TableColumn fx:id="ugSkolskaGodinaCol" text="Školska Godina" prefWidth="150"/>
-                        <TableColumn fx:id="ugGodinaStudijaCol" text="Godina Studija" prefWidth="120"/>
-                        <TableColumn fx:id="ugNacinFinansiranjaCol" text="Finansiranje" prefWidth="150"/>
-                        <TableColumn fx:id="ugIznosCol" text="Iznos (EUR)" prefWidth="100"/>
-                        <TableColumn fx:id="ugUplacenoCol" text="Uplaćeno" prefWidth="100"/>
-                        <TableColumn fx:id="ugPreostaloCol" text="Preostalo" prefWidth="100"/>
-                    </columns>
-                </TableView>
+            <Tab fx:id="upisaneGodineTab" text="Upisane godine">
+                <VBox spacing="10">
+                    <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+
+                    <TableView fx:id="upisaneGodineTable" VBox.vgrow="ALWAYS">
+                        <columns>
+                            <TableColumn fx:id="ugSkolskaGodinaCol" text="Školska godina" prefWidth="150"/>
+                            <TableColumn fx:id="ugGodinaStudijaCol" text="Godina studija" prefWidth="120"/>
+                            <TableColumn fx:id="ugDatumCol" text="Datum" prefWidth="120"/>
+                            <TableColumn fx:id="ugNapomenaCol" text="Napomena" prefWidth="300"/>
+                        </columns>
+                    </TableView>
+                </VBox>
             </Tab>
 
             <!-- TAB: OBNOVE GODINE -->
-            <Tab fx:id="obnoveTab" text="Obnove Godine">
-                <TableView fx:id="obnoveTable">
-                    <columns>
-                        <TableColumn fx:id="obSkolskaGodinaCol" text="Školska Godina" prefWidth="150"/>
-                        <TableColumn fx:id="obGodinaStudijaCol" text="Godina Studija" prefWidth="120"/>
-                        <TableColumn fx:id="obDatumCol" text="Datum" prefWidth="120"/>
-                        <TableColumn fx:id="obNapomenaCol" text="Napomena" prefWidth="300"/>
-                    </columns>
-                </TableView>
+            <Tab fx:id="obnoveTab" text="Obnove godine">
+                <VBox spacing="10">
+                    <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+
+                    <TableView fx:id="obnoveTable" VBox.vgrow="ALWAYS">
+                        <columns>
+                            <TableColumn fx:id="obSkolskaGodinaCol" text="Školska godina" prefWidth="150"/>
+                            <TableColumn fx:id="obGodinaStudijaCol" text="Godina studija" prefWidth="120"/>
+                            <TableColumn fx:id="obDatumCol" text="Datum" prefWidth="120"/>
+                            <TableColumn fx:id="obNapomenaCol" text="Napomena" prefWidth="300"/>
+                        </columns>
+                    </TableView>
+                </VBox>
             </Tab>
 
             <!-- TAB: UPLATE -->
             <Tab fx:id="uplateTab" text="Uplate">
-                <TableView fx:id="uplateTable">
-                    <columns>
-                        <TableColumn fx:id="uplDatumCol" text="Datum" prefWidth="120"/>
-                        <TableColumn fx:id="uplIznosEURCol" text="Iznos (EUR)" prefWidth="120"/>
-                        <TableColumn fx:id="uplIznosRSDCol" text="Iznos (RSD)" prefWidth="120"/>
-                        <TableColumn fx:id="uplNapomenaCol" text="Napomena" prefWidth="300"/>
-                    </columns>
-                </TableView>
-            </Tab>
+                <VBox spacing="10">
+                    <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
 
+                    <HBox spacing="20" alignment="CENTER_LEFT">
+                        <Label fx:id="preostaloEURLabel" text="Preostalo EUR: 0.00" style="-fx-font-weight: bold;"/>
+                        <Label fx:id="preostaloRSDLabel" text="Preostalo RSD: 0.00" style="-fx-font-weight: bold;"/>
+                    </HBox>
+
+                    <TableView fx:id="uplateTable" VBox.vgrow="ALWAYS">
+                        <columns>
+                            <TableColumn fx:id="uplDatumCol" text="Datum" prefWidth="120"/>
+                            <TableColumn fx:id="uplIznosEURCol" text="Iznos (EUR)" prefWidth="120"/>
+                            <TableColumn fx:id="uplIznosRSDCol" text="Iznos (RSD)" prefWidth="120"/>
+                            <TableColumn fx:id="uplKursCol" text="Kurs" prefWidth="100"/>
+                        </columns>
+                    </TableView>
+                </VBox>
+            </Tab>
         </TabPane>
     </center>
 
-    <!-- STATUS BAR -->
+    <!-- BOTTOM - AKCIONI DUGMIĆI -->
     <bottom>
-        <HBox style="-fx-padding: 5; -fx-background-color: #2c3e50;">
-            <Label fx:id="statusLabel" text="Spremno" style="-fx-text-fill: white;"/>
+        <HBox spacing="10" alignment="CENTER_RIGHT" styleClass="card">
+            <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
+
+            <Button fx:id="upisGodineBtn" text="Upis godine" onAction="#handleUpisGodine" styleClass="primary-button"/>
+            <Button fx:id="obnovaGodineBtn" text="Obnova godine" onAction="#handleObnovaGodine" styleClass="warning-button"/>
+            <Button fx:id="dodajUplatuBtn" text="Dodaj uplatu" onAction="#handleDodajUplatu" styleClass="success-button"/>
+            <Button fx:id="prijaviIspitBtn" text="Prijavi ispit" onAction="#handlePrijaviIspit" styleClass="primary-button"/>
+            <Button fx:id="refreshBtn" text="Refresh" onAction="#handleRefresh"/>
+            <Button fx:id="closeBtn" text="Zatvori" onAction="#handleClose" styleClass="danger-button"/>
         </HBox>
     </bottom>
 

@@ -18,6 +18,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
+import org.raflab.studsluzba.repositories.UpisGodineRepository;
+import org.raflab.studsluzba.repositories.UplataRepository;
+import org.raflab.studsluzba.utils.Converters;
+import org.raflab.studsluzba.model.entities.UpisGodine;
+import org.raflab.studsluzba.model.entities.Uplata;
+import org.raflab.studsluzba.dtos.UplataResponse;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +38,10 @@ public class StudentProfileService {
     final StudentIndeksRepository studentIndeksRepo;
     final StudentPodaciRepository studentPodaciRepo;
     final SlusaPredmetRepository slusaPredmetRepo;
-    final PolozenPredmetRepository polozenPredmetRepo; // DODAJ OVO
+    final PolozenPredmetRepository polozenPredmetRepo; 
     final StudentIndeksService studentIndeksService;
+    final UpisGodineRepository upisGodineRepository;
+    final UplataRepository uplataRepository;
 
     @Transactional(readOnly = true)
     public StudentProfileDTO getStudentProfile(Long indeksId) {
@@ -93,6 +102,31 @@ public class StudentProfileService {
         }
 
         retVal.setNepolozeniPredmeti(nepolozeni);
+
+        // ================= UPLATE =================
+
+        // 1. Nađi sve upise godina za ovaj indeks
+        List<UpisGodine> upisi = upisGodineRepository
+                .findByStudentIndeksStudProgramOznakaAndStudentIndeksGodinaAndStudentIndeksBroj(
+                        studIndeks.getStudProgramOznaka(),
+                        studIndeks.getGodina(),
+                        studIndeks.getBroj()
+                );
+
+        // 2. Za svaki upis pokupi uplate
+        List<UplataResponse> sveUplate = new ArrayList<>();
+
+        for (UpisGodine upis : upisi) {
+            List<Uplata> uplateZaUpis =
+                    uplataRepository.findByUpisGodineId(upis.getId());
+
+            sveUplate.addAll(
+                    Converters.toUplataResponseList(uplateZaUpis)
+            );
+        }
+        
+        retVal.setUplate(sveUplate);
+
 
         return retVal;
     }

@@ -15,7 +15,6 @@ module stud_sluzba_desktop_client {
     requires com.fasterxml.jackson.databind;
     requires spring.data.commons;
 
-    requires jasperreports;
     exports org.raflab.studsluzbadesktopclient;
     exports org.raflab.studsluzbadesktopclient.dtos;
     exports org.raflab.studsluzbadesktopclient.controllers;

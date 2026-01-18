@@ -6,6 +6,7 @@ public enum CoderType {
     DRZAVLJANSTVO,
     DRZAVA (TextFileSimpleCoder.class,"coders/drzave.txt"),
     TIP_SREDNJE_SKOLE(TextFileSimpleCoder.class,"coders/tipsrednjeskole.txt"),
+    SREDNJA_SKOLA(TextFileSimpleCoder.class,"coders/srednjeskole.txt"), // ⭐ DODAJ OVO
     VISOKOSKOLSKA_USTANOVA,
     NASTAVNO_ZVANJE,
     VRSTA_STUDIJA ,

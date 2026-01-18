@@ -9,6 +9,7 @@ public class CoderFactory {
     private Coder<SimpleCode> drzaveCoder;
     private Coder<SimpleCode> mestaCoder;
     private Coder<SimpleCode> tipSrednjeSkole;
+    private Coder<SimpleCode> srednjaSkolaCoder; // ⭐ DODAJ OVO
     private Coder<SimpleCode> ispitniRok;
 
     // ucita samo ako nije ucitano
@@ -28,6 +29,10 @@ public class CoderFactory {
                 if(tipSrednjeSkole==null)
                     tipSrednjeSkole = new TextFileSimpleCoder(coderType.getPath());
                 return tipSrednjeSkole;
+            case SREDNJA_SKOLA: // ⭐ DODAJ OVO
+                if(srednjaSkolaCoder==null)
+                    srednjaSkolaCoder = new TextFileSimpleCoder(coderType.getPath());
+                return srednjaSkolaCoder;
             case ISPITNI_ROK:
                 if(ispitniRok==null)
                     ispitniRok = new TextFileSimpleCoder(coderType.getPath());

@@ -5,6 +5,7 @@ import org.raflab.studsluzba.model.entities.PredispitnaIzlazak;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
+import org.raflab.studsluzba.model.entities.SlusaPredmet;
 
 import java.util.List;
 
@@ -23,4 +24,5 @@ public interface PredispitnaIzlazakRepository extends CrudRepository<Predispitna
             Long predmetId,
             Long skolskaGodinaId
     );
+    List<PredispitnaIzlazak> findAllBySlusaPredmet(SlusaPredmet slusaPredmet);
 }

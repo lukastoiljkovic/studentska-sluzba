@@ -10,6 +10,9 @@ import lombok.RequiredArgsConstructor;
 import org.raflab.studsluzba.dtos.SrednjaSkolaResponse;
 import org.raflab.studsluzba.dtos.StudentIndeksResponse;
 import org.raflab.studsluzbadesktopclient.app.MainView;
+import org.raflab.studsluzbadesktopclient.coder.CoderFactory;
+import org.raflab.studsluzbadesktopclient.coder.CoderType;
+import org.raflab.studsluzbadesktopclient.coder.SimpleCode;
 import org.raflab.studsluzbadesktopclient.dtos.StudentDTO;
 import org.raflab.studsluzbadesktopclient.services.StudentService;
 import org.raflab.studsluzbadesktopclient.services.SifarniciService;
@@ -26,6 +29,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StudentSearchController {
 
+    private final CoderFactory coderFactory;
+
     private final StudentService studentService;
     private final SifarniciService sifarniciService;
     private final MainView mainView;
@@ -33,7 +38,7 @@ public class StudentSearchController {
     @FXML private TextField imeTf;
     @FXML private TextField prezimeTf;
     @FXML private TextField fastSearchTf;
-    @FXML private ComboBox<SrednjaSkolaResponse> srednjaSkolaCb;
+    @FXML private ComboBox<SimpleCode> srednjaSkolaCb;
 
     @FXML private TableView<StudentDTO> resultTable;
     @FXML private TableColumn<StudentDTO, String> imeCol;
@@ -50,7 +55,6 @@ public class StudentSearchController {
         setupTable();
         setupFastSearch();
         setupDoubleClick();
-        setupSrednjaSkolaCombo();
         loadSrednjeSkole();
     }
 
@@ -94,30 +98,15 @@ public class StudentSearchController {
         });
     }
 
-    private void setupSrednjaSkolaCombo() {
-        srednjaSkolaCb.setConverter(new javafx.util.StringConverter<>() {
-            @Override
-            public String toString(SrednjaSkolaResponse skola) {
-                return skola == null ? "" : skola.getNaziv();
-            }
-
-            @Override
-            public SrednjaSkolaResponse fromString(String s) {
-                return null;
-            }
-        });
-    }
-
-
     private void loadSrednjeSkole() {
-        sifarniciService.getAllSrednjeSkole()
-                .collectList()
-                .subscribe(
-                        list -> Platform.runLater(() ->
-                                srednjaSkolaCb.setItems(FXCollections.observableArrayList(list))),
-                        err -> AlertHelper.showException("Greška", (Exception) err)
-                );
+        var coder = coderFactory.getSimpleCoder(CoderType.SREDNJA_SKOLA);
+        if (coder != null) {
+            srednjaSkolaCb.setItems(
+                    FXCollections.observableArrayList(coder.getCodes())
+            );
+        }
     }
+
 
     // ================= SEARCH =================
 
@@ -163,7 +152,7 @@ public class StudentSearchController {
 
     @FXML
     public void handleSearchBySrednjaSkola() {
-        SrednjaSkolaResponse skola = srednjaSkolaCb.getValue();
+        SimpleCode skola = srednjaSkolaCb.getValue();
         if (skola == null) {
             AlertHelper.showWarning("Upozorenje", "Izaberite srednju školu.");
             return;
@@ -171,20 +160,28 @@ public class StudentSearchController {
 
         statusLabel.setText("Pretraga po srednjoj školi...");
 
-        sifarniciService.getStudentiPoSrednjojSkoli(skola.getNaziv())
-                .flatMap(studentPodaci ->
-                        studentService.getIndeksiForStudent(studentPodaci.getId())
-                                .filter(StudentIndeksResponse::isAktivan)
-                                .next()
-                                .map(indeks -> {
+        String nazivSkole = skola.getCode();
+
+        sifarniciService.getStudentiPoSrednjojSkoli(nazivSkole)
+                .flatMap(sp ->
+                        studentService.searchSync(
+                                        sp.getIme(),
+                                        sp.getPrezime(),
+                                        null, null, null,
+                                        0, 1
+                                )
+                                .flatMapIterable(list -> list)
+                                // ✅ OBAVEZNO mapiranje SERVER → CLIENT DTO
+                                .map(s -> {
                                     StudentDTO dto = new StudentDTO();
-                                    dto.setIdIndeks(indeks.getId());
-                                    dto.setIme(studentPodaci.getIme());
-                                    dto.setPrezime(studentPodaci.getPrezime());
-                                    dto.setStudProgramOznaka(indeks.getStudProgramOznaka());
-                                    dto.setBroj(indeks.getBroj());
-                                    dto.setGodinaUpisa(indeks.getGodina());
-                                    dto.setAktivanIndeks(indeks.isAktivan());
+                                    dto.setIdIndeks(s.getIdIndeks());
+                                    dto.setIdStudentPodaci(s.getIdStudentPodaci());
+                                    dto.setIme(s.getIme());
+                                    dto.setPrezime(s.getPrezime());
+                                    dto.setGodinaUpisa(s.getGodinaUpisa());
+                                    dto.setStudProgramOznaka(s.getStudProgramOznaka());
+                                    dto.setBroj(s.getBroj());
+                                    dto.setAktivanIndeks(s.isAktivanIndeks());
                                     return dto;
                                 })
                 )
@@ -200,6 +197,8 @@ public class StudentSearchController {
                         })
                 );
     }
+
+
 
 
     @FXML

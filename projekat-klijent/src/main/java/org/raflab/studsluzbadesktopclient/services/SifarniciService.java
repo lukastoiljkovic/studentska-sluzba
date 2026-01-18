@@ -63,7 +63,7 @@ public class SifarniciService {
     }
 
     public Flux<StudentPodaciResponse> getStudentiPoSrednjojSkoli(String nazivSkole) {
-        return webClient.post()
+        return webClient.get()
                 .uri("/api/student/po-srednjoj-skoli?naziv=" + nazivSkole)
                 .retrieve()
                 .bodyToFlux(StudentPodaciResponse.class);

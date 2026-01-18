@@ -14,9 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,59 +27,75 @@ public class PolozenPredmetService {
     private final IspitIzlazakRepository ispitIzlazakRepository;
     private final SlusaPredmetRepository slusaPredmetRepository; // DODAJ OVO
 
-    // POLOŽENI - ostaje isto
     public Page<PolozenPredmetResponse> getPolozeniIspiti(Long studentIndeksId, Pageable pageable) {
         return polozenPredmetRepository
                 .findByStudentIndeksIdAndOcenaIsNotNull(studentIndeksId, pageable)
                 .map(Converters::toPolozenPredmetResponse);
     }
 
-    /// U servisu
     @Transactional(readOnly = true)
-    public Page<NepolozenPredmetResponse> getNepolozeniIspiti(Long studentIndeksId, Pageable pageable) {
-        List<SlusaPredmet> slusaPredmete = slusaPredmetRepository
-                .findAllByStudentIndeksIdWithPredmet(studentIndeksId);
+    public Page<NepolozenPredmetResponse> getNepolozeniIspiti(
+            Long studentIndeksId,
+            Pageable pageable
+    ) {
+        List<SlusaPredmet> slusaPredmete =
+                slusaPredmetRepository.findAllByStudentIndeksIdWithPredmet(studentIndeksId);
 
-        List<PolozenPredmet> polozeni = polozenPredmetRepository
-                .findByStudentIndeksIdAndOcenaIsNotNull(studentIndeksId);
+        List<PolozenPredmet> polozeni =
+                polozenPredmetRepository.findByStudentIndeksIdAndOcenaIsNotNull(studentIndeksId);
 
         Set<Long> polozeniPredmetiIds = polozeni.stream()
                 .map(pp -> pp.getPredmet().getId())
                 .collect(Collectors.toSet());
 
-        List<NepolozenPredmetResponse> nepolozeni = slusaPredmete.stream()
-                .filter(sp -> sp.getDrziPredmet() != null &&
-                        sp.getDrziPredmet().getPredmet() != null &&
-                        !polozeniPredmetiIds.contains(sp.getDrziPredmet().getPredmet().getId()))
-                .map(sp -> {
-                    Predmet p = sp.getDrziPredmet().getPredmet();
-                    Nastavnik n = sp.getDrziPredmet().getNastavnik();
+        Map<Long, NepolozenPredmetResponse> nepolozeniMapa = new LinkedHashMap<>();
 
-                    NepolozenPredmetResponse response = new NepolozenPredmetResponse();
-                    response.setSlusaPredmetId(sp.getId());
-                    response.setPredmetId(p.getId());
-                    response.setPredmetSifra(p.getSifra());
-                    response.setPredmetNaziv(p.getNaziv());
-                    response.setEspb(p.getEspb());
-                    response.setSemestar(p.getSemestar());
+        for (SlusaPredmet sp : slusaPredmete) {
+            if (sp.getDrziPredmet() == null) continue;
+            Predmet p = sp.getDrziPredmet().getPredmet();
+            if (p == null) continue;
 
-                    if (n != null) {
-                        response.setNastavnikIme(n.getIme() + " " + n.getPrezime());
-                    }
+            // preskoči ako je položen
+            if (polozeniPredmetiIds.contains(p.getId())) continue;
 
-                    // Broj izlazaka na ispit
-                    long brojIzlazaka = ispitIzlazakRepository
-                            .countByStudentIndeks_IdAndIspitPrijava_Ispit_Predmet_Id(studentIndeksId, p.getId());
-                    response.setBrojIzlazaka((int) brojIzlazaka);
+            // već dodat → preskoči
+            if (nepolozeniMapa.containsKey(p.getId())) continue;
 
-                    return response;
-                })
-                .collect(Collectors.toList());
+            Nastavnik n = sp.getDrziPredmet().getNastavnik();
+
+            NepolozenPredmetResponse response = new NepolozenPredmetResponse();
+            response.setSlusaPredmetId(sp.getId());
+            response.setPredmetId(p.getId());
+            response.setPredmetSifra(p.getSifra());
+            response.setPredmetNaziv(p.getNaziv());
+            response.setEspb(p.getEspb());
+            response.setSemestar(p.getSemestar());
+
+            if (n != null) {
+                response.setNastavnikIme(n.getIme() + " " + n.getPrezime());
+            }
+
+            // broj izlazaka na ispit (ukupno)
+            long brojIzlazaka =
+                    ispitIzlazakRepository.countByStudentIndeks_IdAndIspitPrijava_Ispit_Predmet_Id(
+                            studentIndeksId, p.getId()
+                    );
+            response.setBrojIzlazaka((int) brojIzlazaka);
+
+            nepolozeniMapa.put(p.getId(), response);
+        }
+
+        List<NepolozenPredmetResponse> nepolozeni =
+                new ArrayList<>(nepolozeniMapa.values());
 
         int start = (int) pageable.getOffset();
-        int end = Math.min((start + pageable.getPageSize()), nepolozeni.size());
+        int end = Math.min(start + pageable.getPageSize(), nepolozeni.size());
 
-        return new PageImpl<>(nepolozeni.subList(start, end), pageable, nepolozeni.size());
+        return new PageImpl<>(
+                nepolozeni.subList(start, end),
+                pageable,
+                nepolozeni.size()
+        );
     }
 
     public Long addPolozenPredmet(PolozenPredmetRequest req) {

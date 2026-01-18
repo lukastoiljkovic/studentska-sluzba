@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio 7.0.3 -->
+<jasperReport name="Blank_A4" language="java"
+			  pageWidth="595" pageHeight="842" columnWidth="555"
+			  leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20"
+			  uuid="7115f6bb-eb56-422d-a199-aea653092095">
+
+	<!-- PARAMETERS -->
+	<parameter name="predmetNaziv" class="java.lang.String"/>
+	<parameter name="ispitniRokNaziv" class="java.lang.String"/>
+	<parameter name="datumIspita" class="java.lang.String"/>
+	<parameter name="nastavnikImePrezime" class="java.lang.String"/>
+	<parameter name="ukupnoPrijavljenih" class="java.lang.Integer"/>
+	<parameter name="ukupnoPolozilo" class="java.lang.Integer"/>
+	<parameter name="prosecnaOcena" class="java.lang.Double"/>
+
+	<query language="sql"><![CDATA[]]></query>
+
+	<!-- FIELDS -->
+	<field name="ime" class="java.lang.String"/>
+	<field name="prezime" class="java.lang.String"/>
+	<field name="studProgramOznaka" class="java.lang.String"/>
+	<field name="brojIndeksa" class="java.lang.Integer"/>
+	<field name="godinaUpisa" class="java.lang.Integer"/>
+	<field name="predispitni" class="java.lang.Integer"/>
+	<field name="ispitni" class="java.lang.Integer"/>
+	<field name="ukupno" class="java.lang.Integer"/>
+
+	<!-- TITLE -->
+	<title height="90">
+		<element kind="staticText" x="197" y="30" width="200" height="30"
+				 hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[ZAPISNIK SA ISPITA]]></text>
+		</element>
+	</title>
+
+	<!-- PAGE HEADER -->
+	<pageHeader height="60">
+		<element kind="textField" x="15" y="5" width="80" height="20">
+			<expression><![CDATA["Predmet:"]]></expression>
+		</element>
+		<element kind="textField" x="140" y="5" width="100" height="20">
+			<expression><![CDATA["Ispitni rok:"]]></expression>
+		</element>
+		<element kind="textField" x="270" y="5" width="80" height="20">
+			<expression><![CDATA["Datum:"]]></expression>
+		</element>
+		<element kind="textField" x="420" y="5" width="100" height="20">
+			<expression><![CDATA["Nastavnik:"]]></expression>
+		</element>
+
+		<element kind="textField" x="15" y="25" width="120" height="20">
+			<expression><![CDATA[$P{predmetNaziv}]]></expression>
+		</element>
+		<element kind="textField" x="140" y="25" width="120" height="20">
+			<expression><![CDATA[$P{ispitniRokNaziv}]]></expression>
+		</element>
+		<element kind="textField" x="270" y="25" width="120" height="20">
+			<expression><![CDATA[$P{datumIspita}]]></expression>
+		</element>
+		<element kind="textField" x="420" y="25" width="150" height="20">
+			<expression><![CDATA[$P{nastavnikImePrezime}]]></expression>
+		</element>
+	</pageHeader>
+
+	<!-- COLUMN HEADER -->
+	<columnHeader height="40">
+		<element kind="textField" x="0" y="10" width="40" height="20">
+			<expression><![CDATA["Broj"]]></expression>
+		</element>
+		<element kind="textField" x="60" y="10" width="80" height="20">
+			<expression><![CDATA["Indeks"]]></expression>
+		</element>
+		<element kind="textField" x="160" y="10" width="120" height="20">
+			<expression><![CDATA["Ime i prezime"]]></expression>
+		</element>
+		<element kind="textField" x="300" y="10" width="80" height="20">
+			<expression><![CDATA["Predispitni"]]></expression>
+		</element>
+		<element kind="textField" x="400" y="10" width="80" height="20">
+			<expression><![CDATA["Ispitni"]]></expression>
+		</element>
+		<element kind="textField" x="500" y="10" width="80" height="20">
+			<expression><![CDATA["Ukupno"]]></expression>
+		</element>
+	</columnHeader>
+
+	<!-- DETAIL -->
+	<detail>
+		<band height="25">
+			<element kind="textField" x="0" y="0" width="40" height="20">
+				<expression><![CDATA[$V{REPORT_COUNT}]]></expression>
+			</element>
+			<element kind="textField" x="60" y="0" width="100" height="20">
+				<expression><![CDATA[$F{studProgramOznaka} + $F{brojIndeksa} + "/" + $F{godinaUpisa}]]></expression>
+			</element>
+			<element kind="textField" x="160" y="0" width="140" height="20">
+				<expression><![CDATA[$F{ime} + " " + $F{prezime}]]></expression>
+			</element>
+			<element kind="textField" x="300" y="0" width="80" height="20">
+				<expression><![CDATA[$F{predispitni}]]></expression>
+			</element>
+			<element kind="textField" x="400" y="0" width="80" height="20">
+				<expression><![CDATA[$F{ispitni}]]></expression>
+			</element>
+			<element kind="textField" x="500" y="0" width="80" height="20">
+				<expression><![CDATA[$F{ukupno}]]></expression>
+			</element>
+		</band>
+	</detail>
+
+</jasperReport>

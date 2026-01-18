@@ -238,11 +238,19 @@ public class Converters {
         UplataResponse r = new UplataResponse();
         r.setId((long) u.getId());
         r.setDatum(u.getDatum());
-        r.setIznosEUR(u.getIznosEUR());
         r.setIznosRSD(u.getIznosRSD());
         r.setKurs(u.getKurs());
+
+        Double eur = u.getIznosEUR();
+        
+        if (eur == null && u.getIznosRSD() != null && u.getKurs() != null && u.getKurs() != 0) {
+            eur = u.getIznosRSD() / u.getKurs();
+        }
+
+        r.setIznosEUR(eur);
         return r;
     }
+
 
     public static List<UplataResponse> toUplataResponseList(List<Uplata> lista) {
         return lista.stream()
