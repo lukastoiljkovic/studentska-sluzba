@@ -2,6 +2,7 @@ C:\Users\Asus\Documents\GitHub\studentska-sluzba\shared-dtos\src\main\java\org.r
 C:\Users\Asus\Documents\GitHub\studentska-sluzba\shared-dtos\src\main\java\org.raflab.studsluzba.dtos\PolozenPredmetRequest.java
 C:\Users\Asus\Documents\GitHub\studentska-sluzba\shared-dtos\src\main\java\org.raflab.studsluzba.dtos\PolozenPredmetResponse.java
 C:\Users\Asus\Documents\GitHub\studentska-sluzba\shared-dtos\src\main\java\org.raflab.studsluzba.dtos\StudentWebProfileDTO.java
+C:\Users\Asus\Documents\GitHub\studentska-sluzba\shared-dtos\src\main\java\org.raflab.studsluzba.dtos\ObnovaGodineDetailedResponse.java
 C:\Users\Asus\Documents\GitHub\studentska-sluzba\shared-dtos\src\main\java\org.raflab.studsluzba.dtos\DrziPredmetRequest.java
 C:\Users\Asus\Documents\GitHub\studentska-sluzba\shared-dtos\src\main\java\org.raflab.studsluzba.dtos\IspitRezultatResponse.java
 C:\Users\Asus\Documents\GitHub\studentska-sluzba\shared-dtos\src\main\java\org.raflab.studsluzba.dtos\NastavnikZvanjeResponse.java
@@ -22,6 +23,7 @@ C:\Users\Asus\Documents\GitHub\studentska-sluzba\shared-dtos\src\main\java\org.r
 C:\Users\Asus\Documents\GitHub\studentska-sluzba\shared-dtos\src\main\java\org.raflab.studsluzba.dtos\DrziPredmetInitResponse.java
 C:\Users\Asus\Documents\GitHub\studentska-sluzba\shared-dtos\src\main\java\org.raflab.studsluzba.dtos\ObnovaGodineResponse.java
 C:\Users\Asus\Documents\GitHub\studentska-sluzba\shared-dtos\src\main\java\org.raflab.studsluzba.dtos\DrziPredmetPoklapanjeInitResponse.java
+C:\Users\Asus\Documents\GitHub\studentska-sluzba\shared-dtos\src\main\java\org.raflab.studsluzba.dtos\SlusaPredmetResponse.java
 C:\Users\Asus\Documents\GitHub\studentska-sluzba\shared-dtos\src\main\java\org.raflab.studsluzba.dtos\StudentPodaciResponse.java
 C:\Users\Asus\Documents\GitHub\studentska-sluzba\shared-dtos\src\main\java\org.raflab.studsluzba.dtos\IspitIzlazakResponse.java
 C:\Users\Asus\Documents\GitHub\studentska-sluzba\shared-dtos\src\main\java\org.raflab.studsluzba.dtos\PageResponse.java

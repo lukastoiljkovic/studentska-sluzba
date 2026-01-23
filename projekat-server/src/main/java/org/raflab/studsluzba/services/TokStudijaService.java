@@ -25,11 +25,16 @@ public class TokStudijaService {
     private final UpisGodineRepository upisGodineRepository;
     private final ObnovaGodineRepository obnovaGodineRepository;
 
-    // CREATE
     @Transactional
     public TokStudijaResponse create(TokStudijaRequest req) {
         StudentIndeks si = studentIndeksRepository.findById(req.getStudentIndeksId())
-                .orElseThrow(() -> new NoSuchElementException("StudentIndeks ne postoji: id=" + req.getStudentIndeksId()));
+                .orElseThrow(() -> new NoSuchElementException("StudentIndeks ne postoji"));
+
+        List<TokStudija> postojeci = tokStudijaRepository.findAllByStudentIndeksId(si.getId());
+        if (!postojeci.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "TokStudija za ovog studenta već postoji.");
+        }
 
         TokStudija ts = new TokStudija();
         ts.setStudentIndeks(si);
@@ -47,7 +52,6 @@ public class TokStudijaService {
         return Converters.toTokStudijaResponse(saved);
     }
 
-    // READ (list/filter)
     @Transactional(readOnly = true)
     public List<TokStudijaResponse> list(Long studentIndeksId) {
         Iterable<TokStudija> src = (studentIndeksId == null)

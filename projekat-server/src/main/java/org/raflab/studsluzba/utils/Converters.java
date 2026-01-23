@@ -27,7 +27,6 @@ public class Converters {
         r.setNaziv(v.getNaziv());
         r.setMesto(v.getMesto());
 
-        // Mapiranje enum-a
         if (v.getVrsta() != null) {
             r.setVrsta(VrstaVisokoskolskeUstanove.valueOf(v.getVrsta().name()));
         }
@@ -199,8 +198,6 @@ public class Converters {
         return response;
     }
 
-    // --------- GRUPA ---------
-
     public static Grupa toGrupa(GrupaRequest req, StudijskiProgram sp, SkolskaGodina sg) {
         Grupa g = new Grupa();
         g.setNaziv(req.getNaziv());
@@ -230,8 +227,6 @@ public class Converters {
         return lista;
     }
 
-    // ---------- UPLATA ----------
-
     public static UplataResponse toUplataResponse(Uplata u) {
         if (u == null) return null;
 
@@ -258,8 +253,6 @@ public class Converters {
                 .collect(Collectors.toList());
     }
     
-    // ---------- ISPIT IZLAZAK ----------
-
     public static IspitIzlazakResponse toIspitIzlazakResponse(IspitIzlazak e) {
         if (e == null) return null;
 
@@ -426,7 +419,7 @@ public class Converters {
         dto.setDatum(o.getDatum());
         dto.setNapomena(o.getNapomena());
 
-        // samo ID-evi, nema povratka ka entitetu
+        // samo id-jevi... nema povratka ka entitetu
         dto.setStudentIndeksId(o.getStudentIndeks() != null ? o.getStudentIndeks().getId() : null);
         dto.setSkolskaGodinaId(o.getSkolskaGodina() != null ? o.getSkolskaGodina().getId() : null);
         dto.setPredmetiKojeObnavljaIds(
@@ -512,7 +505,6 @@ public class Converters {
         return list;
     }
 
-    // ---- NASTAVNIK ZVANJE ----
     public static NastavnikZvanje toNastavnikZvanje(NastavnikZvanjeRequest req, Nastavnik nastavnik) {
         NastavnikZvanje nz = new NastavnikZvanje();
         nz.setDatumIzbora(req.getDatumIzbora());
@@ -584,7 +576,6 @@ public class Converters {
         return list;
     }
 
-    // Converters.java (dodatak)
     public static UpisGodineResponse toUpisGodineResponse(UpisGodine u) {
         if (u == null) return null;
         UpisGodineResponse r = new UpisGodineResponse();
@@ -707,7 +698,7 @@ public class Converters {
     public static List<PredmetResponse> toPredmetResponseList(List<Predmet> lista) {
         return lista.stream()
                 .map(Converters::toPredmetResponse)
-                .collect(Collectors.toList()); // kompatibilno sa Java 11
+                .collect(Collectors.toList());
     }
 
 
@@ -742,5 +733,116 @@ public class Converters {
         return out;
     }
 
+    public static SlusaPredmetResponse toSlusaPredmetResponse(SlusaPredmet sp) {
+        if (sp == null) return null;
+
+        SlusaPredmetResponse r = new SlusaPredmetResponse();
+        r.setId(sp.getId());
+
+        if (sp.getStudentIndeks() != null) {
+            r.setStudentIndeksId(sp.getStudentIndeks().getId());
+            if (sp.getStudentIndeks().getStudent() != null) {
+                r.setStudentIme(sp.getStudentIndeks().getStudent().getIme());
+                r.setStudentPrezime(sp.getStudentIndeks().getStudent().getPrezime());
+            }
+            r.setIndeks(sp.getStudentIndeks().getStudProgramOznaka() + "/" +
+                    (sp.getStudentIndeks().getGodina() % 100) + "/" +
+                    sp.getStudentIndeks().getBroj());
+        }
+
+        if (sp.getDrziPredmet() != null && sp.getDrziPredmet().getPredmet() != null) {
+            Predmet p = sp.getDrziPredmet().getPredmet();
+            r.setPredmetId(p.getId());
+            r.setPredmetSifra(p.getSifra());
+            r.setPredmetNaziv(p.getNaziv());
+            r.setPredmetEspb(p.getEspb());
+
+            if (sp.getDrziPredmet().getNastavnik() != null) {
+                Nastavnik n = sp.getDrziPredmet().getNastavnik();
+                r.setNastavnikId(n.getId());
+                r.setNastavnikIme(n.getIme() + " " + n.getPrezime());
+            }
+        }
+
+        if (sp.getGrupa() != null) {
+            r.setGrupaId(sp.getGrupa().getId());
+            r.setGrupaNaziv(sp.getGrupa().getNaziv());
+        }
+
+        if (sp.getSkolskaGodina() != null) {
+            r.setSkolskaGodinaId(sp.getSkolskaGodina().getId());
+            r.setSkolskaGodinaNaziv(sp.getSkolskaGodina().getNaziv());
+        }
+
+        return r;
+    }
+
+    public static List<SlusaPredmetResponse> toSlusaPredmetResponseList(Iterable<SlusaPredmet> items) {
+        List<SlusaPredmetResponse> list = new ArrayList<>();
+        items.forEach(x -> list.add(toSlusaPredmetResponse(x)));
+        return list;
+    }
+
+    public static ObnovaGodineDetailedResponse toObnovaDetailedResponse(ObnovaGodine o) {
+        if (o == null) return null;
+
+        ObnovaGodineDetailedResponse r = new ObnovaGodineDetailedResponse();
+        r.setId(o.getId());
+        r.setGodinaStudija(o.getGodinaStudija());
+        r.setDatum(o.getDatum());
+        r.setNapomena(o.getNapomena());
+
+        if (o.getStudentIndeks() != null) {
+            r.setStudentIndeksId(o.getStudentIndeks().getId());
+            if (o.getStudentIndeks().getStudent() != null) {
+                r.setStudentIme(o.getStudentIndeks().getStudent().getIme());
+                r.setStudentPrezime(o.getStudentIndeks().getStudent().getPrezime());
+            }
+            r.setIndeks(o.getStudentIndeks().getStudProgramOznaka() + "/" +
+                    (o.getStudentIndeks().getGodina() % 100) + "/" +
+                    o.getStudentIndeks().getBroj());
+        }
+
+        if (o.getSkolskaGodina() != null) {
+            r.setSkolskaGodinaId(o.getSkolskaGodina().getId());
+            r.setSkolskaGodinaNaziv(o.getSkolskaGodina().getNaziv());
+        }
+
+        if (o.getPredmetiKojeObnavlja() != null) {
+            List<ObnovaGodineDetailedResponse.PredmetKojiSeObnavljaDTO> predmeti = new ArrayList<>();
+
+            for (SlusaPredmet sp : o.getPredmetiKojeObnavlja()) {
+                ObnovaGodineDetailedResponse.PredmetKojiSeObnavljaDTO dto =
+                        new ObnovaGodineDetailedResponse.PredmetKojiSeObnavljaDTO();
+
+                dto.setSlusaPredmetId(sp.getId());
+
+                if (sp.getDrziPredmet() != null && sp.getDrziPredmet().getPredmet() != null) {
+                    Predmet p = sp.getDrziPredmet().getPredmet();
+                    dto.setPredmetId(p.getId());
+                    dto.setPredmetSifra(p.getSifra());
+                    dto.setPredmetNaziv(p.getNaziv());
+                    dto.setEspb(p.getEspb());
+
+                    if (sp.getDrziPredmet().getNastavnik() != null) {
+                        Nastavnik n = sp.getDrziPredmet().getNastavnik();
+                        dto.setNastavnikIme(n.getIme() + " " + n.getPrezime());
+                    }
+                }
+
+                predmeti.add(dto);
+            }
+
+            r.setPredmetiKojeObnavlja(predmeti);
+        }
+
+        return r;
+    }
+
+    public static List<ObnovaGodineDetailedResponse> toObnovaDetailedResponseList(Iterable<ObnovaGodine> items) {
+        List<ObnovaGodineDetailedResponse> list = new ArrayList<>();
+        items.forEach(x -> list.add(toObnovaDetailedResponse(x)));
+        return list;
+    }
 
 }

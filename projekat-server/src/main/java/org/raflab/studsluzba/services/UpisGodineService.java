@@ -37,7 +37,6 @@ public class UpisGodineService {
                 .collect(Collectors.toList());
     }
 
-    // CREATE
     @Transactional
     public UpisGodineResponse create(UpisGodineRequest req) {
         StudentIndeks si = studentIndeksRepository.findById(req.getStudentIndeksId())
@@ -92,7 +91,6 @@ public class UpisGodineService {
         return Converters.toUpisGodineResponse(u);
     }
 
-    // READ: list sa opcionalnim filterima
     @Transactional(readOnly = true)
     public List<UpisGodineResponse> list(Long studentIndeksId, Long skolskaGodinaId) {
         List<UpisGodine> all = StreamSupport.stream(upisGodineRepository.findAll().spliterator(), false)
@@ -111,7 +109,6 @@ public class UpisGodineService {
         return Converters.toUpisGodineResponseList(all);
     }
 
-    // READ: single
     @Transactional(readOnly = true)
     public UpisGodineResponse get(Long id) {
         UpisGodine u = upisGodineRepository.findById(id)
@@ -119,7 +116,6 @@ public class UpisGodineService {
         return Converters.toUpisGodineResponse(u);
     }
 
-    // UPDATE (koristi isti request DTO; null = ne menjaj)
     @Transactional
     public UpisGodineResponse update(Long id, UpisGodineRequest req) {
         UpisGodine u = upisGodineRepository.findById(id)
@@ -140,7 +136,6 @@ public class UpisGodineService {
             u.setSkolskaGodina(sg);
         }
 
-        // Anti-duplikat posle eventualne promene studenta/godine
         if (u.getStudentIndeks() != null && u.getSkolskaGodina() != null) {
             boolean conflict = StreamSupport.stream(upisGodineRepository.findAll().spliterator(), false)
                     .anyMatch(other -> !Objects.equals(other.getId(), u.getId())

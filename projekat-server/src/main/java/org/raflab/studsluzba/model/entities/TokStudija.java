@@ -13,9 +13,9 @@ public class TokStudija {
     @ManyToOne(fetch = FetchType.LAZY)
     private StudentIndeks studentIndeks;
 
-    @OneToMany(fetch = FetchType.LAZY) // LAZY
+    @OneToMany(fetch = FetchType.LAZY)
     private Set<UpisGodine> upisi;
 
-    @OneToMany(fetch = FetchType.LAZY) // LAZY
+    @OneToMany(fetch = FetchType.LAZY)
     private Set<ObnovaGodine> obnove;
 }

@@ -49,7 +49,7 @@ public class StudentIndeksService {
                 .filter(Objects::nonNull)
                 .distinct()
                 .sorted()
-                .collect(java.util.stream.Collectors.toList()); // <= works on JDK 8+
+                .collect(java.util.stream.Collectors.toList());
 
         int expected = 1;
         for (int num : sorted) {
@@ -59,22 +59,27 @@ public class StudentIndeksService {
         return expected;
     }
 
+    @Transactional
     public StudentIndeks findByStudentIdAndAktivan(Long studentPodaciId) {
         return studentIndeksRepository.findAktivanStudentIndeksiByStudentPodaciId(studentPodaciId);
     }
 
+    @Transactional
     public StudentIndeks findStudentIndeks(String studProgramOznaka, int godina, int broj){
         return studentIndeksRepository.findStudentIndeks(studProgramOznaka,godina,broj);
     }
 
+    @Transactional
     public Page<StudentIndeks> findStudentIndeks(String ime, String prezime, String studProgramOznaka, Integer godina, Integer broj, Pageable pageable) {
         return studentIndeksRepository.findStudentIndeks(ime, prezime, studProgramOznaka, godina, broj, pageable);
     }
 
+    @Transactional
     public List<StudentIndeks> findStudentIndeksiForStudentPodaciId(Long idStudentPodaci) {
         return studentIndeksRepository.findStudentIndeksiForStudentPodaciId(idStudentPodaci);
     }
 
+    @Transactional
     public StudentIndeks addNewStudentIndeks(StudentIndeks studentIndeks) {
         return studentIndeksRepository.save(studentIndeks);
     }
@@ -95,6 +100,7 @@ public class StudentIndeksService {
         }
     }
 
+    @Transactional
     public List<StudentIndeksResponse> getIndeksiForStudentPodaciId(Long idStudentPodaci){
         return findStudentIndeksiForStudentPodaciId(idStudentPodaci)
                 .stream()
@@ -104,19 +110,16 @@ public class StudentIndeksService {
 
     @Transactional
     public Long saveStudentIndeks(StudentIndeksRequest request) {
-        // 1. Validacija i učitavanje StudentPodaci iz baze
         StudentPodaci student = studentPodaciRepository.findById(request.getStudentId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "StudentPodaci sa ID " + request.getStudentId() + " ne postoji."));
 
-        // 2. Validacija StudijskiProgram
         List<StudijskiProgram> studijskiProgrami = studijskiProgramiService.findByOznaka(request.getStudProgramOznaka());
         if (studijskiProgrami.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     "StudijskiProgram sa oznakom " + request.getStudProgramOznaka() + " ne postoji.");
         }
 
-        // 3. Kreiranje StudentIndeks
         StudentIndeks studentIndeks = new StudentIndeks();
         studentIndeks.setGodina(request.getGodina());
         studentIndeks.setStudProgramOznaka(request.getStudProgramOznaka());
@@ -125,15 +128,12 @@ public class StudentIndeksService {
         studentIndeks.setVaziOd(request.getVaziOd() != null ? request.getVaziOd() : LocalDate.now());
         studentIndeks.setOstvarenoEspb(0);
 
-        // 4. Dodeli sledeci broj indeksa
         int nextBroj = findBroj(request.getGodina(), request.getStudProgramOznaka());
         studentIndeks.setBroj(nextBroj);
 
-        // 5. Poveži sa studentom i programom
         studentIndeks.setStudent(student);
         studentIndeks.setStudijskiProgram(studijskiProgrami.get(0));
 
-        // 6. Sačuvaj
         try {
             StudentIndeks saved = studentIndeksRepository.save(studentIndeks);
             return saved.getId();
@@ -151,9 +151,8 @@ public class StudentIndeksService {
 
         StudentIndeks indeks = indeksOpt.get();
 
-        // ako ima zavisnih entiteta (npr. ispiti), obriši ih ovde
         if (indeks.getStudent() != null) {
-            // npr. getStudent().getNeaktivniIndeksi() ili ispiti
+            // ....
         }
 
         studentIndeksRepository.deleteById(id);

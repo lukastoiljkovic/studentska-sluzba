@@ -23,6 +23,7 @@ public class NastavnikZvanjeService {
     private final NastavnikZvanjeRepository nastavnikZvanjeRepository;
     private final NastavnikRepository nastavnikRepository;
 
+    @Transactional
     public Long add(NastavnikZvanjeRequest req) {
         Nastavnik n = nastavnikRepository.findById(req.getNastavnikId()).orElseThrow();
 
@@ -30,10 +31,12 @@ public class NastavnikZvanjeService {
         return nastavnikZvanjeRepository.save(nz).getId();
     }
 
+    @Transactional
     public Optional<NastavnikZvanje> findById(Long id) {
         return nastavnikZvanjeRepository.findById(id);
     }
 
+    @Transactional
     public List<NastavnikZvanje> findAll() {
         return nastavnikZvanjeRepository.findAll();
     }

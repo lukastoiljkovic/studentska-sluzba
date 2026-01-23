@@ -29,13 +29,12 @@ public class StudentController {
     private final StudentProfileService studentProfileService;
     private final StudentIndeksService studentIndeksService;
     private final StudentSearchService studentSearchService;
+    private final SkolskaGodinaRepository skolskaGodinaRepo;
+    private final UpisGodineRepository upisGodineRepo;
     private final UpisGodineService upisGodineService;
     private final SrednjaSkolaService srednjaSkolaService;
     private final UplataService uplataService;
 
-    // DODAJ OVE DEPENDENCY-E:
-    private final SkolskaGodinaRepository skolskaGodinaRepository;
-    private final UpisGodineRepository upisGodineRepository;
 
     @GetMapping(path="/podaci/byIndeks")
     public ResponseEntity<StudentPodaciResponse> getStudentPodaciByIndeks(
@@ -98,12 +97,12 @@ public class StudentController {
         }
 
         // Nađi trenutnu aktivnu školsku godinu
-        SkolskaGodina aktivnaSkolskaGodina = skolskaGodinaRepository.findByAktivnaTrue()
+        SkolskaGodina aktivnaSkolskaGodina = skolskaGodinaRepo.findByAktivnaTrue()
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Aktivna školska godina ne postoji"));
 
         // Nađi UpisGodine za ovaj indeks i aktivnu školsku godinu
-        UpisGodine upisGodine = upisGodineRepository
+        UpisGodine upisGodine = upisGodineRepo
                 .findByStudentIndeksAndSkolskaGodina(aktivanIndeks, aktivnaSkolskaGodina)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Upis godine za studenta u aktivnoj školskoj godini ne postoji"));

@@ -19,11 +19,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/*
- * Operacije za raspodelu nastave - koji profesor drzi koji predmet 
- * i koji student slusa koji predmet 
- * 
- */
 @CrossOrigin
 @AllArgsConstructor
 @RestController
@@ -49,6 +44,8 @@ public class RaspodelaNastaveController {
     public Long addDrziPredmet(@RequestBody DrziPredmet drziPredmet) {
         return raspodelaNastaveService.addDrziPredmet(drziPredmet).getId();
     }
+
+    // SLUSA
 
     @GetMapping(path = "/slusapredmet/aktivna/{idPredmeta}/{idNastavnika}")
 	public List<StudentIndeks> getSlusaPredmetUAktivnojSkolskojGodini(@PathVariable Long idPredmeta, @PathVariable Long idNastavnika) {

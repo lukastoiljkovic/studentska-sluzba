@@ -22,6 +22,7 @@ public class IspitniRokService {
     final IspitniRokRepository ispitniRokRepository;
     final SkolskaGodinaRepository skolskaGodinaRepository;
 
+    @Transactional
     public Long add(IspitniRokRequest req) {
         SkolskaGodina sg = skolskaGodinaRepository.findById(req.getSkolskaGodinaId()).orElse(null);
 
@@ -34,10 +35,12 @@ public class IspitniRokService {
         return ispitniRokRepository.save(ir).getId();
     }
 
+    @Transactional
     public Optional<IspitniRok> findById(Long id) {
         return ispitniRokRepository.findById(id);
     }
 
+    @Transactional
     public List<IspitniRok> findAll() {
         return (List<IspitniRok>) ispitniRokRepository.findAll();
     }

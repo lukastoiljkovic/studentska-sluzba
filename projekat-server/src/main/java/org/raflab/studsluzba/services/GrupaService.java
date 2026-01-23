@@ -26,6 +26,7 @@ public class GrupaService {
     final StudijskiProgramRepository studijskiProgramRepository;
     final SkolskaGodinaRepository skolskaGodinaRepository;
 
+    @Transactional
     public Long addGrupa(GrupaRequest req) {
         StudijskiProgram sp = studijskiProgramRepository.findById(req.getStudijskiProgramId()).orElse(null);
         SkolskaGodina sg = skolskaGodinaRepository.findById(req.getSkolskaGodinaId()).orElse(null);
@@ -34,10 +35,12 @@ public class GrupaService {
         return grupaRepository.save(g).getId();
     }
 
+    @Transactional
     public Optional<Grupa> findById(Long id) {
         return grupaRepository.findById(id);
     }
 
+    @Transactional
     public List<Grupa> findAll() {
         return grupaRepository.findAll();
     }

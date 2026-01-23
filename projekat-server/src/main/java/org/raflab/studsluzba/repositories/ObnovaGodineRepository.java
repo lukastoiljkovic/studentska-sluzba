@@ -4,8 +4,10 @@ import org.raflab.studsluzba.model.entities.DrziPredmet;
 import org.raflab.studsluzba.model.entities.ObnovaGodine;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public interface ObnovaGodineRepository extends CrudRepository<ObnovaGodine, Long> {
@@ -16,6 +18,9 @@ public interface ObnovaGodineRepository extends CrudRepository<ObnovaGodine, Lon
 
     @Query("SELECT o FROM ObnovaGodine o LEFT JOIN FETCH o.predmetiKojeObnavlja")
     List<ObnovaGodine> findAllWithPredmeti();
+
+    @Query("SELECT o FROM ObnovaGodine o LEFT JOIN FETCH o.studentIndeks LEFT JOIN FETCH o.predmetiKojeObnavlja WHERE o.id = :id")
+    Optional<ObnovaGodine> findByIdWithPredmeti(@Param("id") Long id);
 
 
 }

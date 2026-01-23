@@ -22,7 +22,7 @@ public class SkolskaGodina {
     @OneToMany(mappedBy = "skolskaGodina")
     private Set<SlusaPredmet> slusaPredmetList;
 
-    @OneToMany(mappedBy = "skolskaGodina", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "skolskaGodina", fetch = FetchType.EAGER)
     private Set<IspitniRok> ispitniRokovi;
 
 }

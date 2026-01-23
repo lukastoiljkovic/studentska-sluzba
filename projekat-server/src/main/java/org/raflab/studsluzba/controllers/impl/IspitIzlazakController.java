@@ -18,26 +18,22 @@ public class IspitIzlazakController {
 
     final IspitIzlazakService service;
 
-    // POST /add
     @PostMapping("/add")
     public Long add(@RequestBody IspitIzlazakRequest req) {
         return service.add(req);
     }
 
-    // GET /{id}
     @GetMapping("/{id}")
     public IspitIzlazakResponse get(@PathVariable Long id) {
         Optional<IspitIzlazak> e = service.findById(id);
         return e.map(Converters::toIspitIzlazakResponse).orElse(null);
     }
 
-    // GET /all
     @GetMapping("/all")
     public List<IspitIzlazakResponse> all() {
         return Converters.toIspitIzlazakResponseList(service.findAll());
     }
 
-    // DELETE /{id}
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         service.deleteById(id);

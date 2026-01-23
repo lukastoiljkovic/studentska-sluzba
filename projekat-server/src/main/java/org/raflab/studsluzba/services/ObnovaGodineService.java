@@ -78,18 +78,26 @@ public class ObnovaGodineService {
 
     @Transactional
     public ObnovaGodineResponse addObnova(ObnovaGodineRequest request) {
-        // nadji potrebne entitete
         StudentIndeks si = studentIndeksRepository.findById(request.getStudentIndeksId())
                 .orElseThrow(() -> new RuntimeException("Student not found"));
 
         SkolskaGodina sg = skolskaGodinaRepository.findById(request.getSkolskaGodinaId())
                 .orElseThrow(() -> new RuntimeException("Skolska godina not found"));
 
+        List<ObnovaGodine> postojece = obnovaGodineRepository.findByStudentIndeksId(si.getId());
+        boolean vecPostoji = postojece.stream()
+                .anyMatch(o -> o.getSkolskaGodina() != null && o.getSkolskaGodina().getId().equals(sg.getId()));
+
+        if (vecPostoji) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Obnova za ovu školsku godinu već postoji.");
+        }
+
+        Set<Long> uniqueIds = new HashSet<>(request.getPredmetiKojeObnavljaIds());
         Set<SlusaPredmet> predmeti = new HashSet<>(
-                (Collection) slusaPredmetRepository.findAllById(request.getPredmetiKojeObnavljaIds())
+                (Collection) slusaPredmetRepository.findAllById(uniqueIds)
         );
 
-        // napravi novi entitet
         ObnovaGodine o = new ObnovaGodine();
         o.setGodinaStudija(request.getGodinaStudija());
         o.setDatum(request.getDatum());
@@ -98,12 +106,10 @@ public class ObnovaGodineService {
         o.setSkolskaGodina(sg);
         o.setPredmetiKojeObnavlja(predmeti);
 
-        // sacuvaj
         ObnovaGodine saved = obnovaGodineRepository.save(o);
-
-        // konvertuj u DTO (bez bidirekcija)
         return Converters.toObnovaResponse(saved);
     }
+
 
     @Transactional(readOnly = true)
     public Optional<ObnovaGodine> findById(Long id) {
@@ -128,4 +134,18 @@ public class ObnovaGodineService {
                     "Ne može se obrisati obnova jer postoje povezani zapisi.");
         }
     }
+
+    @Transactional(readOnly = true)
+    public List<ObnovaGodineDetailedResponse> getObnoveForStudentDetailed(Long studentIndeksId) {
+        List<ObnovaGodine> obnove = obnovaGodineRepository.findByStudentIndeksId(studentIndeksId);
+        return Converters.toObnovaDetailedResponseList(obnove);
+    }
+
+    @Transactional(readOnly = true)
+    public ObnovaGodineDetailedResponse getObnovaDetailed(Long id) {
+        ObnovaGodine o = obnovaGodineRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Obnova ne postoji"));
+        return Converters.toObnovaDetailedResponse(o);
+    }
+
 }

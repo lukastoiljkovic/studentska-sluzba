@@ -17,17 +17,11 @@ import java.util.Set;
         "skolskaGodina",
         "obnove"
 })
-@EqualsAndHashCode(exclude = {
-        "studentIndeks",
-        "drziPredmet",
-        "skolskaGodina",
-        "obnove"
-})
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
 public class SlusaPredmet {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @EqualsAndHashCode.Include
     private Long id;
 
     @ManyToOne
@@ -46,6 +40,6 @@ public class SlusaPredmet {
     private Grupa grupa;
 
     @ManyToMany(mappedBy = "predmetiKojeObnavlja")
-    @JsonIgnore // ovo je ključno da se ne pravi ciklus
+    //@JsonIgnore
     private Set<ObnovaGodine> obnove;
 }

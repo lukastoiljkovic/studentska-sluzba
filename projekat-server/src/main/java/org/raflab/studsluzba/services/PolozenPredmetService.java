@@ -27,6 +27,7 @@ public class PolozenPredmetService {
     private final IspitIzlazakRepository ispitIzlazakRepository;
     private final SlusaPredmetRepository slusaPredmetRepository; // DODAJ OVO
 
+    @Transactional
     public Page<PolozenPredmetResponse> getPolozeniIspiti(Long studentIndeksId, Pageable pageable) {
         return polozenPredmetRepository
                 .findByStudentIndeksIdAndOcenaIsNotNull(studentIndeksId, pageable)
@@ -98,6 +99,7 @@ public class PolozenPredmetService {
         );
     }
 
+    @Transactional
     public Long addPolozenPredmet(PolozenPredmetRequest req) {
         StudentIndeks si = studentIndeksRepository.findById(req.getStudentIndeksId()).orElseThrow();
         Predmet p = predmetRepository.findById(req.getPredmetId()).orElseThrow();
@@ -109,10 +111,12 @@ public class PolozenPredmetService {
         return polozenPredmetRepository.save(pp).getId();
     }
 
+    @Transactional
     public Optional<PolozenPredmet> findById(Long id) {
         return polozenPredmetRepository.findById(id);
     }
 
+    @Transactional
     public List<PolozenPredmet> findAll() {
         return (List<PolozenPredmet>) polozenPredmetRepository.findAll();
     }

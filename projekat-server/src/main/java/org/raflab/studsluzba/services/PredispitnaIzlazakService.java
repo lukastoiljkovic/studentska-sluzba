@@ -25,6 +25,7 @@ public class PredispitnaIzlazakService {
     private final SlusaPredmetRepository slusaPredmetRepository;
     private final PredispitnaObavezaRepository predispitnaObavezaRepository;
 
+    @Transactional
     public Long addPredispitnaIzlazak(PredispitnaIzlazakRequest req) {
         SlusaPredmet sp = slusaPredmetRepository.findById(req.getSlusaPredmetId()).orElseThrow();
         PredispitnaObaveza po = predispitnaObavezaRepository.findById(req.getPredispitnaObavezaId()).orElseThrow();
@@ -32,10 +33,12 @@ public class PredispitnaIzlazakService {
         return izlazakRepository.save(izlazak).getId();
     }
 
+    @Transactional
     public PredispitnaIzlazak findById(Long id) {
         return izlazakRepository.findById(id).orElse(null);
     }
 
+    @Transactional
     public List<PredispitnaIzlazak> findAll() {
         return (List<PredispitnaIzlazak>) izlazakRepository.findAll();
     }

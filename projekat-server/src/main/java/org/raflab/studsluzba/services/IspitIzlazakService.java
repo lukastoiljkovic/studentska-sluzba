@@ -25,10 +25,12 @@ public class IspitIzlazakService {
     private final PredispitnaIzlazakRepository predispitnaIzlazakRepository;
     private final PolozenPredmetRepository polozenPredmetRepository;
 
+    @Transactional
     public Optional<IspitIzlazak> findById(Long id) {
         return ispitIzlazakRepository.findById(id);
     }
 
+    @Transactional
     public List<IspitIzlazak> findAll() {
         return (List<IspitIzlazak>) ispitIzlazakRepository.findAll();
     }
@@ -47,6 +49,7 @@ public class IspitIzlazakService {
         }
     }
 
+    @Transactional
     public Long add(IspitIzlazakRequest req) {
         // validacija ulaza
         if (req.getIspitPrijavaId() == null || req.getBrojPoena() == null || req.getBrojPoena() < 0) {
@@ -56,38 +59,32 @@ public class IspitIzlazakService {
         IspitPrijava prijava = ispitPrijavaRepository.findById(req.getIspitPrijavaId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ispit prijava ne postoji."));
 
-        // (opciono) ako je client poslao studentIndeksId, proveri konzistentnost
         if (req.getStudentIndeksId() != null &&
                 !prijava.getStudentIndeks().getId().equals(req.getStudentIndeksId())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "studentIndeksId ne odgovara prijavi.");
         }
 
-        // jedan izlazak po prijavi (OneToOne)
         if (prijava.getIspitIzlazak() != null) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Za ovu prijavu već postoji izlazak.");
         }
 
-        // (opciono) zabrani unos ako je ispit zaključen
         if (prijava.getIspit() != null && prijava.getIspit().isZakljucen()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ispit je zaključen.");
         }
 
-        // kreiraj izlazak
         IspitIzlazak ie = new IspitIzlazak();
         ie.setIspitPrijava(prijava);
         ie.setStudentIndeks(prijava.getStudentIndeks());
         ie.setBrojPoena(req.getBrojPoena());
         ie.setNapomena(req.getNapomena());
-        ie.setPonistava(Boolean.TRUE.equals(req.getPonistava())); // Boolean → boolean
+        ie.setPonistava(Boolean.TRUE.equals(req.getPonistava()));
 
         IspitIzlazak sacuvan = ispitIzlazakRepository.save(ie);
         prijava.setIspitIzlazak(sacuvan);
         ispitPrijavaRepository.save(prijava);
 
-        // ako je poništio — nema dalje
         if (Boolean.TRUE.equals(req.getPonistava())) return sacuvan.getId();
 
-        // saberi predispitne poene (tačan predmet i školska godina)
         Long siId = prijava.getStudentIndeks().getId();
         Long predmetId = prijava.getIspit().getPredmet().getId();
         Long skGodId = prijava.getIspit().getIspitniRok().getSkolskaGodina().getId();
@@ -97,7 +94,6 @@ public class IspitIzlazakService {
 
         int ukupno = (predispitni != null ? predispitni : 0) + req.getBrojPoena();
 
-        // ako je ukupno ≥ 51 — upiši u Položenim sa ocenom
         if (ukupno >= 51) {
             PolozenPredmet pp = new PolozenPredmet();
             pp.setPriznat(false);
@@ -117,7 +113,7 @@ public class IspitIzlazakService {
         if (poeni >= 71) return 8;
         if (poeni >= 61) return 7;
         if (poeni >= 51) return 6;
-        return 5; // ne snimamo u Položenim ispod 51
+        return 5;
     }
 
 }

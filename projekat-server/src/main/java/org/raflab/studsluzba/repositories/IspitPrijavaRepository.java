@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface IspitPrijavaRepository extends JpaRepository<IspitPrijava, Long> {
 
-    // sve prijave za dati ispit (možeš dodati i ORDER BY studentIndeks.godina, broj)
+    // sve prijave za dati ispit
     @Query("SELECT ip FROM IspitPrijava ip " +
             "JOIN FETCH ip.studentIndeks si " +
             "JOIN FETCH si.student s " +

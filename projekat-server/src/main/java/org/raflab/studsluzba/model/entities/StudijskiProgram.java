@@ -24,7 +24,7 @@ public class StudijskiProgram {
     @Column(nullable = false) private String vrstaStudija;  // OAS, MAS, OSS, DAS
     @Column(nullable = false) private Integer ukupnoEspb;
 	
-	@JsonIgnore
+	//@JsonIgnore
 	@OneToMany(mappedBy = "studProgram")
 	private List<Predmet> predmeti;
 

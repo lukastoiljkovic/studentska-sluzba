@@ -1,12 +1,14 @@
 package org.raflab.studsluzba.controllers.impl;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import lombok.AllArgsConstructor;
 import org.raflab.studsluzba.dtos.*;
 import org.raflab.studsluzba.model.entities.StudijskiProgram;
 import org.raflab.studsluzba.services.PredmetService;
 import org.raflab.studsluzba.services.StudijskiProgramiService;
+import org.raflab.studsluzba.utils.Converters;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -26,8 +28,11 @@ public class StudijskiProgramiController {
     }
 
 	@GetMapping(path = "/all/sorted")
-	public List<StudijskiProgram> getAllStudProgramiSortedDesc(){
-		return studijskiProgramiService.getAllStudProgramiSortedDesc();
+	public List<StudijskiProgramResponse> getAllStudProgramiSortedDesc(){
+		return studijskiProgramiService.getAllStudProgramiSortedDesc()
+				.stream()
+				.map(Converters::toStudijskiProgramResponse)
+				.collect(Collectors.toList());
 	}
 
 	@GetMapping(path="/oznaka/all")

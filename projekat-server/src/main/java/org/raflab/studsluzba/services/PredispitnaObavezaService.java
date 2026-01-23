@@ -23,16 +23,19 @@ public class PredispitnaObavezaService {
     private final PredispitnaObavezaRepository predispitnaObavezaRepository;
     private final PredmetRepository predmetRepository;
 
+    @Transactional
     public Long addPredispitnaObaveza(PredispitnaObavezaRequest req) {
         Predmet predmet = predmetRepository.findById(req.getPredmetId()).orElseThrow();
         PredispitnaObaveza p = Converters.toPredispitnaObaveza(req, predmet);
         return predispitnaObavezaRepository.save(p).getId();
     }
 
+    @Transactional
     public Optional<PredispitnaObaveza> findById(Long id) {
         return predispitnaObavezaRepository.findById(id);
     }
 
+    @Transactional
     public List<PredispitnaObaveza> findAll() {
         return (List<PredispitnaObaveza>) predispitnaObavezaRepository.findAll();
     }

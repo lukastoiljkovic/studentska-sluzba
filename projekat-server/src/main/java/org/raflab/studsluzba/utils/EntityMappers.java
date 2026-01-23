@@ -72,8 +72,6 @@ public class EntityMappers {
         resp.setLicnuKartuIzdao(student.getLicnuKartuIzdao());
         resp.setUspehSrednjaSkola(student.getUspehSrednjaSkola());
         resp.setUspehPrijemni(student.getUspehPrijemni());
-
-        // dodaj nazive entiteta
         resp.setSrednjaSkola(student.getSrednjaSkola() != null ? student.getSrednjaSkola().getNaziv() : null);
         resp.setPrethodnaUstanova(student.getPrethodnaUstanova() != null ? student.getPrethodnaUstanova().getNaziv() : null);
 

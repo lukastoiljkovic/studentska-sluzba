@@ -15,7 +15,7 @@ public class IspitIzlazak {
     private boolean ponistava;
 
     @OneToOne
-    private IspitPrijava ispitPrijava; // Ispit dobijamo preko gettera
+    private IspitPrijava ispitPrijava;
 
     @ManyToOne
     private StudentIndeks studentIndeks;

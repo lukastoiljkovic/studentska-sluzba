@@ -464,7 +464,6 @@ public class Seeder implements CommandLineRunner {
         return liste;
     }
 
-
     private Map<Predmet, List<PredispitnaObaveza>> createPredispitneObaveze(List<Predmet> predmeti) {
         Map<Predmet, List<PredispitnaObaveza>> mapa = new HashMap<>();
 
@@ -665,7 +664,7 @@ public class Seeder implements CommandLineRunner {
                     izlazak.setStudentIndeks(idx);
                     izlazak.setBrojPoena(poeniIspit);
                     izlazak.setPonistava(false);
-                    izlazak.setNapomena(ukupno >= 51 ? "Položio/la" : "Pao/la");
+                    izlazak.setNapomena(ukupno >= 51 ? "Položio/la" : "Pao/Pala");
                     izlazak = ispitIzlazakRepository.save(izlazak);
 
                     if (ukupno >= 51) {
@@ -857,7 +856,31 @@ public class Seeder implements CommandLineRunner {
             p.setDatum(is.getDatumVremePocetka().toLocalDate().minusDays(6));
             ispitPrijavaRepository.save(p);
         }
+
+        if (ispitiPrograma.size() >= 1 && grupe.size() > 0) {
+            DrziPredmet dpZaTest = drziPredmeti.stream().filter(
+                    dp -> dp.getSkolskaGodina().equals(aktivnaSg))
+                    .filter(dp -> dp.getPredmet().getStudProgram().equals(prog))
+                    .findFirst()
+                    .orElse(null);
+
+            if (dpZaTest != null) {
+                boolean vecSlusaa = StreamSupport
+                        .stream(slusaPredmetRepository.findAll().spliterator(), false)
+                        .anyMatch(sp -> sp.getStudentIndeks().equals(idx)
+                                && sp.getDrziPredmet().equals(dpZaTest));
+                if (!vecSlusaa) {
+                    SlusaPredmet novaSlusaPredmet = new SlusaPredmet();
+                    novaSlusaPredmet.setStudentIndeks(idx);
+                    novaSlusaPredmet.setDrziPredmet(dpZaTest);
+                    novaSlusaPredmet.setSkolskaGodina(aktivnaSg);
+                    novaSlusaPredmet.setGrupa(grupa);
+                    slusaPredmetRepository.save(novaSlusaPredmet);
+                }
+            }
+        }
     }
+
 
     private void addExamOutcome(
             StudentIndeks idx,

@@ -29,6 +29,7 @@ public class RaspodelaNastaveService {
         return drziPredmetRepository.getPredmetiZaNastavnikaUAktivnojSkolskojGodini(idNastavnika);
     }
 
+    @Transactional
     public DrziPredmet addDrziPredmet(DrziPredmet drziPredmet) {
         return drziPredmetRepository.save(drziPredmet);
     }
@@ -49,18 +50,22 @@ public class RaspodelaNastaveService {
 
     // ZA SLUSA PREDMET
 
+    @Transactional
     public List<StudentIndeks> getStudentiSlusaPredmetAktivnaGodina(Long idPredmeta, Long idNastavnika) {
         return slusaPredmetRepository.getStudentiSlusaPredmetAktivnaGodina(idPredmeta, idNastavnika);
     }
 
+    @Transactional
     public List<StudentIndeks> getStudentiSlusaPredmetZaDrziPredmet(Long idDrziPredmet) {
         return slusaPredmetRepository.getStudentiSlusaPredmetZaDrziPredmet(idDrziPredmet);
     }
 
+    @Transactional
     public List<StudentIndeks> getStudentiNeSlusajuDrziPredmet(Long idDrziPredmet) {
         return slusaPredmetRepository.getStudentiNeSlusajuDrziPredmet(idDrziPredmet);
     }
 
+    @Transactional
     public SlusaPredmet addSlusaPredmet(SlusaPredmet slusaPredmet) {
         return slusaPredmetRepository.save(slusaPredmet);
     }

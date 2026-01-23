@@ -21,10 +21,12 @@ public class VisokoskolskaUstanovaService {
 
     private final VisokoskolskaUstanovaRepository repo;
 
+    @Transactional
     public Optional<VisokoskolskaUstanova> findById(Long id) {
         return repo.findById(id);
     }
 
+    @Transactional
     public List<VisokoskolskaUstanova> findAll() {
         Iterable<VisokoskolskaUstanova> it = repo.findAll();
         return StreamSupport.stream(it.spliterator(), false).collect(Collectors.toList());
@@ -44,12 +46,12 @@ public class VisokoskolskaUstanovaService {
         }
     }
 
+    @Transactional
     public Long add(VisokoskolskaUstanovaRequest req) {
         VisokoskolskaUstanova v = new VisokoskolskaUstanova();
         v.setNaziv(req.getNaziv());
         v.setMesto(req.getMesto());
 
-        // Mapiranje enum-a
         if (req.getVrsta() != null) {
             v.setVrsta(VisokoskolskaUstanova.Vrsta.valueOf(req.getVrsta().name()));
         }

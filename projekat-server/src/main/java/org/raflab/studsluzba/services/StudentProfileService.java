@@ -77,24 +77,18 @@ public class StudentProfileService {
 
         retVal.setSlusaPredmete(spDTO);
 
-        // ========== ISPRAVLJEN DEO - NEPOLOZENI PREDMETI ==========
-
-        // 1. Nađi sve položene predmete za ovog studenta
         List<PolozenPredmet> polozeni = polozenPredmetRepo
                 .findByStudentIndeksIdAndOcenaIsNotNull(indeksId);
 
-        // 2. Kreiraj set ID-eva položenih predmeta
         Set<Long> polozeniPredmetiIds = polozeni.stream()
                 .map(pp -> pp.getPredmet().getId())
                 .collect(Collectors.toSet());
 
-        // 3. Filtriraj predmete koje sluša - ostavi samo nepoložene
         List<String> nepolozeni = new ArrayList<>();
         for (SlusaPredmet sp : slusaPredmete) {
             if (sp.getDrziPredmet() != null && sp.getDrziPredmet().getPredmet() != null) {
                 Long predmetId = sp.getDrziPredmet().getPredmet().getId();
 
-                // Ako predmet NIJE u listi položenih, dodaj ga u nepoložene
                 if (!polozeniPredmetiIds.contains(predmetId)) {
                     nepolozeni.add(sp.getDrziPredmet().getPredmet().getNaziv());
                 }
@@ -103,9 +97,6 @@ public class StudentProfileService {
 
         retVal.setNepolozeniPredmeti(nepolozeni);
 
-        // ================= UPLATE =================
-
-        // 1. Nađi sve upise godina za ovaj indeks
         List<UpisGodine> upisi = upisGodineRepository
                 .findByStudentIndeksStudProgramOznakaAndStudentIndeksGodinaAndStudentIndeksBroj(
                         studIndeks.getStudProgramOznaka(),
@@ -113,7 +104,6 @@ public class StudentProfileService {
                         studIndeks.getBroj()
                 );
 
-        // 2. Za svaki upis pokupi uplate
         List<UplataResponse> sveUplate = new ArrayList<>();
 
         for (UpisGodine upis : upisi) {

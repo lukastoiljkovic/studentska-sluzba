@@ -15,6 +15,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +32,7 @@ public class IspitService {
     private final PredispitnaIzlazakRepository predispRepo;
     private final IspitIzlazakRepository ispitIzlazakRepository;
 
+    @Transactional
     public Long add(IspitRequest req) {
         IspitniRok rok = ispitniRokRepository.findById(req.getIspitniRokId()).orElseThrow();
         Nastavnik nastavnik = nastavnikRepository.findById(req.getNastavnikId()).orElseThrow();
@@ -46,6 +48,7 @@ public class IspitService {
         return ispitRepository.save(i).getId();
     }
 
+    @Transactional
     public List<IspitPrijavaResponse> getPrijavljeniStudentiZaIspit(Long ispitId) {
         if (!ispitRepository.existsById(ispitId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ispit ne postoji.");
@@ -54,6 +57,7 @@ public class IspitService {
         return Converters.toIspitPrijavaResponseList(prijave);
     }
 
+    @Transactional
     public Double getProsecnaOcenaNaIspitu(Long ispitId) {
         if (!ispitRepository.existsById(ispitId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ispit ne postoji.");
@@ -62,6 +66,7 @@ public class IspitService {
         return avg != null ? avg : 0.0;
     }
 
+    @Transactional
     public IspitPrijavaResponse prijaviIspit(IspitPrijavaRequest req) {
         if (req.getStudentIndeksId() == null || req.getIspitId() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "studentIndeksId i ispitId su obavezni.");
@@ -96,6 +101,7 @@ public class IspitService {
         return Converters.toIspitPrijavaResponse(saved);
     }
 
+    @Transactional
     public List<IspitRezultatResponse> getRezultatiIspita(Long ispitId) {
         Ispit ispit = ispitRepository.findById(ispitId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ispit ne postoji."));
@@ -218,6 +224,7 @@ public class IspitService {
         return 5;
     }
 
+    @Transactional
     public PredispitniPoeniStudentResponse getPredispitniPoeni(Long studentIndeksId, Long predmetId, Long skGodId) {
         Integer ukupno = predispRepo.sumPoeniZaStudentaPredmetGodinu(studentIndeksId, predmetId, skGodId);
         if (ukupno == null) ukupno = 0;
@@ -248,14 +255,17 @@ public class IspitService {
                 .build();
     }
 
+    @Transactional
     public long countIzlazakaNaPredmet(Long studentIndeksId, Long predmetId) {
         return ispitIzlazakRepository.countByStudentIndeks_IdAndIspitPrijava_Ispit_Predmet_Id(studentIndeksId, predmetId);
     }
 
+    @Transactional
     public Optional<Ispit> findById(Long id) {
         return ispitRepository.findById(id);
     }
 
+    @Transactional
     public List<Ispit> findAll() {
         return (List<Ispit>) ispitRepository.findAll();
     }
@@ -264,13 +274,34 @@ public class IspitService {
     public void deleteById(Long id) {
         if (!ispitRepository.existsById(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "Entitet sa ID " + id + " ne postoji.");
+                    "Ispit sa ID " + id + " ne postoji.");
         }
+
         try {
+            List<IspitPrijava> prijave = ispitPrijavaRepository.findAllByIspitId(id);
+
+            for (IspitPrijava prijava : prijave) {
+                if (prijava.getIspitIzlazak() != null) {
+                    Long izlazakId = prijava.getIspitIzlazak().getId();
+
+                    List<PolozenPredmet> polozeni = StreamSupport
+                            .stream(polozenPredmetRepository.findAll().spliterator(), false)
+                            .filter(pp -> pp.getIspitIzlazak() != null && pp.getIspitIzlazak().getId().equals(izlazakId))
+                            .collect(Collectors.toList());
+
+                    polozeni.forEach(pp -> polozenPredmetRepository.deleteById(pp.getId()));
+
+                    ispitIzlazakRepository.deleteById(izlazakId);
+                }
+
+                ispitPrijavaRepository.deleteById(prijava.getId());
+            }
+
             ispitRepository.deleteById(id);
+
         } catch (DataIntegrityViolationException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "Ne moze se obrisati entitet jer postoje povezani zapisi.");
+                    "Ne može se obrisati ispit jer postoje povezani zapisi.");
         }
     }
 }

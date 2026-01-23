@@ -47,9 +47,4 @@ public interface SlusaPredmetRepository extends CrudRepository<SlusaPredmet, Lon
             "WHERE sp.studentIndeks.id = :indeksId")
     List<SlusaPredmet> getSlusaPredmetForIndeksAktivnaGodinaWithDetails(@Param("indeksId") Long indeksId);
 
-
-	/*
-	 * dodati slicne operacije koja vracaju sve studente za stud program/ godinu studija koje ne slusaju predmet
-	 */
-
 }

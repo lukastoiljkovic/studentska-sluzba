@@ -18,14 +18,17 @@ public class SkolskaGodinaService {
 
     private final SkolskaGodinaRepository skolskaGodinaRepository;
 
+    @Transactional
     public SkolskaGodina addSkolskaGodina(SkolskaGodina sg){
         return skolskaGodinaRepository.save(sg);
     }
 
+    @Transactional
     public Optional<SkolskaGodina> findById(Long id){
         return skolskaGodinaRepository.findById(id);
     }
 
+    @Transactional
     public List<SkolskaGodina> findAll(){
         return skolskaGodinaRepository.findAll();
     }

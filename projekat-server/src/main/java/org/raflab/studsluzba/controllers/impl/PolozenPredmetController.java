@@ -20,7 +20,7 @@ public class PolozenPredmetController {
 
     private final PolozenPredmetService polozenPredmetService;
 
-    // selekcija svih položenih ispita za broj indeksa studenta, paginirano
+    /// selekcija svih položenih ispita za broj indeksa studenta, paginirano
     @GetMapping("/polozeni/{studentIndeksId}")
     public PageResponse<PolozenPredmetResponse> getPolozeni(
             @PathVariable Long studentIndeksId,
@@ -32,7 +32,7 @@ public class PolozenPredmetController {
         return toPageResponse(p, page, size);
     }
 
-    // selekcija svih nepoloženih ispita za broj indeksa studenta, paginirano
+    /// selekcija svih nepoloženih ispita za broj indeksa studenta, paginirano
     @GetMapping("/nepolozeni/{studentIndeksId}")
     public PageResponse<NepolozenPredmetResponse> getNepolozeni(
             @PathVariable Long studentIndeksId,
@@ -65,7 +65,7 @@ public class PolozenPredmetController {
         polozenPredmetService.deleteById(id);
     }
 
-    // helper: pretvara Spring Page u tvoj PageResponse (POJO)
+    // pretvara Spring Page u nas PageResponse
     private <T> PageResponse<T> toPageResponse(Page<T> p, int page, int size) {
         PageResponse<T> dto = new PageResponse<>();
         dto.setContent(p.getContent());

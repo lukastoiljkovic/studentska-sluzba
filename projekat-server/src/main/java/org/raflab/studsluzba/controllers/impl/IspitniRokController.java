@@ -19,26 +19,22 @@ public class IspitniRokController {
 
     final IspitniRokService service;
 
-    // POST /add
     @PostMapping("/add")
     public Long add(@RequestBody @Valid IspitniRokRequest req) {
         return service.add(req);
     }
 
-    // GET /{id}
     @GetMapping("/{id}")
     public IspitniRokResponse get(@PathVariable Long id) {
         Optional<IspitniRok> x = service.findById(id);
         return x.map(Converters::toIspitniRokResponse).orElse(null);
     }
 
-    // GET /all
     @GetMapping("/all")
     public List<IspitniRokResponse> all() {
         return Converters.toIspitniRokResponseList(service.findAll());
     }
 
-    // DELETE /{id}
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         service.deleteById(id);

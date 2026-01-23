@@ -17,14 +17,17 @@ public class StudijskiProgramiService {
 
     private final StudijskiProgramRepository studijskiProgramRepository;
 
+    @Transactional
     public List<StudijskiProgram> getAllStudProgramiSortedDesc(){
         return studijskiProgramRepository.getAllSortedByGodinaDesc();
     }
 
+    @Transactional
     public Iterable<String> getAllStudProgramOznaka() {
         return studijskiProgramRepository.findAllOznaka();
     }
 
+    @Transactional
     public List<StudijskiProgram> findByOznaka(String oznaka){
         return studijskiProgramRepository.findByOznaka(oznaka);
     }

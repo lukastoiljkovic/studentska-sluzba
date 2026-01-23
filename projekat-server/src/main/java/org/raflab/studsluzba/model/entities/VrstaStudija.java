@@ -1,6 +1,6 @@
 package org.raflab.studsluzba.model.entities;
 
-// ne koristi se (za sad)
+// ne koristi se trenutno
 
 public enum VrstaStudija {
     OSS("Osnovne strukovne studije"),

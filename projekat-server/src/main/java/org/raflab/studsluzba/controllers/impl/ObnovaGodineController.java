@@ -25,8 +25,8 @@ public class ObnovaGodineController {
 
     /// - pregled obnovljenih godina za broj indeksa
     @GetMapping("/student/{studentIndeksId}")
-    public List<ObnovaGodineResponse> getObnoveForStudent(@PathVariable Long studentIndeksId) {
-        return obnovaGodineService.getObnoveForStudentIndeks(studentIndeksId);
+    public List<ObnovaGodineDetailedResponse> getObnoveForStudent(@PathVariable Long studentIndeksId) {
+        return obnovaGodineService.getObnoveForStudentDetailed(studentIndeksId);
     }
 
     /// obnova godine za studenta gde je potrebno omogućiti da se, pored nepoloženih,
@@ -53,15 +53,13 @@ public class ObnovaGodineController {
     }
 
     @PostMapping(path="/add")
-    public ObnovaGodineResponse addNewObnova(@RequestBody @Valid ObnovaGodineRequest request) {
+    public ObnovaGodineResponse addObnova(@RequestBody @Valid ObnovaGodineRequest request) {
         return obnovaGodineService.addObnova(request);
     }
 
     @GetMapping(path = "/{id}")
-    public ObnovaGodineResponse getObnovaById(@PathVariable Long id) {
-        return obnovaGodineService.findById(id)
-                .map(Converters::toObnovaResponse)
-                .orElse(null);
+    public ObnovaGodineDetailedResponse getObnovaById(@PathVariable Long id) {
+        return obnovaGodineService.getObnovaDetailed(id);
     }
 
     @GetMapping(path = "/all")

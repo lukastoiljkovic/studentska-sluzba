@@ -7,6 +7,7 @@ import org.raflab.studsluzba.repositories.UpisGodineRepository;
 import org.raflab.studsluzba.repositories.UplataRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -24,11 +25,11 @@ public class UplataService {
 
     private static final double SKOLARINA_EUR = 3000.0;
 
+    @Transactional
     public Uplata dodajUplatu(Long upisGodineId, Double iznosEUR) {
         UpisGodine upis = upisGodineRepository.findById(upisGodineId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Upis godine ne postoji"));
 
-        // ========= ISPRAVLJENO: API vraća JSON objekat, ne samo broj =========
         String url = "https://kurs.resenje.org/api/v1/currencies/eur/rates/today";
 
         try {
@@ -69,6 +70,7 @@ public class UplataService {
         }
     }
 
+    @Transactional
     public double preostaliIznosEUR(Long upisGodineId) {
         List<Uplata> uplate = uplataRepository.findByUpisGodineId(upisGodineId);
         double sumaEUR = uplate.stream()
@@ -77,6 +79,7 @@ public class UplataService {
         return Math.max(0, SKOLARINA_EUR - sumaEUR);
     }
 
+    @Transactional
     public double preostaliIznosRSD(Long upisGodineId) {
         List<Uplata> uplate = uplataRepository.findByUpisGodineId(upisGodineId);
         if (uplate.isEmpty()) return 0;

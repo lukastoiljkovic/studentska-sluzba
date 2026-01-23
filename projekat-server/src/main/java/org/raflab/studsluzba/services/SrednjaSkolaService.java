@@ -25,18 +25,22 @@ public class SrednjaSkolaService {
     private final EntityMappers entityMappers;
     private final StudentPodaciRepository studentPodaciRepository;
 
+    @Transactional
     public SrednjaSkola addSrednjaSkola(SrednjaSkola ss) {
         return srednjaSkolaRepository.save(ss);
     }
 
+    @Transactional
     public Optional<SrednjaSkola> findById(Long id) {
         return srednjaSkolaRepository.findById(id);
     }
 
+    @Transactional
     public Optional<SrednjaSkola> findByNaziv(String naziv) {
         return srednjaSkolaRepository.findByNaziv(naziv);
     }
 
+    @Transactional
     public List<SrednjaSkola> findAll() {
         return srednjaSkolaRepository.findAll();
     }
@@ -55,6 +59,7 @@ public class SrednjaSkolaService {
         }
     }
 
+    @Transactional
     public List<StudentPodaciResponse> getStudentiPoSrednjojSkoli(SrednjaSkola skola) {
         List<StudentPodaci> studenti = studentPodaciRepository.findBySrednjaSkola(skola);
         return studenti.stream()

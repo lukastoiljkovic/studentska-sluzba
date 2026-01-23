@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Service @AllArgsConstructor
@@ -19,6 +20,7 @@ public class StudentSearchService {
     private final StudentIndeksService studentIndeksService;
     private final EntityMappers entityMappers;
 
+    @Transactional
     public Page<StudentDTO> search(String ime,
                                    String prezime,
                                    String studProgram,
@@ -43,9 +45,7 @@ public class StudentSearchService {
         return siList.map(EntityMappers::fromStudentIndeksToDTO);
     }
 
-
-
-
+    @Transactional
     public StudentIndeksResponse fastSearch(String indeksShort) {
         String[] parsedData = ParseUtils.parseIndeks(indeksShort);
         if(parsedData!=null) {
@@ -54,6 +54,7 @@ public class StudentSearchService {
         }else return null;
     }
 
+    @Transactional
     public StudentIndeksResponse emailSearch(String studEmail) {
         String[] parsedData = ParseUtils.parseEmail(studEmail);
         if(parsedData!=null) {

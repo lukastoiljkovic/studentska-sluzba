@@ -15,10 +15,8 @@ public interface UpisGodineRepository extends CrudRepository<UpisGodine, Long> {
 
     List<UpisGodine> findByStudentIndeksStudProgramOznakaAndStudentIndeksGodinaAndStudentIndeksBroj(String studProgramOznaka, int godina, int broj);
 
-    // metoda koju hocemo pozvati iz servisa
     Optional<UpisGodine> findByStudentIndeksAndSkolskaGodina(StudentIndeks studentIndeks, SkolskaGodina skolskaGodina);
 
-    // mozes imati i listu, ako je moguce vise upisa (recimo ako dodjes na master)
     List<UpisGodine> findAllByStudentIndeksAndSkolskaGodina(StudentIndeks studentIndeks, SkolskaGodina skolskaGodina);
 
 }
