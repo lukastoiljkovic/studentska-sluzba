@@ -5,6 +5,7 @@ import org.raflab.studsluzba.dtos.*;
 import org.raflab.studsluzba.model.entities.*;
 import org.raflab.studsluzba.repositories.*;
 import org.raflab.studsluzba.utils.Converters;
+import org.raflab.studsluzba.utils.ParseUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -25,7 +26,7 @@ public class PolozenPredmetService {
     private final StudentIndeksRepository studentIndeksRepository;
     private final PredmetRepository predmetRepository;
     private final IspitIzlazakRepository ispitIzlazakRepository;
-    private final SlusaPredmetRepository slusaPredmetRepository; // DODAJ OVO
+    private final SlusaPredmetRepository slusaPredmetRepository;
 
     @Transactional
     public Page<PolozenPredmetResponse> getPolozeniIspiti(Long studentIndeksId, Pageable pageable) {
@@ -134,4 +135,19 @@ public class PolozenPredmetService {
                     "Ne moze se obrisati entitet jer postoje povezani zapisi.");
         }
     }
+
+    public Long resolveStudentIndeksId(String indeksCompact) {
+        String[] parsed = ParseUtils.parseIndeksCompact(indeksCompact);
+        if (parsed == null) return null;
+
+        StudentIndeks si = studentIndeksRepository.findAktivanStudentIndeks(
+                parsed[0],
+                Integer.parseInt(parsed[1]),
+                Integer.parseInt(parsed[2])
+        );
+
+        return si != null ? si.getId() : null;
+    }
+
+
 }

@@ -5,6 +5,7 @@ import org.raflab.studsluzba.dtos.*;
 import org.raflab.studsluzba.model.entities.*;
 import org.raflab.studsluzba.repositories.*;
 import org.raflab.studsluzba.utils.Converters;
+import org.raflab.studsluzba.utils.ParseUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -147,5 +148,20 @@ public class ObnovaGodineService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Obnova ne postoji"));
         return Converters.toObnovaDetailedResponse(o);
     }
+
+    @Transactional(readOnly = true)
+    public Long resolveStudentIndeksId(String indeksShort) {
+        String[] parsed = ParseUtils.parseIndeksCompact(indeksShort);
+        if (parsed == null) return null;
+
+        StudentIndeks si = studentIndeksRepository.findAktivanStudentIndeks(
+                parsed[0],                     // studProgramOznaka
+                Integer.parseInt(parsed[1]),   // godina
+                Integer.parseInt(parsed[2])    // broj
+        );
+
+        return si != null ? si.getId() : null;
+    }
+
 
 }

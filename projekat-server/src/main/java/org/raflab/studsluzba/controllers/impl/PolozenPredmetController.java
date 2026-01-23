@@ -21,28 +21,31 @@ public class PolozenPredmetController {
     private final PolozenPredmetService polozenPredmetService;
 
     /// selekcija svih položenih ispita za broj indeksa studenta, paginirano
-    @GetMapping("/polozeni/{studentIndeksId}")
+    @GetMapping("/polozeni/{indeksShort}")
     public PageResponse<PolozenPredmetResponse> getPolozeni(
-            @PathVariable Long studentIndeksId,
+            @PathVariable String indeksShort,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        Page<PolozenPredmetResponse> p = polozenPredmetService
-                .getPolozeniIspiti(studentIndeksId, PageRequest.of(page, size));
+        Long studentIndeksId = polozenPredmetService.resolveStudentIndeksId(indeksShort);
+        Page<PolozenPredmetResponse> p =
+                polozenPredmetService.getPolozeniIspiti(studentIndeksId, PageRequest.of(page, size));
         return toPageResponse(p, page, size);
     }
 
     /// selekcija svih nepoloženih ispita za broj indeksa studenta, paginirano
-    @GetMapping("/nepolozeni/{studentIndeksId}")
+    @GetMapping("/nepolozeni/{indeksShort}")
     public PageResponse<NepolozenPredmetResponse> getNepolozeni(
-            @PathVariable Long studentIndeksId,
+            @PathVariable String indeksShort,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        Page<NepolozenPredmetResponse> p = polozenPredmetService
-                .getNepolozeniIspiti(studentIndeksId, PageRequest.of(page, size));
+        Long studentIndeksId = polozenPredmetService.resolveStudentIndeksId(indeksShort);
+        Page<NepolozenPredmetResponse> p =
+                polozenPredmetService.getNepolozeniIspiti(studentIndeksId, PageRequest.of(page, size));
         return toPageResponse(p, page, size);
     }
+
 
     @PostMapping("/add")
     public Long add(@RequestBody PolozenPredmetRequest req) {

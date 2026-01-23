@@ -39,7 +39,26 @@ public class ParseUtils {
         return retVal;
     }
 
-	/*
+    public static String[] parseIndeksCompact(String indeks) {
+        if (indeks == null || indeks.length() < 5) return null;
+
+        String program = indeks.substring(0, 2);
+
+        String godinaStr = indeks.substring(indeks.length() - 2);
+        int godina = 2000 + Integer.parseInt(godinaStr);
+
+        String brojStr = indeks.substring(2, indeks.length() - 2);
+        int broj = Integer.parseInt(brojStr);
+
+        return new String[]{
+                program,
+                String.valueOf(godina),
+                String.valueOf(broj)
+        };
+    }
+
+
+    /*
 	 * dobija email studenta na primer ppetrovic1220rn@raf.rs, a vraca indeks u obliku  [rn, 20, 12]
 	 */
 

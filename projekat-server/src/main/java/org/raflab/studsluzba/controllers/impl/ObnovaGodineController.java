@@ -7,7 +7,9 @@ import org.raflab.studsluzba.model.entities.ObnovaGodine;
 import org.raflab.studsluzba.services.ObnovaGodineService;
 import org.raflab.studsluzba.utils.Converters;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
 import java.time.LocalDate;
@@ -23,11 +25,28 @@ public class ObnovaGodineController {
 
     final ObnovaGodineService obnovaGodineService;
 
-    /// - pregled obnovljenih godina za broj indeksa
+    /// pregled obnovljenih godina po broju indeksa
+    @GetMapping("/student/by-indeks/{indeksShort}")
+    public List<ObnovaGodineDetailedResponse> getObnoveForStudentByIndeks(
+            @PathVariable String indeksShort) {
+
+        // resolve studentIndeksId preko parsera i aktivnog indeksa
+        Long studentIndeksId = obnovaGodineService.resolveStudentIndeksId(indeksShort);
+
+        if (studentIndeksId == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Ne postoji aktivan indeks za: " + indeksShort);
+        }
+
+        return obnovaGodineService.getObnoveForStudentDetailed(studentIndeksId);
+    }
+
+
+    /*/// - pregled obnovljenih godina za broj indeksa
     @GetMapping("/student/{studentIndeksId}")
     public List<ObnovaGodineDetailedResponse> getObnoveForStudent(@PathVariable Long studentIndeksId) {
         return obnovaGodineService.getObnoveForStudentDetailed(studentIndeksId);
-    }
+    }*/
 
     /// obnova godine za studenta gde je potrebno omogućiti da se, pored nepoloženih,
     /// izaberu predmeti iz naredne godine. Maksimalni zbir ESPB poena može biti 60.
